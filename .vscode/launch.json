@@ -1,0 +1,51 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(Windows) Build & Run Debug",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "cauldron.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/bin/cauldron/bin/Win64/Debug",
+            "environment": [],
+            "externalConsole": true,
+            "preLaunchTask": "build"
+        },
+        {
+            "name": "(Windows) Build & Run Release",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "cauldron.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/bin/cauldron/bin/Win64/Release",
+            "environment": [],
+            "externalConsole": true,
+            "preLaunchTask": "build release"
+        },
+        {
+            "name": "(Windows) Run Debug",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "cauldron.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/bin/cauldron/bin/Win64/Debug",
+            "environment": [],
+            "externalConsole": true
+        },
+        {
+            "name": "(Windows) Run Release",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "cauldron.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/bin/cauldron/bin/Win64/Release",
+            "environment": [],
+            "externalConsole": false
+        }
+    ]
+}
