@@ -148,9 +148,6 @@ quat quat_rotate(float angle, const vec3 axis);
 vec3 quat_mul_vec3(const quat q, const vec3 v);
 quat quat_from_mat4x4(const mat4 m);
 
-// TODO: REMOVE NO COMMIT
-#define TX_MATH_IMPL
-
 // Implementation
 #ifdef TX_MATH_IMPL
 
@@ -987,4 +984,4 @@ quat quat_from_mat4(const mat4 m)
         .w = m.m[i2][i1] - m.m[i1][i2] / (2.0f * r),
     };
 }
-#endif
+#endif // TX_MATH_IMPL
