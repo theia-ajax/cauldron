@@ -18,12 +18,14 @@ project "cauldron"
 
     filter "platforms:Win64"
         system "Windows"
+        defines { "_CRT_SECURE_NO_WARNINGS" }
         architecture "x86_64"
         includedirs { string.format("%s/Include", VULKAN_SDK) }
         libdirs { string.format("%s/Lib", VULKAN_SDK) }
 
     filter "platforms:Win32"
         system "Windows"
+        defines { "_CRT_SECURE_NO_WARNINGS" }
         architecture "x86"
         includedirs { string.format("%s/Include", VULKAN_SDK) }
         libdirs { string.format("%s/Lib32", VULKAN_SDK) }

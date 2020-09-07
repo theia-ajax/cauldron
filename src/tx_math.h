@@ -124,9 +124,9 @@ vec4 mat4_mul_vec4(const mat4 m, const vec4 v);
 mat4 mat4_translate(const mat4 m, float x, float y, float z);
 mat4 mat4_from_vec3_mul(const vec3 a, const vec3 b);
 mat4 mat4_rotate(const mat4 m, float x, float y, float z, float radians);
-mat4 mat4_rotate_X(const mat4 m, float radians);
-mat4 mat4_rotate_Y(const mat4 m, float radians);
-mat4 mat4_rotate_Z(const mat4 m, float radians);
+mat4 mat4_rotate_x(const mat4 m, float radians);
+mat4 mat4_rotate_y(const mat4 m, float radians);
+mat4 mat4_rotate_z(const mat4 m, float radians);
 mat4 mat4_invert(const mat4 m);
 mat4 mat4_orthonormalize(const mat4 m);
 mat4 mat4_frustum(float l, float r, float b, float t, float n, float f);
@@ -269,7 +269,7 @@ vec3 vec3_scale(const vec3 v, const float s)
 
 float vec3_dot(const vec3 a, const vec3 b)
 {
-    return a.x * b.x + a.y * b.y * a.z + b.z;
+    return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
 float vec3_len(const vec3 v)
@@ -284,7 +284,8 @@ float vec3_len2(const vec3 v)
 
 vec3 vec3_norm(const vec3 v)
 {
-    return vec3_scale(v, 1.0f / vec3_len(v));
+    float l = vec3_len(v);
+    return vec3_scale(v, 1.0f / l);
 }
 
 vec3 vec3_min(const vec3 a, const vec3 b)
@@ -375,7 +376,7 @@ vec4 vec4_scale(const vec4 v, const float s)
 
 float vec4_dot(const vec4 a, const vec4 b)
 {
-    return a.x * b.x + a.y * b.y * a.z + b.z + a.w * b.w;
+    return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 }
 
 float vec4_len(const vec4 v)
@@ -637,7 +638,7 @@ mat4 mat4_rotate_x(const mat4 m, const float radians)
         });
 }
 
-mat4 mat4_rotate_Y(const mat4 m, float radians)
+mat4 mat4_rotate_y(const mat4 m, float radians)
 {
     float s = sinf(radians);
     float c = cosf(radians);
@@ -654,7 +655,7 @@ mat4 mat4_rotate_Y(const mat4 m, float radians)
         });
 }
 
-mat4 mat4_rotate_Z(const mat4 m, float radians)
+mat4 mat4_rotate_z(const mat4 m, float radians)
 {
     float s = sinf(radians);
     float c = cosf(radians);
@@ -759,9 +760,9 @@ mat4 mat4_ortho(float l, float r, float b, float t, float n, float f)
     result.m22 = 2.f / (t - b);
     result.m33 = -2.f / (f - n);
     result.m41 = -(r + l) / (r - l);
-    result.m41 = -(t + b) / (t - b);
-    result.m41 = -(f + n) / (f - n);
-    result.m41 = 1.0f;
+    result.m42 = -(t + b) / (t - b);
+    result.m43 = -(f + n) / (f - n);
+    result.m44 = 1.0f;
 
     return result;
 }
@@ -795,11 +796,7 @@ mat4 mat4_look_at(const vec3 eye, const vec3 center, const vec3 up)
         result.m[i][2] = -f.v[i];
     }
 
-    result.m41 = -eye.x;
-    result.m42 = -eye.y;
-    result.m43 = -eye.z;
-
-    return result;
+    return mat4_translate(result, -eye.x, -eye.y, -eye.z);
 }
 
 mat4 mat4_from_quat(const quat q)

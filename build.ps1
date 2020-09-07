@@ -45,8 +45,7 @@ param (
     [string] $configuration = "Debug"
 )
 
-# sdl2-ttf pulls in sdl2 as well
-$dependencies = "sdl2-ttf", "vulkan", "tinyxml2", "glm", "stb", "imgui[sdl2-binding,vulkan-binding]", "sokol", "gl3w"
+$dependencies = "sdl2", "stb", "imgui[sdl2-binding,opengl3-gl3w-binding]", "sokol", "gl3w", "cgltf"
 
 $toolset_version_from_product_line = @{
     "2019" = "16"
