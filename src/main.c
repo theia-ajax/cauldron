@@ -43,10 +43,12 @@ int main(int argc, char* argv[])
 
     sg_setup(&(sg_desc){0});
 
+    sg_buffer vbuf, ibuf;
+
     cgltf_options options = {0};
     cgltf_data* data = NULL;
-    if (cgltf_parse_file(&(cgltf_options){0}, "assets/carPolice.gltf", &data)) {
-
+    cgltf_result result = cgltf_parse_file(&(cgltf_options){0}, "assets/carPolice.gltf", &data);
+    if (result == cgltf_result_success) {
         cgltf_free(data);
     }
 
