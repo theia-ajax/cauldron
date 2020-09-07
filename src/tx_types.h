@@ -22,4 +22,4 @@
 #define TX_ASSERT(expresion, ...)
 #endif
 
-#define VALID_INDEX(index, count) (static_cast<size_t>(index) < static_cast<size_t>(count))
+#define VALID_INDEX(index, count) ((size_t)(index) < (size_t)(count))

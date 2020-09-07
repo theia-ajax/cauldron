@@ -11,8 +11,28 @@
 #define SOKOL_ASSERT TX_ASSERT
 #include "sokol_gfx.h"
 
+#define TX_MATH_IMPL
+#include "tx_math.h"
+
 int main(int argc, char* argv[])
 {
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+    vec2 a = {.x = 1, .y = 2};
+
+    mat4 test = mat4_identity();
+    test.m12 = 5.0f;
+
+    mat4 test2 = test;
+
+    for (int i = 0; i < 16; ++i) {
+        printf("%f\n", test2.d[i]);
+    }
+
+    vec2_add((vec2){.x = 1, .y = 3}, (vec2){.x = 3, .y = 7});
+
     SDL_Window* window = SDL_CreateWindow(
         "cauldron",
         SDL_WINDOWPOS_CENTERED,
