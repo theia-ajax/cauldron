@@ -3,7 +3,8 @@
 #include "tx_types.h"
 #include <math.h>
 
-#define TX_PI 3.14159265358979f
+#define K_TX_PI 3.14159265358979f
+#define K_TX_EPSILON 1e-4f;
 
 struct vector2 {
     union {
@@ -34,10 +35,11 @@ struct vector4 {
 
 struct quaternion {
     union {
-        float v[4];
+        float q[4];
         struct {
             float x, y, z, w;
         };
+        struct vector3 v3;
     };
 };
 
@@ -45,12 +47,17 @@ struct matrix4x4 {
     union {
         float m[4][4];
         float d[16];
+        struct vector4 v[4];
         struct {
             float m11, m12, m13, m14;
             float m21, m22, m23, m24;
             float m31, m32, m33, m34;
             float m41, m42, m43, m44;
         };
+        struct {
+            struct vector3 v;
+            float w;
+        } v3[4];
     };
 };
 
@@ -114,7 +121,7 @@ mat4 mat4_scale_aniso(const mat4 a, float x, float y, float z);
 mat4 mat4_mul(const mat4 a, const mat4 b);
 vec4 mat4_mul_vec4(const mat4 m, const vec4 v);
 mat4 mat4_translate(const mat4 m, float x, float y, float z);
-mat4 mat4_from_vec3_mul_outer(const vec3 a, const vec3 b);
+mat4 mat4_from_vec3_mul(const vec3 a, const vec3 b);
 mat4 mat4_rotate(const mat4 m, float x, float y, float z, float radians);
 mat4 mat4_rotate_X(const mat4 m, float radians);
 mat4 mat4_rotate_Y(const mat4 m, float radians);
@@ -123,8 +130,22 @@ mat4 mat4_invert(const mat4 m);
 mat4 mat4_orthonormalize(const mat4 m);
 mat4 mat4_frustum(float l, float r, float b, float t, float n, float f);
 mat4 mat4_ortho(float l, float r, float b, float t, float n, float f);
-mat4 mat4_perspective(float y_fov, float aspect, float n, float f);
+mat4 mat4_perspective(float y_fov_rad, float aspect, float n, float f);
 mat4 mat4_look_at(const vec3 eye, const vec3 center, const vec3 up);
+mat4 mat4_from_quat(const quat q);
+mat4 mat4_arcball(const mat4 m, const vec2 a, const vec2 b, float s);
+
+quat quat_identity();
+quat quat_add(const quat a, const quat b);
+quat quat_sub(const quat a, const quat b);
+quat quat_mul(const quat p, const quat q);
+quat quat_scale(const quat q, float s);
+quat quat_norm(const quat q);
+float quat_dot(const quat a, const quat b);
+quat quat_conj(const quat r, const quat q);
+quat quat_rotate(float angle, const vec3 axis);
+vec3 quat_mul_vec3(const quat q, const vec3 v);
+quat quat_from_mat4x4(const mat4 m);
 
 // TODO: REMOVE NO COMMIT
 #define TX_MATH_IMPL
@@ -550,250 +571,272 @@ vec4 mat4_mul_vec4(const mat4 m, const vec4 v)
 
 mat4 mat4_translate(const mat4 m, float x, float y, float z)
 {
-    mat4 result = mat4_identity();
-    result.m[3][0] = x;
-    result.m[3][1] = y;
-    result.m[3][2] = z;
+    mat4 result = m;
+    result.m41 = x;
+    result.m42 = y;
+    result.m43 = z;
+    return result;
+}
+
+mat4 mat4_from_vec3_mul(const vec3 a, const vec3 b)
+{
+    mat4 result = {0};
+
+    for (int r = 0; r < 3; ++r) {
+        for (int c = 0; c < 3; ++c) {
+            result.m[r][c] = a.v[r] * b.v[c];
+        }
+    }
+
     return result;
 }
 
 // mat4 mat4_from_vec3_mul_outer(const vec3 a, const vec3 b);
-// mat4 mat4_rotate(const mat4 m, float x, float y, float z, float radians);
-// mat4 mat4_rotate_X(const mat4 m, float radians);
-// mat4 mat4_rotate_Y(const mat4 m, float radians);
-// mat4 mat4_rotate_Z(const mat4 m, float radians);
-// mat4 mat4_invert(const mat4 m);
-// mat4 mat4_orthonormalize(const mat4 m);
-// mat4 mat4_frustum(float l, float r, float b, float t, float n, float f);
-// mat4 mat4_ortho(float l, float r, float b, float t, float n, float f);
-// mat4 mat4_perspective(float y_fov, float aspect, float n, float f);
-// mat4 mat4_look_at(const vec3 eye, const vec3 center, const vec3 up);
+mat4 mat4_rotate(const mat4 m, float x, float y, float z, float radians)
+{
+    float s = sinf(radians);
+    float c = cosf(radians);
+    vec3 u = {x, y, z};
+
+    if (vec3_len2(u) > 1e-8) {
+        u = vec3_norm(u);
+        mat4 mt = mat4_from_vec3_mul(u, u);
+        mat4 ms = mat4_scale(
+            (mat4){
+                .m =
+                    {
+                        {0.0f, u.z, -u.y, 0},
+                        {-u.z, 0.0f, u.x, 0.0f},
+                        {u.y, -u.x, 0.f, 0.0f},
+                        {0.0f, 0.0f, 0.0f, 0.0f},
+                    },
+            },
+            s);
+        mat4 mc = mat4_scale(mat4_sub(mat4_identity(), mt), c);
+
+        mat4 temp = mat4_add(mat4_add(mt, mc), ms);
+        temp.m33 = 1.0f;
+        return mat4_mul(m, temp);
+    } else {
+        return m;
+    }
+}
+
+mat4 mat4_rotate_x(const mat4 m, const float radians)
+{
+    float s = sinf(radians);
+    float c = cosf(radians);
+    return mat4_mul(
+        m,
+        (mat4){
+            .m =
+                {
+                    {1.0f, 0.0f, 0.0f, 0.0f},
+                    {0.0f, c, s, 0.0f},
+                    {0.0f, -s, c, 0.0f},
+                    {0.0f, 0.0f, 0.0f, 1.0f},
+                },
+        });
+}
+
+mat4 mat4_rotate_Y(const mat4 m, float radians)
+{
+    float s = sinf(radians);
+    float c = cosf(radians);
+    return mat4_mul(
+        m,
+        (mat4){
+            .m =
+                {
+                    {c, 0.0f, s, 0.0f},
+                    {0.0f, 1.0f, 0.0f, 0.0f},
+                    {-s, 0.0f, c, 0.0f},
+                    {0.0f, 0.0f, 0.0f, 1.0f},
+                },
+        });
+}
+
+mat4 mat4_rotate_Z(const mat4 m, float radians)
+{
+    float s = sinf(radians);
+    float c = cosf(radians);
+    return mat4_mul(
+        m,
+        (mat4){
+            .m =
+                {
+                    {c, s, 0.0f, 0.0f},
+                    {-s, c, 0.0f, 0.0f},
+                    {0.0f, 0.0f, 1.0f, 0.0f},
+                    {0.0f, 0.0f, 0.0f, 1.0f},
+                },
+        });
+}
+
+mat4 mat4_invert(const mat4 m)
+{
+    float t0[6];
+    float t1[6];
+
+    t0[0] = m.m11 * m.m22 - m.m21 * m.m12;
+    t0[1] = m.m11 * m.m23 - m.m21 * m.m13;
+    t0[2] = m.m11 * m.m24 - m.m21 * m.m14;
+    t0[3] = m.m12 * m.m23 - m.m22 * m.m13;
+    t0[4] = m.m12 * m.m24 - m.m22 * m.m14;
+    t0[5] = m.m13 * m.m24 - m.m23 * m.m14;
+
+    t1[0] = m.m31 * m.m42 - m.m41 * m.m32;
+    t1[1] = m.m31 * m.m43 - m.m41 * m.m33;
+    t1[2] = m.m31 * m.m44 - m.m41 * m.m34;
+    t1[3] = m.m32 * m.m43 - m.m42 * m.m33;
+    t1[4] = m.m32 * m.m44 - m.m42 * m.m34;
+    t1[5] = m.m33 * m.m44 - m.m43 * m.m34;
+
+    float inv_det = 1.0f
+                    / (t0[0] * t1[5] - t0[1] * t1[4] + t0[2] * t1[3] + t0[3] * t1[2] - t0[4] * t1[1]
+                       + t0[5] * t1[0]);
+
+    mat4 result;
+    result.m11 = (m.m22 * t1[5] - m.m23 * t1[4] + m.m24 * t1[3]) * inv_det;
+    result.m12 = (-m.m12 * t1[5] - m.m13 * t1[4] + m.m14 * t1[3]) * inv_det;
+    result.m13 = (m.m42 * t0[5] - m.m43 * t0[4] + m.m44 * t0[3]) * inv_det;
+    result.m14 = (-m.m32 * t0[5] - m.m33 * t0[4] + m.m34 * t0[3]) * inv_det;
+
+    result.m21 = (-m.m21 * t1[5] + m.m23 * t1[2] - m.m24 * t1[1]) * inv_det;
+    result.m22 = (m.m11 * t1[5] - m.m13 * t1[2] + m.m14 * t1[1]) * inv_det;
+    result.m23 = (-m.m41 * t0[5] + m.m43 * t0[2] - m.m44 * t0[1]) * inv_det;
+    result.m24 = (m.m31 * t0[5] - m.m33 * t0[2] + m.m34 * t0[1]) * inv_det;
+
+    result.m31 = (m.m21 * t1[4] - m.m22 * t1[2] + m.m24 * t1[0]) * inv_det;
+    result.m32 = (-m.m11 * t1[4] + m.m13 * t1[2] - m.m14 * t1[0]) * inv_det;
+    result.m33 = (m.m41 * t0[4] - m.m42 * t0[2] + m.m44 * t0[0]) * inv_det;
+    result.m34 = (-m.m31 * t0[4] + m.m32 * t0[2] - m.m34 * t0[0]) * inv_det;
+
+    result.m41 = (-m.m21 * t1[3] + m.m22 * t1[1] - m.m23 * t1[0]) * inv_det;
+    result.m42 = (m.m11 * t1[3] - m.m12 * t1[1] + m.m13 * t1[0]) * inv_det;
+    result.m43 = (-m.m41 * t0[3] + m.m42 * t0[1] - m.m43 * t0[0]) * inv_det;
+    result.m44 = (m.m31 * t0[3] - m.m32 * t0[1] + m.m33 * t0[0]) * inv_det;
+
+    return result;
+}
+
+mat4 mat4_orthonormalize(const mat4 m)
+{
+    mat4 r = m;
+
+    r.v3[2].v = vec3_norm(r.v3[2].v);
+
+    float s = vec3_dot(r.v3[1].v, r.v3[2].v);
+    r.v3[1].v = vec3_norm(vec3_sub(r.v3[1].v, vec3_scale(r.v3[2].v, s)));
+
+    s = vec3_dot(r.v3[0].v, r.v3[2].v);
+    r.v3[0].v = vec3_sub(r.v3[0].v, vec3_scale(r.v3[2].v, s));
+
+    s = vec3_dot(r.v3[0].v, r.v3[1].v);
+    r.v3[0].v = vec3_norm(vec3_sub(r.v3[0].v, vec3_scale(r.v3[1].v, s)));
+
+    return r;
+}
+
+mat4 mat4_frustum(float l, float r, float b, float t, float n, float f)
+{
+    mat4 result = {0};
+
+    result.m11 = 2.0f * n / (r - l);
+    result.m22 = 2.0f * n / (t - b);
+    result.m31 = (r + l) / (r - l);
+    result.m32 = (t + b) / (t - b);
+    result.m33 = -(f + n) / (f - n);
+    result.m34 = -1.0f;
+    result.m43 = -2.0f * (f * n) / (f - n);
+
+    return result;
+}
+
+mat4 mat4_ortho(float l, float r, float b, float t, float n, float f)
+{
+    mat4 result = {0};
+
+    result.m11 = 2.f / (r - l);
+    result.m22 = 2.f / (t - b);
+    result.m33 = -2.f / (f - n);
+    result.m41 = -(r + l) / (r - l);
+    result.m41 = -(t + b) / (t - b);
+    result.m41 = -(f + n) / (f - n);
+    result.m41 = 1.0f;
+
+    return result;
+}
+
+mat4 mat4_perspective(float y_fov_rad, float aspect, float n, float f)
+{
+    const float a = 1.0f / tanf(y_fov_rad / 2.0f);
+
+    mat4 result = {0};
+
+    result.m11 = a / aspect;
+    result.m22 = a;
+    result.m33 = -((f + n) / (f - n));
+    result.m34 = -1.0f;
+    result.m43 = -((2.f * f * n) / (f - n));
+
+    return result;
+}
+
+mat4 mat4_look_at(const vec3 eye, const vec3 center, const vec3 up)
+{
+    vec3 f = vec3_norm(vec3_sub(center, eye));
+    vec3 s = vec3_norm(vec3_cross(f, up));
+    vec3 t = vec3_cross(s, f);
+
+    mat4 result = mat4_identity();
+
+    for (int i = 0; i < 3; ++i) {
+        result.m[i][0] = s.v[i];
+        result.m[i][1] = t.v[i];
+        result.m[i][2] = -f.v[i];
+    }
+
+    result.m41 = -eye.x;
+    result.m42 = -eye.y;
+    result.m43 = -eye.z;
+
+    return result;
+}
+
+mat4 mat4_from_quat(const quat q)
+{
+    float a = q.w;
+    float b = q.x;
+    float c = q.y;
+    float d = q.z;
+
+    float a2 = a * a;
+    float b2 = b * b;
+    float c2 = c * c;
+    float d2 = d * d;
+
+    mat4 result = mat4_identity();
+    result.m11 = a + b2 - c2 - d2;
+    result.m12 = 2.0f * (b * c + a * d);
+    result.m13 = 2.0f * (b * d - a * c);
+
+    result.m21 = 2.0f * (b * c - a * d);
+    result.m22 = a2 - b2 + c2 - d2;
+    result.m23 = 2.0f * (c * d + a * b);
+
+    result.m31 = 2.0f * (b * d + a * c);
+    result.m32 = 2.0f * (c * d - a * b);
+    result.m33 = a2 - b2 - c2 + d2;
+
+    return result;
+}
+
+mat4 mat4_arcball(const mat4 m, const vec2 a, const vec2 b, float s);
+
+// quat
 #endif
 
-// static inline void mat4x4_from_vec3_mul_outer(mat4x4 M, vec3 a, vec3 b)
-// {
-//     int i, j;
-//     for (i = 0; i < 4; ++i)
-//         for (j = 0; j < 4; ++j)
-//             M[i][j] = i < 3 && j < 3 ? a[i] * b[j] : 0.f;
-// }
-// static inline void mat4x4_rotate(mat4x4 R, mat4x4 M, float x, float y, float z, float angle)
-// {
-//     float s = sinf(angle);
-//     float c = cosf(angle);
-//     vec3 u = {x, y, z};
-
-//     if (vec3_len(u) > 1e-4) {
-//         vec3_norm(u, u);
-//         mat4x4 T;
-//         mat4x4_from_vec3_mul_outer(T, u, u);
-
-//         mat4x4 S = {{0, u[2], -u[1], 0}, {-u[2], 0, u[0], 0}, {u[1], -u[0], 0, 0}, {0, 0, 0, 0}};
-//         mat4x4_scale(S, S, s);
-
-//         mat4x4 C;
-//         mat4x4_identity(C);
-//         mat4x4_sub(C, C, T);
-
-//         mat4x4_scale(C, C, c);
-
-//         mat4x4_add(T, T, C);
-//         mat4x4_add(T, T, S);
-
-//         T[3][3] = 1.;
-//         mat4x4_mul(R, M, T);
-//     } else {
-//         mat4x4_dup(R, M);
-//     }
-// }
-// static inline void mat4x4_rotate_X(mat4x4 Q, mat4x4 M, float angle)
-// {
-//     float s = sinf(angle);
-//     float c = cosf(angle);
-//     mat4x4 R = {{1.f, 0.f, 0.f, 0.f}, {0.f, c, s, 0.f}, {0.f, -s, c, 0.f}, {0.f, 0.f, 0.f, 1.f}};
-//     mat4x4_mul(Q, M, R);
-// }
-// static inline void mat4x4_rotate_Y(mat4x4 Q, mat4x4 M, float angle)
-// {
-//     float s = sinf(angle);
-//     float c = cosf(angle);
-//     mat4x4 R = {{c, 0.f, -s, 0.f}, {0.f, 1.f, 0.f, 0.f}, {s, 0.f, c, 0.f}, {0.f, 0.f, 0.f, 1.f}};
-//     mat4x4_mul(Q, M, R);
-// }
-// static inline void mat4x4_rotate_Z(mat4x4 Q, mat4x4 M, float angle)
-// {
-//     float s = sinf(angle);
-//     float c = cosf(angle);
-//     mat4x4 R = {{c, s, 0.f, 0.f}, {-s, c, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}};
-//     mat4x4_mul(Q, M, R);
-// }
-// static inline void mat4x4_invert(mat4x4 T, mat4x4 M)
-// {
-//     float s[6];
-//     float c[6];
-//     s[0] = M[0][0] * M[1][1] - M[1][0] * M[0][1];
-//     s[1] = M[0][0] * M[1][2] - M[1][0] * M[0][2];
-//     s[2] = M[0][0] * M[1][3] - M[1][0] * M[0][3];
-//     s[3] = M[0][1] * M[1][2] - M[1][1] * M[0][2];
-//     s[4] = M[0][1] * M[1][3] - M[1][1] * M[0][3];
-//     s[5] = M[0][2] * M[1][3] - M[1][2] * M[0][3];
-
-//     c[0] = M[2][0] * M[3][1] - M[3][0] * M[2][1];
-//     c[1] = M[2][0] * M[3][2] - M[3][0] * M[2][2];
-//     c[2] = M[2][0] * M[3][3] - M[3][0] * M[2][3];
-//     c[3] = M[2][1] * M[3][2] - M[3][1] * M[2][2];
-//     c[4] = M[2][1] * M[3][3] - M[3][1] * M[2][3];
-//     c[5] = M[2][2] * M[3][3] - M[3][2] * M[2][3];
-
-//     /* Assumes it is invertible */
-//     float idet =
-//         1.0f / (s[0] * c[5] - s[1] * c[4] + s[2] * c[3] + s[3] * c[2] - s[4] * c[1] + s[5] *
-//         c[0]);
-
-//     T[0][0] = (M[1][1] * c[5] - M[1][2] * c[4] + M[1][3] * c[3]) * idet;
-//     T[0][1] = (-M[0][1] * c[5] + M[0][2] * c[4] - M[0][3] * c[3]) * idet;
-//     T[0][2] = (M[3][1] * s[5] - M[3][2] * s[4] + M[3][3] * s[3]) * idet;
-//     T[0][3] = (-M[2][1] * s[5] + M[2][2] * s[4] - M[2][3] * s[3]) * idet;
-
-//     T[1][0] = (-M[1][0] * c[5] + M[1][2] * c[2] - M[1][3] * c[1]) * idet;
-//     T[1][1] = (M[0][0] * c[5] - M[0][2] * c[2] + M[0][3] * c[1]) * idet;
-//     T[1][2] = (-M[3][0] * s[5] + M[3][2] * s[2] - M[3][3] * s[1]) * idet;
-//     T[1][3] = (M[2][0] * s[5] - M[2][2] * s[2] + M[2][3] * s[1]) * idet;
-
-//     T[2][0] = (M[1][0] * c[4] - M[1][1] * c[2] + M[1][3] * c[0]) * idet;
-//     T[2][1] = (-M[0][0] * c[4] + M[0][1] * c[2] - M[0][3] * c[0]) * idet;
-//     T[2][2] = (M[3][0] * s[4] - M[3][1] * s[2] + M[3][3] * s[0]) * idet;
-//     T[2][3] = (-M[2][0] * s[4] + M[2][1] * s[2] - M[2][3] * s[0]) * idet;
-
-//     T[3][0] = (-M[1][0] * c[3] + M[1][1] * c[1] - M[1][2] * c[0]) * idet;
-//     T[3][1] = (M[0][0] * c[3] - M[0][1] * c[1] + M[0][2] * c[0]) * idet;
-//     T[3][2] = (-M[3][0] * s[3] + M[3][1] * s[1] - M[3][2] * s[0]) * idet;
-//     T[3][3] = (M[2][0] * s[3] - M[2][1] * s[1] + M[2][2] * s[0]) * idet;
-// }
-// static inline void mat4x4_orthonormalize(mat4x4 R, mat4x4 M)
-// {
-//     mat4x4_dup(R, M);
-//     float s = 1.;
-//     vec3 h;
-
-//     vec3_norm(R[2], R[2]);
-
-//     s = vec3_mul_inner(R[1], R[2]);
-//     vec3_scale(h, R[2], s);
-//     vec3_sub(R[1], R[1], h);
-//     vec3_norm(R[1], R[1]);
-
-//     s = vec3_mul_inner(R[0], R[2]);
-//     vec3_scale(h, R[2], s);
-//     vec3_sub(R[0], R[0], h);
-
-//     s = vec3_mul_inner(R[0], R[1]);
-//     vec3_scale(h, R[1], s);
-//     vec3_sub(R[0], R[0], h);
-//     vec3_norm(R[0], R[0]);
-// }
-
-// static inline void mat4x4_frustum(mat4x4 M, float l, float r, float b, float t, float n, float f)
-// {
-//     M[0][0] = 2.f * n / (r - l);
-//     M[0][1] = M[0][2] = M[0][3] = 0.f;
-
-//     M[1][1] = 2. * n / (t - b);
-//     M[1][0] = M[1][2] = M[1][3] = 0.f;
-
-//     M[2][0] = (r + l) / (r - l);
-//     M[2][1] = (t + b) / (t - b);
-//     M[2][2] = -(f + n) / (f - n);
-//     M[2][3] = -1.f;
-
-//     M[3][2] = -2.f * (f * n) / (f - n);
-//     M[3][0] = M[3][1] = M[3][3] = 0.f;
-// }
-// static inline void mat4x4_ortho(mat4x4 M, float l, float r, float b, float t, float n, float f)
-// {
-//     M[0][0] = 2.f / (r - l);
-//     M[0][1] = M[0][2] = M[0][3] = 0.f;
-
-//     M[1][1] = 2.f / (t - b);
-//     M[1][0] = M[1][2] = M[1][3] = 0.f;
-
-//     M[2][2] = -2.f / (f - n);
-//     M[2][0] = M[2][1] = M[2][3] = 0.f;
-
-//     M[3][0] = -(r + l) / (r - l);
-//     M[3][1] = -(t + b) / (t - b);
-//     M[3][2] = -(f + n) / (f - n);
-//     M[3][3] = 1.f;
-// }
-// static inline void mat4x4_perspective(mat4x4 m, float y_fov, float aspect, float n, float f)
-// {
-//     /* NOTE: Degrees are an unhandy unit to work with.
-//      * linmath.h uses radians for everything! */
-//     float const a = 1.f / tan(y_fov / 2.f);
-
-//     m[0][0] = a / aspect;
-//     m[0][1] = 0.f;
-//     m[0][2] = 0.f;
-//     m[0][3] = 0.f;
-
-//     m[1][0] = 0.f;
-//     m[1][1] = a;
-//     m[1][2] = 0.f;
-//     m[1][3] = 0.f;
-
-//     m[2][0] = 0.f;
-//     m[2][1] = 0.f;
-//     m[2][2] = -((f + n) / (f - n));
-//     m[2][3] = -1.f;
-
-//     m[3][0] = 0.f;
-//     m[3][1] = 0.f;
-//     m[3][2] = -((2.f * f * n) / (f - n));
-//     m[3][3] = 0.f;
-// }
-// static inline void mat4x4_look_at(mat4x4 m, vec3 eye, vec3 center, vec3 up)
-// {
-//     /* Adapted from Android's OpenGL Matrix.java.                        */
-//     /* See the OpenGL GLUT documentation for gluLookAt for a description */
-//     /* of the algorithm. We implement it in a straightforward way:       */
-
-//     /* TODO: The negation of of can be spared by swapping the order of
-//      *       operands in the following cross products in the right way. */
-//     vec3 f;
-//     vec3_sub(f, center, eye);
-//     vec3_norm(f, f);
-
-//     vec3 s;
-//     vec3_mul_cross(s, f, up);
-//     vec3_norm(s, s);
-
-//     vec3 t;
-//     vec3_mul_cross(t, s, f);
-
-//     m[0][0] = s[0];
-//     m[0][1] = t[0];
-//     m[0][2] = -f[0];
-//     m[0][3] = 0.f;
-
-//     m[1][0] = s[1];
-//     m[1][1] = t[1];
-//     m[1][2] = -f[1];
-//     m[1][3] = 0.f;
-
-//     m[2][0] = s[2];
-//     m[2][1] = t[2];
-//     m[2][2] = -f[2];
-//     m[2][3] = 0.f;
-
-//     m[3][0] = 0.f;
-//     m[3][1] = 0.f;
-//     m[3][2] = 0.f;
-//     m[3][3] = 1.f;
-
-//     mat4x4_translate_in_place(m, -eye[0], -eye[1], -eye[2]);
-// }
-
-// typedef float quat[4];
 // static inline void quat_identity(quat q)
 // {
 //     q[0] = q[1] = q[2] = 0.f;
@@ -902,17 +945,6 @@ mat4 mat4_translate(const mat4 m, float x, float y, float z)
 //     M[3][3] = 1.f;
 // }
 
-// static inline void mat4x4o_mul_quat(mat4x4 R, mat4x4 M, quat q)
-// {
-//     /*  XXX: The way this is written only works for othogonal matrices. */
-//     /* TODO: Take care of non-orthogonal case. */
-//     quat_mul_vec3(R[0], q, M[0]);
-//     quat_mul_vec3(R[1], q, M[1]);
-//     quat_mul_vec3(R[2], q, M[2]);
-
-//     R[3][0] = R[3][1] = R[3][2] = 0.f;
-//     R[3][3] = 1.f;
-// }
 // static inline void quat_from_mat4x4(quat q, mat4x4 M)
 // {
 //     float r = 0.f;
