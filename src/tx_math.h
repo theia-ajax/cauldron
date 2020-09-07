@@ -39,7 +39,8 @@ struct quaternion {
         struct {
             float x, y, z, w;
         };
-        struct vector3 v3;
+        struct vector3 xyz;
+        struct vector4 xyzw;
     };
 };
 
@@ -55,7 +56,7 @@ struct matrix4x4 {
             float m41, m42, m43, m44;
         };
         struct {
-            struct vector3 v;
+            struct vector3 xyz;
             float w;
         } v3[4];
     };
@@ -142,7 +143,7 @@ quat quat_mul(const quat p, const quat q);
 quat quat_scale(const quat q, float s);
 quat quat_norm(const quat q);
 float quat_dot(const quat a, const quat b);
-quat quat_conj(const quat r, const quat q);
+quat quat_conj(const quat q);
 quat quat_rotate(float angle, const vec3 axis);
 vec3 quat_mul_vec3(const quat q, const vec3 v);
 quat quat_from_mat4x4(const mat4 m);
@@ -724,16 +725,16 @@ mat4 mat4_orthonormalize(const mat4 m)
 {
     mat4 r = m;
 
-    r.v3[2].v = vec3_norm(r.v3[2].v);
+    r.v3[2].xyz = vec3_norm(r.v3[2].xyz);
 
-    float s = vec3_dot(r.v3[1].v, r.v3[2].v);
-    r.v3[1].v = vec3_norm(vec3_sub(r.v3[1].v, vec3_scale(r.v3[2].v, s)));
+    float s = vec3_dot(r.v3[1].xyz, r.v3[2].xyz);
+    r.v3[1].xyz = vec3_norm(vec3_sub(r.v3[1].xyz, vec3_scale(r.v3[2].xyz, s)));
 
-    s = vec3_dot(r.v3[0].v, r.v3[2].v);
-    r.v3[0].v = vec3_sub(r.v3[0].v, vec3_scale(r.v3[2].v, s));
+    s = vec3_dot(r.v3[0].xyz, r.v3[2].xyz);
+    r.v3[0].xyz = vec3_sub(r.v3[0].xyz, vec3_scale(r.v3[2].xyz, s));
 
-    s = vec3_dot(r.v3[0].v, r.v3[1].v);
-    r.v3[0].v = vec3_norm(vec3_sub(r.v3[0].v, vec3_scale(r.v3[1].v, s)));
+    s = vec3_dot(r.v3[0].xyz, r.v3[1].xyz);
+    r.v3[0].xyz = vec3_norm(vec3_sub(r.v3[0].xyz, vec3_scale(r.v3[1].xyz, s)));
 
     return r;
 }
@@ -832,177 +833,158 @@ mat4 mat4_from_quat(const quat q)
     return result;
 }
 
-mat4 mat4_arcball(const mat4 m, const vec2 a, const vec2 b, float s);
+mat4 mat4_arcball(const mat4 m, const vec2 a, const vec2 b, float s)
+{
+    vec3 a3 = {.x = a.x, .y = a.y};
+    vec3 b3 = {.x = b.x, .y = b.y};
+
+    float al2 = vec2_len2(a);
+    float bl2 = vec2_len2(b);
+
+    if (vec2_len2(a) < 1.0f) {
+        a3.z = sqrtf(1.0f - vec2_len2(a));
+    } else {
+        vec2 an = vec2_norm(a);
+        a3.x = an.x;
+        a3.y = an.y;
+    }
+
+    if (vec2_len2(b) < 1.0f) {
+        b3.z = sqrtf(1.0f - vec2_len2(b));
+    } else {
+        vec2 bn = vec2_norm(b);
+        b3.x = bn.x;
+        b3.y = bn.y;
+    }
+
+    vec3 c = vec3_cross(a3, b3);
+    const float radians = acosf(vec3_dot(a3, b3)) * s;
+    return mat4_rotate(m, c.x, c.y, c.z, radians);
+}
 
 // quat
+quat quat_identity()
+{
+    // 0, 0, 0, 1
+    return (quat){
+        .q = {[3] = 1.0f},
+    };
+}
+
+quat quat_add(const quat a, const quat b)
+{
+    return (quat){
+        .x = a.x + b.x,
+        .y = a.y + b.y,
+        .z = a.z + b.z,
+        .w = a.w + b.w,
+    };
+}
+
+quat quat_sub(const quat a, const quat b)
+{
+    return (quat){
+        .x = a.x - b.x,
+        .y = a.y - b.y,
+        .z = a.z - b.z,
+        .w = a.w - b.w,
+    };
+}
+
+quat quat_mul(const quat p, const quat q)
+{
+    vec3 r3 = vec3_cross(p.xyz, q.xyz);
+    r3 = vec3_add(r3, vec3_scale(p.xyz, q.w));
+    r3 = vec3_add(r3, vec3_scale(q.xyz, p.w));
+
+    return (quat){
+        .x = r3.x,
+        .y = r3.y,
+        .z = r3.z,
+        .w = p.w * q.w - vec3_dot(p.xyz, q.xyz),
+    };
+}
+
+quat quat_scale(const quat q, float s)
+{
+    vec4 scale = vec4_scale(q.xyzw, s);
+    quat result;
+    memcpy(result.q, scale.v, sizeof(result.q));
+    return result;
+}
+
+quat quat_norm(const quat q)
+{
+    vec4 norm = vec4_norm(q.xyzw);
+    quat result;
+    memcpy(result.q, norm.v, sizeof(result.q));
+    return result;
+}
+
+float quat_dot(const quat a, const quat b)
+{
+    return vec4_dot(a.xyzw, b.xyzw);
+}
+
+quat quat_conj(const quat q)
+{
+    return (quat){
+        .x = -q.x,
+        .y = -q.y,
+        .z = -q.z,
+        .w = q.w,
+    };
+}
+
+quat quat_rotate(float radians, const vec3 axis)
+{
+    vec3 v = vec3_scale(axis, sinf(radians / 2.0f));
+    return (quat){
+        .x = v.x,
+        .y = v.y,
+        .z = v.z,
+        .w = cosf(radians / 2.0f),
+    };
+}
+
+vec3 quat_mul_vec3(const quat q, const vec3 v)
+{
+    // Method by Fabian 'ryg' Giessen (of Farbrausch)
+    //  t = 2 * cross(q.xyz, v)
+    //  v' = v + q.w * t + cross(q.xyz, t)
+
+    vec3 t = vec3_scale(vec3_cross(q.xyz, v), 2.0f);
+    vec3 u = vec3_cross(q.xyz, t);
+    return vec3_add(vec3_add(v, vec3_scale(t, q.w)), u);
+}
+
+quat quat_from_mat4(const mat4 m)
+{
+    float r = 0.0f;
+    int i0 = 0, i1, i2;
+
+    for (int i = 0; i < 3; ++i) {
+        float mv = m.m[i][i];
+        if (mv >= r) {
+            mv = r;
+            i0 = i;
+        }
+    }
+
+    i1 = (i0 + 1) % 3;
+    i2 = (i0 + 2) % 3;
+
+    r = sqrtf(1.0f + m.m[i0][i0] - m.m[i1][i1] - m.m[i2][i2]);
+
+    if (r < 1e-6f) {
+        return (quat){1.0f, 0.0f, 0.0f, 0.0f};
+    }
+
+    return (quat){
+        .x = r / 2.0f,
+        .y = m.m[i0][i1] - m.m[i1][i0] / (2.0f * r),
+        .z = m.m[i2][i0] - m.m[i0][i2] / (2.0f * r),
+        .w = m.m[i2][i1] - m.m[i1][i2] / (2.0f * r),
+    };
+}
 #endif
-
-// static inline void quat_identity(quat q)
-// {
-//     q[0] = q[1] = q[2] = 0.f;
-//     q[3] = 1.f;
-// }
-// static inline void quat_add(quat r, quat a, quat b)
-// {
-//     int i;
-//     for (i = 0; i < 4; ++i)
-//         r[i] = a[i] + b[i];
-// }
-// static inline void quat_sub(quat r, quat a, quat b)
-// {
-//     int i;
-//     for (i = 0; i < 4; ++i)
-//         r[i] = a[i] - b[i];
-// }
-// static inline void quat_mul(quat r, quat p, quat q)
-// {
-//     vec3 w;
-//     vec3_mul_cross(r, p, q);
-//     vec3_scale(w, p, q[3]);
-//     vec3_add(r, r, w);
-//     vec3_scale(w, q, p[3]);
-//     vec3_add(r, r, w);
-//     r[3] = p[3] * q[3] - vec3_mul_inner(p, q);
-// }
-// static inline void quat_scale(quat r, quat v, float s)
-// {
-//     int i;
-//     for (i = 0; i < 4; ++i)
-//         r[i] = v[i] * s;
-// }
-// static inline float quat_inner_product(quat a, quat b)
-// {
-//     float p = 0.f;
-//     int i;
-//     for (i = 0; i < 4; ++i)
-//         p += b[i] * a[i];
-//     return p;
-// }
-// static inline void quat_conj(quat r, quat q)
-// {
-//     int i;
-//     for (i = 0; i < 3; ++i)
-//         r[i] = -q[i];
-//     r[3] = q[3];
-// }
-// static inline void quat_rotate(quat r, float angle, vec3 axis)
-// {
-//     vec3 v;
-//     vec3_scale(v, axis, sinf(angle / 2));
-//     int i;
-//     for (i = 0; i < 3; ++i)
-//         r[i] = v[i];
-//     r[3] = cosf(angle / 2);
-// }
-// #define quat_norm vec4_norm
-// static inline void quat_mul_vec3(vec3 r, quat q, vec3 v)
-// {
-//     /*
-//      * Method by Fabian 'ryg' Giessen (of Farbrausch)
-//     t = 2 * cross(q.xyz, v)
-//     v' = v + q.w * t + cross(q.xyz, t)
-//      */
-//     vec3 t;
-//     vec3 q_xyz = {q[0], q[1], q[2]};
-//     vec3 u = {q[0], q[1], q[2]};
-
-//     vec3_mul_cross(t, q_xyz, v);
-//     vec3_scale(t, t, 2);
-
-//     vec3_mul_cross(u, q_xyz, t);
-//     vec3_scale(t, t, q[3]);
-
-//     vec3_add(r, v, t);
-//     vec3_add(r, r, u);
-// }
-// static inline void mat4x4_from_quat(mat4x4 M, quat q)
-// {
-//     float a = q[3];
-//     float b = q[0];
-//     float c = q[1];
-//     float d = q[2];
-//     float a2 = a * a;
-//     float b2 = b * b;
-//     float c2 = c * c;
-//     float d2 = d * d;
-
-//     M[0][0] = a2 + b2 - c2 - d2;
-//     M[0][1] = 2.f * (b * c + a * d);
-//     M[0][2] = 2.f * (b * d - a * c);
-//     M[0][3] = 0.f;
-
-//     M[1][0] = 2 * (b * c - a * d);
-//     M[1][1] = a2 - b2 + c2 - d2;
-//     M[1][2] = 2.f * (c * d + a * b);
-//     M[1][3] = 0.f;
-
-//     M[2][0] = 2.f * (b * d + a * c);
-//     M[2][1] = 2.f * (c * d - a * b);
-//     M[2][2] = a2 - b2 - c2 + d2;
-//     M[2][3] = 0.f;
-
-//     M[3][0] = M[3][1] = M[3][2] = 0.f;
-//     M[3][3] = 1.f;
-// }
-
-// static inline void quat_from_mat4x4(quat q, mat4x4 M)
-// {
-//     float r = 0.f;
-//     int i;
-
-//     int perm[] = {0, 1, 2, 0, 1};
-//     int *p = perm;
-
-//     for (i = 0; i < 3; i++) {
-//         float m = M[i][i];
-//         if (m < r)
-//             continue;
-//         m = r;
-//         p = &perm[i];
-//     }
-
-//     r = sqrtf(1.f + M[p[0]][p[0]] - M[p[1]][p[1]] - M[p[2]][p[2]]);
-
-//     if (r < 1e-6) {
-//         q[0] = 1.f;
-//         q[1] = q[2] = q[3] = 0.f;
-//         return;
-//     }
-
-//     q[0] = r / 2.f;
-//     q[1] = (M[p[0]][p[1]] - M[p[1]][p[0]]) / (2.f * r);
-//     q[2] = (M[p[2]][p[0]] - M[p[0]][p[2]]) / (2.f * r);
-//     q[3] = (M[p[2]][p[1]] - M[p[1]][p[2]]) / (2.f * r);
-// }
-
-// static inline void mat4x4_arcball(mat4x4 R, mat4x4 M, vec2 _a, vec2 _b, float s)
-// {
-//     vec2 a;
-//     memcpy(a, _a, sizeof(a));
-//     vec2 b;
-//     memcpy(b, _b, sizeof(b));
-
-//     float z_a = 0.;
-//     float z_b = 0.;
-
-//     if (vec2_len(a) < 1.) {
-//         z_a = sqrtf(1. - vec2_mul_inner(a, a));
-//     } else {
-//         vec2_norm(a, a);
-//     }
-
-//     if (vec2_len(b) < 1.) {
-//         z_b = sqrtf(1. - vec2_mul_inner(b, b));
-//     } else {
-//         vec2_norm(b, b);
-//     }
-
-//     vec3 a_ = {a[0], a[1], z_a};
-//     vec3 b_ = {b[0], b[1], z_b};
-
-//     vec3 c_;
-//     vec3_mul_cross(c_, a_, b_);
-
-//     float const angle = acos(vec3_mul_inner(a_, b_)) * s;
-//     mat4x4_rotate(R, M, c_[0], c_[1], c_[2], angle);
-// }
