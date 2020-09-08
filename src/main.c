@@ -43,12 +43,15 @@ int main(int argc, char* argv[])
 
     sg_setup(&(sg_desc){0});
 
-    sg_buffer vbuf, ibuf;
+    // sg_buffer vbuf, ibuf;
 
     cgltf_options options = {0};
     cgltf_data* data = NULL;
     cgltf_result result = cgltf_parse_file(&(cgltf_options){0}, "assets/carPolice.gltf", &data);
     if (result == cgltf_result_success) {
+        TX_ASSERT(
+            cgltf_load_buffers(&options, data, "assets/carPolice.gltf") == cgltf_result_success);
+
         cgltf_free(data);
     }
 
@@ -63,10 +66,8 @@ int main(int argc, char* argv[])
         {.pos = {.x = -0.5f, .y = -0.5f, .z = 0.5f}, .uv = {.x = 0.0f, .y = 1.0f}},
     };
 
-    sg_buffer vbuf = sg_make_buffer(&(sg_buffer_desc){
-        .size = sizeof(vertices),
-        .content = vertices,
-    });
+    sg_buffer vbuf =
+        sg_make_buffer(&(sg_buffer_desc){.size = sizeof(vertices), .content = vertices});
 
     // clang-format off
     const uint16_t indices[] = {
