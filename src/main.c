@@ -45,12 +45,12 @@ int main(int argc, char* argv[])
 
     // sg_buffer vbuf, ibuf;
 
+    const char* asset_path = "assets/stone_tallE.gltf";
     cgltf_options options = {0};
     cgltf_data* data = NULL;
-    cgltf_result result = cgltf_parse_file(&(cgltf_options){0}, "assets/carPolice.gltf", &data);
+    cgltf_result result = cgltf_parse_file(&(cgltf_options){0}, asset_path, &data);
     if (result == cgltf_result_success) {
-        TX_ASSERT(
-            cgltf_load_buffers(&options, data, "assets/carPolice.gltf") == cgltf_result_success);
+        TX_ASSERT(cgltf_load_buffers(&options, data, asset_path) == cgltf_result_success);
 
         cgltf_free(data);
     }
