@@ -522,9 +522,9 @@ mat4 mat4_sub(const mat4 a, const mat4 b)
 mat4 mat4_scale(const mat4 m, float s)
 {
     mat4 result = m;
-    for (int i = 0; i < 16; ++i) {
-        result.d[i] *= s;
-    }
+    result.m11 *= s;
+    result.m22 *= s;
+    result.m33 *= s;
     return result;
 }
 

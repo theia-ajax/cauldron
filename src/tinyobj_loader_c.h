@@ -1352,10 +1352,6 @@ int tinyobj_parse_obj(
         return TINYOBJ_ERROR_INVALID_PARAMETER;
     if (buf == NULL)
         return TINYOBJ_ERROR_INVALID_PARAMETER;
-    if (materials_out == NULL)
-        return TINYOBJ_ERROR_INVALID_PARAMETER;
-    if (num_materials_out == NULL)
-        return TINYOBJ_ERROR_INVALID_PARAMETER;
 
     tinyobj_attrib_init(attrib);
 
@@ -1402,20 +1398,38 @@ int tinyobj_parse_obj(
     }
 
     /* Load material(if exits) */
-    if (mtllib_line_index >= 0 && commands[mtllib_line_index].mtllib_name
+    if (materials_out && num_materials_out && mtllib_line_index >= 0
+        && commands[mtllib_line_index].mtllib_name
         && commands[mtllib_line_index].mtllib_name_len > 0) {
-        char *filename = my_strndup(
-            commands[mtllib_line_index].mtllib_name, commands[mtllib_line_index].mtllib_name_len);
 
-        int ret = tinyobj_parse_and_index_mtl_file(
-            &materials, &num_materials, filename, file_reader, &material_table);
-
-        if (ret != TINYOBJ_SUCCESS) {
-            /* warning. */
-            fprintf(stderr, "TINYOBJ: Failed to parse material file '%s': %d\n", filename, ret);
+        size_t rel_len = strlen(file_name);
+        while (rel_len > 0 && file_name[rel_len - 1] != '/') {
+            --rel_len;
         }
 
-        TINYOBJ_FREE(filename);
+        const char *mtllib_name = commands[mtllib_line_index].mtllib_name;
+        size_t mtllib_name_len = commands[mtllib_line_index].mtllib_name_len;
+        size_t path_len = rel_len + mtllib_name_len;
+
+        if (path_len < 255) {
+            char mtllib_path[256] = {0};
+            memcpy(mtllib_path, file_name, rel_len);
+            memcpy(mtllib_path + rel_len, mtllib_name, mtllib_name_len);
+
+            int ret = tinyobj_parse_and_index_mtl_file(
+                &materials, &num_materials, mtllib_path, file_reader, &material_table);
+
+            if (ret != TINYOBJ_SUCCESS) {
+                /* warning. */
+                fprintf(
+                    stderr, "TINYOBJ: Failed to parse material file '%s': %d\n", mtllib_path, ret);
+            }
+        } else {
+            fprintf(
+                stderr,
+                "TINYOBJ: Failed to parse relative path for material file '%s'\n",
+                file_name);
+        }
     }
 
     /* Construct attributes */
@@ -1612,8 +1626,12 @@ int tinyobj_parse_obj(
 
     destroy_hash_table(&material_table);
 
-    (*materials_out) = materials;
-    (*num_materials_out) = num_materials;
+    if (materials_out) {
+        (*materials_out) = materials;
+    }
+    if (num_materials_out) {
+        (*num_materials_out) = num_materials;
+    }
 
     return TINYOBJ_SUCCESS;
 }
