@@ -149,7 +149,7 @@ vec3 quat_mul_vec3(const quat q, const vec3 v);
 quat quat_from_mat4x4(const mat4 m);
 
 // Implementation
-#ifdef TX_MATH_IMPL
+#ifdef TX_MATH_IMPLEMENTATION
 
 // math utilities
 float clampf(const float v, const float min, const float max)
