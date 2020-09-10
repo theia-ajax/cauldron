@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
     uint8_t* material_pixels = NULL;
     int material_width = 0;
     {
-        const char* obj_filename = "assets/taxi.obj";
+        const char* obj_filename = "assets/hatchback.obj";
 
         tinyobj_shape_t* shapes = NULL;
         tinyobj_material_t* materials = NULL;
