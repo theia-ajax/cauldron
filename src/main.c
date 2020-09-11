@@ -9,11 +9,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct vertex {
+typedef struct vertex_pos_norm_tex {
     vec3 pos;
     vec3 norm;
     vec2 uv;
-} vertex;
+} vertex_pos_norm_tex;
+
+typedef struct vertex_pos_norm {
+    vec3 pos;
+    vec3 norm;
+} vertex_pos_norm;
+
+typedef struct transform {
+    vec3 pos;
+    quat rot;
+} transform;
+
+typedef struct camera {
+    vec3 pos;
+    quat rot;
+} camera;
+
+mat4 camera_look_at(camera cam)
+{
+    vec3 forward = quat_mul_vec3(cam.rot, (vec3){0.0f, 0.0f, -1.0f});
+    vec3 up = quat_mul_vec3(cam.rot, (vec3){0.0f, 1.0f, 0.0f});
+    return mat4_look_at(cam.pos, vec3_add(cam.pos, forward), up);
+}
 
 void read_file_to_buffer(const char* filename, char** buffer, size_t* len)
 {
@@ -72,12 +94,12 @@ int main(int argc, char* argv[])
 
     // sg_buffer vbuf, ibuf;
 
-    vertex* vertices = NULL;
+    vertex_pos_norm_tex* vertices = NULL;
     uint16_t* indices = NULL;
     uint8_t* material_pixels = NULL;
     int material_width = 0;
     {
-        const char* obj_filename = "assets/hatchback.obj";
+        const char* obj_filename = "assets/taxi.obj";
 
         tinyobj_shape_t* shapes = NULL;
         tinyobj_material_t* materials = NULL;
@@ -125,17 +147,17 @@ int main(int argc, char* argv[])
 
                     float u = (float)material_id / num_materials;
 
-                    vertex v0 = (vertex){
+                    vertex_pos_norm_tex v0 = (vertex_pos_norm_tex){
                         .pos = {v_pos0[0], v_pos0[1], v_pos0[2]},
                         .norm = {v_norm0[0], v_norm0[1], v_norm0[2]},
                         .uv = {u, 0.0f},
                     };
-                    vertex v1 = (vertex){
+                    vertex_pos_norm_tex v1 = (vertex_pos_norm_tex){
                         .pos = {v_pos1[0], v_pos1[1], v_pos1[2]},
                         .norm = {v_norm1[0], v_norm1[1], v_norm1[2]},
                         .uv = {u, 0.0f},
                     };
-                    vertex v2 = (vertex){
+                    vertex_pos_norm_tex v2 = (vertex_pos_norm_tex){
                         .pos = {v_pos2[0], v_pos2[1], v_pos2[2]},
                         .norm = {v_norm2[0], v_norm2[1], v_norm2[2]},
                         .uv = {u, 0.0f},
@@ -199,7 +221,7 @@ int main(int argc, char* argv[])
     // clang-format on
 
     sg_buffer vbuf = sg_make_buffer(&(sg_buffer_desc){
-        .size = (int)arrlen(vertices) * (int)sizeof(vertex),
+        .size = (int)arrlen(vertices) * (int)sizeof(vertex_pos_norm_tex),
         .content = vertices,
     });
 
@@ -226,6 +248,72 @@ int main(int argc, char* argv[])
         free(material_pixels);
     }
 
+    sg_shader lit_colored_shader = sg_make_shader(&(sg_shader_desc){
+        .vs.uniform_blocks =
+            {
+                [0] =
+                    {
+                        .size = sizeof(uniform_block),
+                        .uniforms =
+                            {
+                                [0] = {.name = "view_proj", .type = SG_UNIFORMTYPE_MAT4},
+                                [1] = {.name = "model", .type = SG_UNIFORMTYPE_MAT4},
+                            },
+                    },
+                [1] =
+                    {
+                        .size = sizeof(vec3),
+                        .uniforms =
+                            {
+                                [0] = {.name = "color_tint", .type = SG_UNIFORMTYPE_FLOAT3},
+                            },
+                    },
+            },
+        .vs.source = "#version 330\n"
+                     "layout(location=0) in vec3 position;\n"
+                     "layout(location=1) in vec3 norm;\n"
+                     "uniform mat4 view_proj;\n"
+                     "uniform mat4 model;\n"
+                     "uniform vec3 color_tint;\n"
+                     "out vec3 light;\n"
+                     "out vec3 diffuse;\n"
+                     "void main() {\n"
+                     "  vec3 light_dir = normalize(vec3(0.7, -0.8, 0.1));\n"
+                     "  mat3 normalMatrix = transpose(inverse(mat3(model)));\n"
+                     "  vec3 world_norm = normalize(normalMatrix * norm);\n"
+                     "  vec3 ambient = vec3(0.1, 0.1, 0.1);\n"
+                     "  light = vec3(1, 1, 1) * (1 - dot(light_dir, world_norm));\n"
+                     "  diffuse = clamp(color_tint * light + ambient + position, 0, 1);\n"
+                     "  gl_Position = view_proj * model * vec4(position, 1.0f);\n"
+                     "}\n",
+        .fs.source = "#version 330\n"
+                     "uniform sampler2D tex;\n"
+                     "in vec3 diffuse;\n"
+                     "out vec4 frag_color;\n"
+                     "void main() {\n"
+                     "  frag_color = vec4(diffuse, 1);\n"
+                     "}\n",
+    });
+
+    sg_pipeline prim_pip = sg_make_pipeline(&(sg_pipeline_desc){
+        .shader = lit_colored_shader,
+        .index_type = SG_INDEXTYPE_UINT16,
+        .layout =
+            {
+                .attrs =
+                    {
+                        [0].format = SG_VERTEXFORMAT_FLOAT3,
+                        [1].format = SG_VERTEXFORMAT_FLOAT3,
+                    },
+            },
+        .depth_stencil =
+            {
+                .depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL,
+                .depth_write_enabled = true,
+            },
+        .rasterizer.cull_mode = SG_CULLMODE_BACK,
+    });
+
     sg_shader shd = sg_make_shader(&(sg_shader_desc){
         .vs.uniform_blocks[0] =
             {
@@ -243,24 +331,24 @@ int main(int argc, char* argv[])
                      "layout(location=2) in vec2 texcoord0;\n"
                      "uniform mat4 view_proj;\n"
                      "uniform mat4 model;\n"
-                     "out vec3 light;\n"
+                     "out vec3 diffuse;\n"
                      "out vec2 uv;\n"
                      "void main() {\n"
                      "  vec3 light_dir = normalize(vec3(0.7, -0.8, 0.1));\n"
                      "  mat3 normalMatrix = transpose(inverse(mat3(model)));\n"
                      "  vec3 world_norm = normalize(normalMatrix * norm);\n"
-                     "  light = vec3(1, 1, 1) * (1 - dot(light_dir, world_norm));\n"
+                     "  diffuse = vec3(1, 1, 1) * (1 - dot(light_dir, world_norm));\n"
                      "  uv = texcoord0;\n"
                      "  gl_Position = view_proj * model * vec4(position, 1.0f);\n"
                      "}\n",
         .fs.source = "#version 330\n"
                      "uniform sampler2D tex;\n"
-                     "in vec3 light;\n"
+                     "in vec3 diffuse;\n"
                      "in vec2 uv;\n"
                      "out vec4 frag_color;\n"
                      "void main() {\n"
                      "  vec3 color = texture(tex, uv).rgb;\n"
-                     "  frag_color = vec4(mix(vec3(0, 0, 0), color, light), 1);\n"
+                     "  frag_color = vec4(diffuse * color, 1);\n"
                      "}\n"});
 
     // default render states are fine for triangle
@@ -290,10 +378,36 @@ int main(int argc, char* argv[])
         .fs_images[0] = texture,
     };
 
-    // default: clear to grey
-    sg_pass_action pass_action = {0};
+    vertex_pos_norm ground_verts[4] = {
+        {.pos = {-1.0f, 0.0f, 1.0f}, .norm = {0.0f, 1.0f, 0.0f}},
+        {.pos = {1.0f, 0.0f, 1.0f}, .norm = {0.0f, 1.0f, 0.0f}},
+        {.pos = {1.0f, 0.0f, -1.0f}, .norm = {0.0f, 1.0f, 0.0f}},
+        {.pos = {-1.0f, 0.0f, -1.0f}, .norm = {0.0f, 1.0f, 0.0f}},
+    };
 
+    uint16_t ground_indices[6] = {0, 3, 2, 1, 0, 2};
+
+    sg_buffer ground_vbuf = sg_make_buffer(&(sg_buffer_desc){
+        .size = sizeof(ground_verts),
+        .content = ground_verts,
+    });
+
+    sg_buffer ground_ibuf = sg_make_buffer(&(sg_buffer_desc){
+        .type = SG_BUFFERTYPE_INDEXBUFFER,
+        .size = sizeof(ground_indices),
+        .content = ground_indices,
+    });
+
+    // default: clear to grey
+    sg_pass_action pass_action = {
+        .colors[0] = {
+            .action = SG_ACTION_CLEAR,
+            .val = {0.482f, 0.451f, 0.957f},
+        }};
+
+    camera cam = {.pos = {.x = 0.0f, .y = 2.0f, .z = 10.0f}, .rot = quat_identity()};
     uint64_t last_ticks = SDL_GetPerformanceCounter();
+    float time = 0.0f;
     bool is_running = true;
     while (is_running) {
         SDL_Event event;
@@ -316,29 +430,49 @@ int main(int argc, char* argv[])
         uint64_t delta_ticks = ticks - last_ticks;
         last_ticks = ticks;
         uint64_t frequency = SDL_GetPerformanceFrequency();
-        float dt = (float)((double)delta_ticks / frequency);
+        float dt = (float)delta_ticks / frequency;
+        time += dt;
 
         int cur_width, cur_height;
         SDL_GetWindowSize(window, &cur_width, &cur_height);
         sg_begin_default_pass(&pass_action, cur_width, cur_height);
-        sg_apply_pipeline(pip);
 
-        mat4 view = mat4_look_at((vec3){0, 0, 5}, (vec3){0, 0, 0}, (vec3){0, 1, 0});
+        mat4 view = camera_look_at(cam);
         mat4 projection = mat4_perspective(K_TX_PI / 4.0f, 16.0f / 9, 0.1f, 100.0f);
+        mat4 view_proj = mat4_mul(projection, view);
 
-        static float r = 0.0f;
-        r += dt * K_TX_PI;
-        mat4 scale = mat4_scale(mat4_identity(), 1.0f);
-        mat4 model = mat4_translate(mat4_rotate_y(scale, r), 0.0f, sinf(r) * 0.5f, 0.0f);
+        {
+            mat4 model = mat4_scale(mat4_identity(), 50.0f);
 
-        uniform_block uniforms = {
-            .view_proj = mat4_mul(projection, view),
-            .model = model,
-        };
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, &uniforms, sizeof(uniform_block));
+            sg_apply_pipeline(prim_pip);
+            sg_apply_bindings(&(sg_bindings){
+                .vertex_buffers[0] = ground_vbuf,
+                .index_buffer = ground_ibuf,
+            });
+            uniform_block uniforms = {
+                .view_proj = view_proj,
+                .model = model,
+            };
+            sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, &uniforms, sizeof(uniform_block));
+            sg_apply_uniforms(SG_SHADERSTAGE_VS, 1, &(vec3){0.0f, 1.0f, 0.0f}, sizeof(vec3));
+            sg_draw(0, 6, 1);
+        }
 
-        sg_apply_bindings(&binds);
-        sg_draw(0, (int)arrlen(indices), 1);
+        {
+            static float r = 0.0f;
+            r += dt * K_TX_PI;
+            mat4 model = mat4_translate(mat4_identity(), 0.0f, 0.0f, 0.0f);
+
+            sg_apply_pipeline(pip);
+            sg_apply_bindings(&binds);
+            uniform_block uniforms = {
+                .view_proj = view_proj,
+                .model = model,
+            };
+            sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, &uniforms, sizeof(uniform_block));
+            sg_draw(0, (int)arrlen(indices), 1);
+        }
+
         sg_end_pass();
         sg_commit();
 
