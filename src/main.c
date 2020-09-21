@@ -9,6 +9,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define TX_INPUT_IMPLEMENTATION
+#include "tx_input.h"
+
 typedef struct vertex_pos_norm_tex {
     vec3 pos;
     vec3 norm;
@@ -91,6 +94,7 @@ int main(int argc, char* argv[])
     TX_ASSERT(gl3wInit() == GL3W_OK);
 
     sg_setup(&(sg_desc){0});
+    txinp_init();
 
     // sg_buffer vbuf, ibuf;
 
@@ -399,13 +403,13 @@ int main(int argc, char* argv[])
     });
 
     // default: clear to grey
-    sg_pass_action pass_action = {
-        .colors[0] = {
-            .action = SG_ACTION_CLEAR,
-            .val = {0.482f, 0.451f, 0.957f},
-        }};
+    sg_pass_action pass_action = {.colors[0] = {
+                                      .action = SG_ACTION_CLEAR,
+                                      .val = {0.482f, 0.451f, 0.957f},
+                                  }};
 
     camera cam = {.pos = {.x = 0.0f, .y = 2.0f, .z = 10.0f}, .rot = quat_identity()};
+    transform car_tx = {.pos = {0}, .rot = quat_identity()};
     uint64_t last_ticks = SDL_GetPerformanceCounter();
     float time = 0.0f;
     bool is_running = true;
@@ -421,6 +425,18 @@ int main(int argc, char* argv[])
                 if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
                     is_running = false;
                 }
+
+                txinp_on_key_event((txinp_event_key){
+                    .key = (txinp_key)event.key.keysym.scancode,
+                    .is_down = true,
+                });
+                break;
+
+            case SDL_KEYUP:
+                txinp_on_key_event((txinp_event_key){
+                    .key = (txinp_key)event.key.keysym.scancode,
+                    .is_down = false,
+                });
                 break;
             }
         }
@@ -433,6 +449,21 @@ int main(int argc, char* argv[])
         float dt = (float)delta_ticks / frequency;
         time += dt;
 
+        // update
+        if (txinp_get_key(TXINP_KEY_UP)) {
+            vec3 forward = quat_mul_vec3(car_tx.rot, (vec3){0.0f, 0.0f, 1.0f});
+            car_tx.pos = vec3_add(car_tx.pos, vec3_scale(forward, dt));
+        }
+
+        if (txinp_get_key(TXINP_KEY_RIGHT)) {
+            car_tx.rot = quat_mul(car_tx.rot, quat_rotate(-dt, (vec3){0.0f, 1.0f, 0.0f}));
+        }
+
+        if (txinp_get_key(TXINP_KEY_LEFT)) {
+            car_tx.rot = quat_mul(car_tx.rot, quat_rotate(dt, (vec3){0.0f, 1.0f, 0.0f}));
+        }
+
+        // render
         int cur_width, cur_height;
         SDL_GetWindowSize(window, &cur_width, &cur_height);
         sg_begin_default_pass(&pass_action, cur_width, cur_height);
@@ -461,7 +492,8 @@ int main(int argc, char* argv[])
         {
             static float r = 0.0f;
             r += dt * K_TX_PI;
-            mat4 model = mat4_translate(mat4_identity(), 0.0f, 0.0f, 0.0f);
+            mat4 model = mat4_translate(
+                mat4_from_quat(car_tx.rot), car_tx.pos.x, car_tx.pos.y, car_tx.pos.z);
 
             sg_apply_pipeline(pip);
             sg_apply_bindings(&binds);
