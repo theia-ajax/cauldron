@@ -13,8 +13,6 @@
 #define TX_INPUT_IMPLEMENTATION
 #include "tx_input.h"
 
-void read_file_to_buffer(const char* filename, char** buffer, size_t* len);
-
 int main(int argc, char* argv[])
 {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -37,11 +35,9 @@ int main(int argc, char* argv[])
     spr_init();
     txinp_init();
 
-    sg_pass_action pass_action = {
-        .colors[0] = {
-            .action = SG_ACTION_CLEAR,
-            .val = {0.0f, 0.0f, 0.0f},
-        }};
+    vec3 snake_targ[128] = {0};
+    vec3 snake_pos[128] = {0};
+    vec3 snake_vel[128] = {0};
 
     uint64_t last_ticks = SDL_GetPerformanceCounter();
     float time = 0.0f;
@@ -83,27 +79,57 @@ int main(int argc, char* argv[])
         time += dt;
 
         // update
+        vec2 input = {0};
+
         if (txinp_get_key(TXINP_KEY_UP)) {
+            input.y += 1.0f;
+        }
+
+        if (txinp_get_key(TXINP_KEY_DOWN)) {
+            input.y -= 1.0f;
         }
 
         if (txinp_get_key(TXINP_KEY_RIGHT)) {
+            input.x += 1.0f;
         }
 
         if (txinp_get_key(TXINP_KEY_LEFT)) {
+            input.x -= 1.0f;
         }
 
-        for (float x = -8.0f; x < 8.0f; x += 0.25f) {
-            spr_draw((vec3){.x = x * 1.0f, .y = sinf(time + x) * 8.0f});
+        if (vec2_len2(input) > 0) {
+            input = vec2_norm(input);
         }
 
+        for (int i = 127; i > 0; --i) {
+            snake_targ[i] = snake_targ[i - 1];
+        }
+        snake_targ[0] = vec3_add(snake_targ[0], vec2_vec3(vec2_scale(input, 10.0f * dt)));
+        snake_pos[0] = snake_targ[0];
+
+        const float max_spd = 50.0f;
+        for (int i = 1; i < 128; ++i) {
+            vec3 delta = vec3_sub(snake_targ[i], snake_pos[i]);
+            float dist = vec3_len(delta);
+            vec3 ndelta = vec3_norm(delta);
+            float accel = lerpf(0.0f, 100.0f, clampf(dist / 50.0f, 0.0f, 1.0f));
+            if (vec3_dot(snake_vel[i], delta) < 0) {
+                accel *= 2.0f;
+            }
+            snake_vel[i] =
+                vec3_clamp_len(vec3_add(snake_vel[i], vec3_scale(ndelta, accel * dt)), max_spd);
+            snake_pos[i] = vec3_add(snake_pos[i], vec3_scale(snake_vel[i], dt));
+        }
+
+        for (int i = 127; i >= 0; --i) {
+            spr_draw(snake_pos[i]);
+        }
         // spr_draw((vec3){0, 0, 0});
 
         // render
         int cur_width, cur_height;
         SDL_GetWindowSize(window, &cur_width, &cur_height);
-        sg_begin_default_pass(&pass_action, cur_width, cur_height);
         spr_render(cur_width, cur_height);
-        sg_end_pass();
         sg_commit();
 
         SDL_GL_SwapWindow(window);
@@ -115,34 +141,4 @@ int main(int argc, char* argv[])
     SDL_DestroyWindow(window);
 
     return 0;
-}
-
-void read_file_to_buffer(const char* filename, char** buffer, size_t* len)
-{
-    TX_ASSERT(buffer);
-
-    size_t string_size = 0, read_size = 0;
-    FILE* file = fopen(filename, "r");
-
-    if (file) {
-        fseek(file, 0, SEEK_END);
-        long tell = ftell(file);
-
-        if (tell < 0) {
-            fclose(file);
-            return;
-        }
-
-        string_size = (size_t)tell;
-
-        rewind(file);
-        *buffer = (char*)calloc(string_size + 1, sizeof(char));
-        read_size = fread(*buffer, sizeof(char), string_size, file);
-        (*buffer)[read_size + 1] = '\0';
-        fclose(file);
-    }
-
-    if (len) {
-        *len = read_size;
-    }
 }

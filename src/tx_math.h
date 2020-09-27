@@ -82,6 +82,7 @@ vec2 vec2_min(const vec2 a, const vec2 b);
 vec2 vec2_max(const vec2 a, const vec2 b);
 vec2 vec2_clamp(const vec2 a, const vec2 min, const vec2 max);
 vec2 vec2_lerp(const vec2 a, const vec2 b, const float t);
+vec3 vec2_vec3(const vec2 v);
 
 vec3 vec3_add(const vec3 a, const vec3 b);
 vec3 vec3_sub(const vec3 a, const vec3 b);
@@ -96,6 +97,7 @@ vec3 vec3_clamp(const vec3 a, const vec3 min, const vec3 max);
 vec3 vec3_lerp(const vec3 a, const vec3 b, const float t);
 vec3 vec3_cross(const vec3 a, const vec3 b);
 vec3 vec3_reflect(const vec3 v, const vec3 n);
+vec3 vec3_clamp_len(const vec3 v, const float l);
 
 vec4 vec4_add(const vec4 a, const vec4 b);
 vec4 vec4_sub(const vec4 a, const vec4 b);
@@ -204,7 +206,8 @@ float vec2_len2(const vec2 v)
 
 vec2 vec2_norm(const vec2 v)
 {
-    return vec2_scale(v, 1.0f / vec2_len(v));
+    float l = vec2_len(v);
+    return (l > 0) ? vec2_scale(v, 1.0f / l) : (vec2){0};
 }
 
 vec2 vec2_min(const vec2 a, const vec2 b)
@@ -236,6 +239,15 @@ vec2 vec2_lerp(const vec2 a, const vec2 b, const float t)
     return (vec2){
         .x = lerpf(a.x, b.x, t),
         .y = lerpf(a.y, b.y, t),
+    };
+}
+
+vec3 vec2_vec3(const vec2 v)
+{
+    return (vec3){
+        .x = v.x,
+        .y = v.y,
+        .z = 0.0f,
     };
 }
 
@@ -285,7 +297,7 @@ float vec3_len2(const vec3 v)
 vec3 vec3_norm(const vec3 v)
 {
     float l = vec3_len(v);
-    return vec3_scale(v, 1.0f / l);
+    return (l > 0) ? vec3_scale(v, 1.0f / l) : (vec3){0};
 }
 
 vec3 vec3_min(const vec3 a, const vec3 b)
@@ -343,6 +355,15 @@ vec3 vec3_reflect(const vec3 v, const vec3 n)
     };
 }
 
+vec3 vec3_clamp_len(const vec3 v, const float l)
+{
+    float len = vec3_len(v);
+    if (len > l) {
+        return vec3_sub(v, vec3_scale(v, len - l));
+    }
+    return v;
+}
+
 // vec4
 vec4 vec4_add(const vec4 a, const vec4 b)
 {
@@ -391,7 +412,8 @@ float vec4_len2(const vec4 v)
 
 vec4 vec4_norm(const vec4 v)
 {
-    return vec4_scale(v, 1.0f / vec4_len(v));
+    float l = vec4_len(v);
+    return (l > 0) ? vec4_scale(v, 1.0f / l) : (vec4){0};
 }
 
 vec4 vec4_min(const vec4 a, const vec4 b)
