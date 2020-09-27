@@ -2,8 +2,7 @@
 
 #include <stdio.h>
 
-void _tx_internal_print_assert(const char* expression)
+void _tx_internal_print_assert(const char* filename, int line, const char* expression)
 {
-    printf("_ ASSERTION FAILED __________________________________________________________\n\n");
-    printf("  %s\n", expression);
+    printf("[ASSERTION FAILED] (%s) : %s#%d\n", expression, filename, line);
 }

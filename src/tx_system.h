@@ -7,4 +7,4 @@
 #define DEBUG_BREAK raise(SIGTRAP);
 #endif
 
-void _tx_internal_print_assert(const char* expression);
+void _tx_internal_print_assert(const char* file, int line, const char* expression);

@@ -4,17 +4,16 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+// clang-format off
 #define TX_ASSERT_ALWAYS(expression)                                                               \
     {                                                                                              \
-        static bool s_skip = false;                                                                \
-        if (!s_skip) {                                                                             \
-            s_skip = true;                                                                         \
-            if (!(expression)) {                                                                   \
-                _tx_internal_print_assert(#expression);                                            \
-                DEBUG_BREAK                                                                        \
-            }                                                                                      \
+        if ((expression)) {                                                                        \
+        } else {                                                                                   \
+            _tx_internal_print_assert(__FILE__, __LINE__ , #expression);                           \
+            DEBUG_BREAK                                                                            \
         }                                                                                          \
     }
+// clang-format on
 
 #if _DEBUG
 #define TX_ASSERT(expression) TX_ASSERT_ALWAYS(expression)

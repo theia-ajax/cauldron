@@ -37,11 +37,10 @@ int main(int argc, char* argv[])
     spr_init();
     txinp_init();
 
-    // cornflower blue clear
     sg_pass_action pass_action = {
         .colors[0] = {
             .action = SG_ACTION_CLEAR,
-            .val = {0.482f, 0.451f, 0.957f},
+            .val = {0.0f, 0.0f, 0.0f},
         }};
 
     uint64_t last_ticks = SDL_GetPerformanceCounter();
@@ -93,7 +92,11 @@ int main(int argc, char* argv[])
         if (txinp_get_key(TXINP_KEY_LEFT)) {
         }
 
-        spr_draw((vec3){0, 0, 0});
+        for (float x = -8.0f; x < 8.0f; x += 0.25f) {
+            spr_draw((vec3){.x = x * 1.0f, .y = sinf(time + x) * 8.0f});
+        }
+
+        // spr_draw((vec3){0, 0, 0});
 
         // render
         int cur_width, cur_height;
