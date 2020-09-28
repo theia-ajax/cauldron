@@ -12,16 +12,8 @@ struct vertex {
 struct sprite {
     vec3 pos;
     vec4 rect;
+    vec2 origin;
 };
-
-const struct vertex k_quad_verts[] = {
-    {.pos = {.x = -0.5f, .y = 0.5f}, .uv = {.x = 0.0f, .y = 0.0f}},
-    {.pos = {.x = 0.5f, .y = 0.5f}, .uv = {.x = 1.0f, .y = 0.0f}},
-    {.pos = {.x = 0.5f, .y = -0.5f}, .uv = {.x = 1.0f, .y = 1.0f}},
-    {.pos = {.x = -0.5f, .y = -0.5f}, .uv = {.x = 0.0f, .y = 1.0f}},
-};
-
-const uint16_t k_quad_indices[] = {0, 2, 3, 0, 1, 2};
 
 typedef struct uniform_block {
     mat4 view_proj;
@@ -36,14 +28,10 @@ sg_buffer geom_ibuf;
 
 sg_buffer inst_vbuf;
 
-sg_shader spr_shader;
-sg_pipeline spr_pip;
-sg_bindings spr_binds;
-
 sg_image atlas;
 
 uint32_t sprite_ct;
-float view_size = 8.0f;
+float pixels_per_meter = 8.0f;
 
 const uint32_t k_canvas_width = 256;
 const uint32_t k_canvas_height = 144;
@@ -67,7 +55,6 @@ struct {
 
 void spr_init()
 {
-
     // Configure render target render
     int iw, ih, ichan;
     stbi_uc* pixels = stbi_load("assets/atlas.png", &iw, &ih, &ichan, 4);
@@ -86,15 +73,25 @@ void spr_init()
             },
     });
 
+    const float k_size = 1.0f;
+    struct vertex quad_verts[] = {
+        {.pos = {.x = 0, .y = 0}, .uv = {.x = 0.0f, .y = 0.0f}},
+        {.pos = {.x = k_size, .y = 0}, .uv = {.x = 1.0f, .y = 0.0f}},
+        {.pos = {.x = k_size, .y = k_size}, .uv = {.x = 1.0f, .y = 1.0f}},
+        {.pos = {.x = 0, .y = k_size}, .uv = {.x = 0.0f, .y = 1.0f}},
+    };
+
+    const uint16_t quad_indices[] = {0, 2, 3, 0, 1, 2};
+
     geom_vbuf = sg_make_buffer(&(sg_buffer_desc){
-        .content = k_quad_verts,
-        .size = sizeof(k_quad_verts),
+        .content = quad_verts,
+        .size = sizeof(quad_verts),
     });
 
     geom_ibuf = sg_make_buffer(&(sg_buffer_desc){
         .type = SG_BUFFERTYPE_INDEXBUFFER,
-        .content = k_quad_indices,
-        .size = sizeof(k_quad_indices),
+        .content = quad_indices,
+        .size = sizeof(quad_indices),
     });
 
     inst_vbuf = sg_make_buffer(&(sg_buffer_desc){
@@ -190,6 +187,12 @@ void spr_init()
                                 .offset = 12,
                                 .buffer_index = 1,
                             },
+                        [4] =
+                            {
+                                .format = SG_VERTEXFORMAT_FLOAT2,
+                                .offset = 28,
+                                .buffer_index = 1,
+                            },
                     },
             },
         .depth_stencil =
@@ -283,11 +286,11 @@ void spr_render(int width, int height)
 
     {
         const float aspect = (float)k_canvas_width / k_canvas_height;
-        float half_w = view_size * aspect;
-        float half_h = view_size;
+        float view_width = k_canvas_width / pixels_per_meter;
+        float view_height = k_canvas_height / pixels_per_meter;
 
-        mat4 view = mat4_look_at((vec3){0, 0, 1.0f}, (vec3){0, 0, -1}, (vec3){0, 1, 0});
-        mat4 projection = mat4_ortho(-half_w, half_w, -half_h, half_h, 0.0f, 10.0f);
+        mat4 view = mat4_look_at((vec3){0, 0, 100}, (vec3){0, 0, -1}, (vec3){0, 1, 0});
+        mat4 projection = mat4_ortho(0, view_width, view_height, 0, 0.0f, 250.0f);
         mat4 view_proj = mat4_mul(projection, view);
 
         sg_begin_pass(
@@ -318,12 +321,23 @@ void spr_render(int width, int height)
     sprite_ct = 0;
 }
 
-void spr_draw(vec3 pos)
+void spr_draw(const sprite_draw_desc* desc)
 {
+    TX_ASSERT(desc);
     TX_ASSERT(sprite_ct < K_MAX_SPRITES);
+
+    uint32_t row = desc->sprite_id / 16;
+    uint32_t col = desc->sprite_id % 16;
+
     sprites[sprite_ct] = (struct sprite){
-        .pos = pos,
-        .rect = {1.0f / 16, 0, 1.0f / 16, 1.0f / 16},
+        .pos =
+            (vec3){
+                .x = desc->pos.x,
+                .y = desc->pos.y,
+                .z = desc->layer,
+            },
+        .rect = {col / 16.0f, row / 16.0f, 1.0f / 16, 1.0f / 16},
+        .origin = desc->origin,
     };
     sprite_ct++;
 }

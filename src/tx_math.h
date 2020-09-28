@@ -83,6 +83,7 @@ vec2 vec2_max(const vec2 a, const vec2 b);
 vec2 vec2_clamp(const vec2 a, const vec2 min, const vec2 max);
 vec2 vec2_lerp(const vec2 a, const vec2 b, const float t);
 vec3 vec2_vec3(const vec2 v);
+vec2 vec2_clamp_len(const vec2 v, const float l);
 
 vec3 vec3_add(const vec3 a, const vec3 b);
 vec3 vec3_sub(const vec3 a, const vec3 b);
@@ -249,6 +250,15 @@ vec3 vec2_vec3(const vec2 v)
         .y = v.y,
         .z = 0.0f,
     };
+}
+
+vec2 vec2_clamp_len(const vec2 v, const float l)
+{
+    float len = vec2_len(v);
+    if (len > l) {
+        return vec2_sub(v, vec2_scale(v, len - l));
+    }
+    return v;
 }
 
 // vec3

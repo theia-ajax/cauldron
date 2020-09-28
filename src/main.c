@@ -13,6 +13,11 @@
 #define TX_INPUT_IMPLEMENTATION
 #include "tx_input.h"
 
+#define TX_RAND_IMPLEMENTATION
+#include "tx_rand.h"
+
+#define SNAKE_CHUNKS 128
+
 int main(int argc, char* argv[])
 {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -34,15 +39,23 @@ int main(int argc, char* argv[])
     sg_setup(&(sg_desc){0});
     spr_init();
     txinp_init();
+    txrng_seed(0xFF0077FF);
 
-    vec3 snake_targ[128] = {0};
-    vec3 snake_pos[128] = {0};
-    vec3 snake_vel[128] = {0};
+    vec2 snake_targ[SNAKE_CHUNKS] = {0};
+    vec2 snake_pos[SNAKE_CHUNKS] = {0};
+    vec2 snake_vel[SNAKE_CHUNKS] = {0};
+
+    for (int i = 0; i < SNAKE_CHUNKS; ++i)
+        snake_pos[i] = (vec2){.x = 16, .y = 10};
+    for (int i = 0; i < SNAKE_CHUNKS; ++i)
+        snake_targ[i] = snake_pos[i];
 
     uint64_t last_ticks = SDL_GetPerformanceCounter();
     float time = 0.0f;
     bool is_running = true;
     while (is_running) {
+        txinp_update();
+
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -82,48 +95,73 @@ int main(int argc, char* argv[])
         vec2 input = {0};
 
         if (txinp_get_key(TXINP_KEY_UP)) {
-            input.y += 1.0f;
-        }
-
-        if (txinp_get_key(TXINP_KEY_DOWN)) {
             input.y -= 1.0f;
         }
 
-        if (txinp_get_key(TXINP_KEY_RIGHT)) {
-            input.x += 1.0f;
+        if (txinp_get_key(TXINP_KEY_DOWN)) {
+            input.y += 1.0f;
         }
 
         if (txinp_get_key(TXINP_KEY_LEFT)) {
             input.x -= 1.0f;
         }
 
-        if (vec2_len2(input) > 0) {
-            input = vec2_norm(input);
+        if (txinp_get_key(TXINP_KEY_RIGHT)) {
+            input.x += 1.0f;
         }
 
-        for (int i = 127; i > 0; --i) {
+        for (int i = SNAKE_CHUNKS - 1; i > 0; --i) {
             snake_targ[i] = snake_targ[i - 1];
         }
-        snake_targ[0] = vec3_add(snake_targ[0], vec2_vec3(vec2_scale(input, 10.0f * dt)));
+        snake_targ[0] = vec2_add(snake_targ[0], vec2_scale(vec2_norm(input), 32.0f * dt));
         snake_pos[0] = snake_targ[0];
 
         const float max_spd = 50.0f;
-        for (int i = 1; i < 128; ++i) {
-            vec3 delta = vec3_sub(snake_targ[i], snake_pos[i]);
-            float dist = vec3_len(delta);
-            vec3 ndelta = vec3_norm(delta);
-            float accel = lerpf(0.0f, 100.0f, clampf(dist / 50.0f, 0.0f, 1.0f));
-            if (vec3_dot(snake_vel[i], delta) < 0) {
+        for (int i = 1; i < SNAKE_CHUNKS; ++i) {
+            float r_ang = txrng_rangef(0.0f, K_TX_PI * 2.0f);
+            float r_rad = txrng_rangef(0.0f, 10.0f);
+            vec2 offset = (vec2){.x = cosf(r_ang) * r_rad, .y = sinf(r_ang) * r_rad};
+            vec2 delta = vec2_sub(vec2_add(snake_targ[i], offset), snake_pos[i]);
+            float dist = vec2_len(delta);
+            vec2 ndelta = vec2_norm(delta);
+            float accel = 70.0f - txrng_rangef(0.0f, 15.0f);
+            if (vec2_dot(snake_vel[i], delta) < 0) {
                 accel *= 2.0f;
             }
-            snake_vel[i] =
-                vec3_clamp_len(vec3_add(snake_vel[i], vec3_scale(ndelta, accel * dt)), max_spd);
-            snake_pos[i] = vec3_add(snake_pos[i], vec3_scale(snake_vel[i], dt));
+            snake_vel[i] = vec2_add(snake_vel[i], vec2_scale(ndelta, accel * dt));
+            snake_vel[i] = vec2_sub(
+                snake_vel[i],
+                vec2_scale(vec2_norm(snake_vel[i]), fminf(2.0f, vec2_len(snake_vel[i]) * dt)));
+            snake_pos[i] = vec2_add(snake_pos[i], vec2_scale(snake_vel[i], dt));
+
+            for (int j = i + 1; j < SNAKE_CHUNKS; ++j) {
+                vec2 d = vec2_sub(snake_pos[i], snake_pos[j]);
+                if (vec2_len2(d) < 4) {
+                    vec2 nd = vec2_norm(d);
+                    snake_pos[i] = vec2_add(snake_pos[i], vec2_scale(nd, 0.1f * dt));
+                    snake_pos[j] = vec2_add(snake_pos[j], vec2_scale(nd, -0.1f * dt));
+                }
+            }
+        }
+
+        for (int x = -32; x <= 32; x++) {
+            for (int y = -18; y <= 18; y += 4) {
+                spr_draw(&(sprite_draw_desc){
+                    .sprite_id = 17,
+                    .pos = (vec2){.x = (float)x, .y = (float)y},
+                });
+            }
         }
 
         for (int i = 127; i >= 0; --i) {
-            spr_draw(snake_pos[i]);
+            spr_draw(&(sprite_draw_desc){
+                .sprite_id = 1,
+                .pos = snake_pos[i],
+                .origin = (vec2){0.5f, 1.0f},
+            });
         }
+
+        // printf("pos: %02f, %02f\r", snake_pos[0].x, snake_pos[0].y);
         // spr_draw((vec3){0, 0, 0});
 
         // render
