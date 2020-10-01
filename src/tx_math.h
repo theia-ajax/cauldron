@@ -3,8 +3,8 @@
 #include "tx_types.h"
 #include <math.h>
 
-#define K_TX_PI 3.14159265358979f
-#define K_TX_EPSILON 1e-4f;
+#define TX_PI 3.14159265358979f
+#define TX_EPSILON 1e-4f;
 
 struct vector2 {
     union {
@@ -70,6 +70,7 @@ typedef struct matrix4x4 mat4;
 
 float clampf(const float v, const float min, const float max);
 float lerpf(const float a, const float b, const float t);
+float nsinf(const float t); // normalized sin [0-1] result with normalized input [0-1] (1 tau)
 
 vec2 vec2_add(const vec2 a, const vec2 b);
 vec2 vec2_sub(const vec2 a, const vec2 b);
@@ -163,6 +164,11 @@ float clampf(const float v, const float min, const float max)
 float lerpf(const float a, const float b, const float t)
 {
     return (b - a) * t + a;
+}
+
+float nsinf(const float t)
+{
+    return (sinf(TX_PI * 2.0f * t) + 1) / 2.0f;
 }
 
 // vec2

@@ -7,42 +7,43 @@ double txrng_next();
 int32_t txrng_range(int32_t min, int32_t max);
 float txrng_rangef(float min, float max);
 
-// implmementation
+// implementation
 #if defined(TX_RAND_IMPLEMENTATION)
 
-struct xorshift128_state {
-    uint32_t a, b, c, d;
-};
-
-/* The state array must be initialized to not be all zero */
-uint32_t xorshift128_next(struct xorshift128_state state)
+uint32_t _txrng_xorshift128_next(uint32_t state[4])
 {
-    /* Algorithm "xor128" from p. 5 of Marsaglia, "Xorshift RNGs" */
-    uint32_t t = state.d;
-
-    uint32_t const s = state.a;
-    state.d = state.c;
-    state.c = state.b;
-    state.b = s;
-
+    uint32_t t = state[3];
     t ^= t << 11;
     t ^= t >> 8;
-    return state.a = t ^ s ^ (s >> 19);
+
+    state[3] = state[2];
+    state[2] = state[1];
+    state[1] = state[0];
+
+    const uint32_t s = state[0];
+    state[0] = t ^ s ^ (s >> 19);
+
+    return state[0];
 }
 
-struct xorshift128_state default_rng;
+void _txrng_seed(uint32_t state[4], uint32_t seed)
+{
+    state[0] = seed;
+    state[1] = seed ^ 0xAAAAAAAA;
+    state[2] = seed ^ 0x55555555;
+    state[3] = state[1] ^ state[2];
+}
+
+uint32_t default_rng[4];
 
 void txrng_seed(uint32_t seed)
 {
-    default_rng.a = seed;
-    default_rng.b = seed;
-    default_rng.c = seed;
-    default_rng.d = seed;
+    _txrng_seed(default_rng, seed);
 }
 
 double txrng_next()
 {
-    return (double)xorshift128_next(default_rng) / UINT32_MAX;
+    return (double)_txrng_xorshift128_next(default_rng) / UINT32_MAX;
 }
 
 int32_t txrng_range(int32_t min, int32_t max)
@@ -52,7 +53,8 @@ int32_t txrng_range(int32_t min, int32_t max)
 
 float txrng_rangef(float min, float max)
 {
-    return (float)txrng_next() * (max - min) + min;
+    double next = txrng_next();
+    return (float)next * (max - min) + min;
 }
 
 #endif

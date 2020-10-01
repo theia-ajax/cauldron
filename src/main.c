@@ -9,6 +9,7 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define TX_INPUT_IMPLEMENTATION
 #include "tx_input.h"
@@ -39,14 +40,14 @@ int main(int argc, char* argv[])
     sg_setup(&(sg_desc){0});
     spr_init();
     txinp_init();
-    txrng_seed(0xFF0077FF);
+    txrng_seed((uint32_t)time(NULL));
 
     vec2 snake_targ[SNAKE_CHUNKS] = {0};
     vec2 snake_pos[SNAKE_CHUNKS] = {0};
     vec2 snake_vel[SNAKE_CHUNKS] = {0};
 
     for (int i = 0; i < SNAKE_CHUNKS; ++i)
-        snake_pos[i] = (vec2){.x = 16, .y = 10};
+        snake_pos[i] = (vec2){.x = txrng_rangef(0.0f, 32.0f), .y = txrng_rangef(0.0f, 18.0f)};
     for (int i = 0; i < SNAKE_CHUNKS; ++i)
         snake_targ[i] = snake_pos[i];
 
@@ -118,13 +119,13 @@ int main(int argc, char* argv[])
 
         const float max_spd = 50.0f;
         for (int i = 1; i < SNAKE_CHUNKS; ++i) {
-            float r_ang = txrng_rangef(0.0f, K_TX_PI * 2.0f);
-            float r_rad = txrng_rangef(0.0f, 10.0f);
+            float r_ang = txrng_rangef(0.0f, TX_PI * 2.0f);
+            float r_rad = lerpf(4.0f, 12.0f, nsinf(time / 4.0f)); // txrng_rangef(0.0f, );
             vec2 offset = (vec2){.x = cosf(r_ang) * r_rad, .y = sinf(r_ang) * r_rad};
             vec2 delta = vec2_sub(vec2_add(snake_targ[i], offset), snake_pos[i]);
             float dist = vec2_len(delta);
             vec2 ndelta = vec2_norm(delta);
-            float accel = 70.0f - txrng_rangef(0.0f, 15.0f);
+            float accel = 150.0f - txrng_rangef(0.0f, 15.0f);
             if (vec2_dot(snake_vel[i], delta) < 0) {
                 accel *= 2.0f;
             }
@@ -134,18 +135,18 @@ int main(int argc, char* argv[])
                 vec2_scale(vec2_norm(snake_vel[i]), fminf(2.0f, vec2_len(snake_vel[i]) * dt)));
             snake_pos[i] = vec2_add(snake_pos[i], vec2_scale(snake_vel[i], dt));
 
-            for (int j = i + 1; j < SNAKE_CHUNKS; ++j) {
-                vec2 d = vec2_sub(snake_pos[i], snake_pos[j]);
-                if (vec2_len2(d) < 4) {
-                    vec2 nd = vec2_norm(d);
-                    snake_pos[i] = vec2_add(snake_pos[i], vec2_scale(nd, 0.1f * dt));
-                    snake_pos[j] = vec2_add(snake_pos[j], vec2_scale(nd, -0.1f * dt));
-                }
-            }
+            // for (int j = i + 1; j < SNAKE_CHUNKS; ++j) {
+            //     vec2 d = vec2_sub(snake_pos[i], snake_pos[j]);
+            //     if (vec2_len2(d) < 4) {
+            //         vec2 nd = vec2_norm(d);
+            //         snake_pos[i] = vec2_add(snake_pos[i], vec2_scale(nd, 0.1f * dt));
+            //         snake_pos[j] = vec2_add(snake_pos[j], vec2_scale(nd, -0.1f * dt));
+            //     }
+            // }
         }
 
-        for (int x = -32; x <= 32; x++) {
-            for (int y = -18; y <= 18; y += 4) {
+        for (int x = 0; x < 32; x++) {
+            for (int y = 0; y < 18; y++) {
                 spr_draw(&(sprite_draw_desc){
                     .sprite_id = 17,
                     .pos = (vec2){.x = (float)x, .y = (float)y},
@@ -155,7 +156,7 @@ int main(int argc, char* argv[])
 
         for (int i = 127; i >= 0; --i) {
             spr_draw(&(sprite_draw_desc){
-                .sprite_id = 1,
+                .sprite_id = 50,
                 .pos = snake_pos[i],
                 .origin = (vec2){0.5f, 1.0f},
             });

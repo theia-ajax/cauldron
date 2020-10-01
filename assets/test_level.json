@@ -1,0 +1,19 @@
+{
+	"__header__": {
+		"fileType": "LEd Project JSON",
+		"app": "LEd",
+		"appAuthor": "Sebastien Benard",
+		"appVersion": "0.2.0-beta",
+		"url": "https://deepnight.net/tools/led-2d-level-editor/"
+	},
+	"name": "test_level",
+	"jsonVersion": "0.2.0",
+	"defaultPivotX": 0.0,
+	"defaultPivotY": 0.0,
+	"defaultGridSize": 8,
+	"bgColor": "#7F8093",
+	"nextUid": 1,
+	"minifyJson": false,
+	"defs": { "layers": [], "entities": [], "tilesets": [], "enums": [], "externalEnums": [] },
+	"levels": [ { "identifier": "Level", "uid": 0, "pxWid": 256, "pxHei": 256, "layerInstances": [] } ]
+}
