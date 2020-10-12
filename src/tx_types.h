@@ -23,10 +23,11 @@
 
 #define VALID_INDEX(index, count) ((size_t)(index) < (size_t)(count))
 
-enum tx_result {
+typedef enum tx_result {
     TX_INVALID = -1,
     TX_SUCCESS = 0,
     TX_FILE_ERROR,
     TX_ALLOCATION_ERROR,
+    TX_PARSE_ERROR,
     TX_INVALID_PARAMTER,
-};
+} tx_result;

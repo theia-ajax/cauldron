@@ -1,4 +1,5 @@
 
+#include "game_level.h"
 #include "sokol_gfx.h"
 #include "sprite_draw.h"
 #include "stb_ds.h"
@@ -41,6 +42,9 @@ int main(int argc, char* argv[])
     spr_init();
     txinp_init();
     txrng_seed((uint32_t)time(NULL));
+
+    game_data_proj proj;
+    TX_ASSERT(load_game_data_project("assets/test_level.json", &proj) == TX_SUCCESS);
 
     vec2 snake_targ[SNAKE_CHUNKS] = {0};
     vec2 snake_pos[SNAKE_CHUNKS] = {0};
@@ -120,7 +124,7 @@ int main(int argc, char* argv[])
         const float max_spd = 50.0f;
         for (int i = 1; i < SNAKE_CHUNKS; ++i) {
             float r_ang = txrng_rangef(0.0f, TX_PI * 2.0f);
-            float r_rad = lerpf(4.0f, 12.0f, nsinf(time / 4.0f)); // txrng_rangef(0.0f, );
+            float r_rad = lerpf(4.0f, 8.0f, nsinf(time / 4.0f)); // txrng_rangef(0.0f, );
             vec2 offset = (vec2){.x = cosf(r_ang) * r_rad, .y = sinf(r_ang) * r_rad};
             vec2 delta = vec2_sub(vec2_add(snake_targ[i], offset), snake_pos[i]);
             float dist = vec2_len(delta);
@@ -147,8 +151,9 @@ int main(int argc, char* argv[])
 
         for (int x = 0; x < 32; x++) {
             for (int y = 0; y < 18; y++) {
+                int id = proj.levels[0].tiles[x + y * 32];
                 spr_draw(&(sprite_draw_desc){
-                    .sprite_id = 17,
+                    .sprite_id = id,
                     .pos = (vec2){.x = (float)x, .y = (float)y},
                 });
             }

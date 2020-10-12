@@ -57,7 +57,7 @@ void spr_init()
 {
     // Configure render target render
     int iw, ih, ichan;
-    stbi_uc* pixels = stbi_load("assets/atlas.png", &iw, &ih, &ichan, 4);
+    stbi_uc* pixels = stbi_load("assets/atlas2.png", &iw, &ih, &ichan, 4);
     TX_ASSERT(pixels);
 
     atlas = sg_make_image(&(sg_image_desc){
