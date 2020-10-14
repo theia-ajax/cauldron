@@ -43,8 +43,8 @@ int main(int argc, char* argv[])
     txinp_init();
     txrng_seed((uint32_t)time(NULL));
 
-    game_data_proj proj;
-    TX_ASSERT(load_game_data_project("assets/test_level.json", &proj) == TX_SUCCESS);
+    game_level_proj proj;
+    TX_ASSERT(load_game_level_project("assets/test_level.json", &proj) == TX_SUCCESS);
 
     vec2 snake_targ[SNAKE_CHUNKS] = {0};
     vec2 snake_pos[SNAKE_CHUNKS] = {0};
@@ -149,13 +149,16 @@ int main(int argc, char* argv[])
             // }
         }
 
-        for (int x = 0; x < 32; x++) {
-            for (int y = 0; y < 18; y++) {
-                int id = proj.levels[0].tiles[x + y * 32];
-                spr_draw(&(sprite_draw_desc){
-                    .sprite_id = id,
-                    .pos = (vec2){.x = (float)x, .y = (float)y},
-                });
+        for (int lid = 0; lid < proj.levels[0].layer_insts_size; ++lid) {
+            game_layer_instance layer = proj.levels[0].layer_insts[lid];
+            for (uint32_t x = 0; x < layer.cell_w; x++) {
+                for (uint32_t y = 0; y < layer.cell_h; y++) {
+                    int id = layer.tiles[x + y * layer.cell_w];
+                    spr_draw(&(sprite_draw_desc){
+                        .sprite_id = id,
+                        .pos = (vec2){.x = (float)x, .y = (float)y},
+                    });
+                }
             }
         }
 
@@ -178,6 +181,8 @@ int main(int argc, char* argv[])
 
         SDL_GL_SwapWindow(window);
     }
+
+    free_game_level_project(&proj);
 
     spr_shutdown();
     sg_shutdown();
