@@ -154,18 +154,21 @@ int main(int argc, char* argv[])
             for (uint32_t x = 0; x < layer.cell_w; x++) {
                 for (uint32_t y = 0; y < layer.cell_h; y++) {
                     int id = layer.tiles[x + y * layer.cell_w];
-                    spr_draw(&(sprite_draw_desc){
-                        .sprite_id = id,
-                        .pos = (vec2){.x = (float)x, .y = (float)y},
-                    });
+                    if (id > 0) {
+                        spr_draw(&(sprite_draw_desc){
+                            .sprite_id = id,
+                            .pos = (vec2){.x = (float)x, .y = (float)y},
+                        });
+                    }
                 }
             }
         }
 
         for (int i = 127; i >= 0; --i) {
             spr_draw(&(sprite_draw_desc){
-                .sprite_id = 50,
+                .sprite_id = 18,
                 .pos = snake_pos[i],
+                .layer = 1.0f,
                 .origin = (vec2){0.5f, 1.0f},
             });
         }
