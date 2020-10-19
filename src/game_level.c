@@ -1,6 +1,7 @@
 #include "game_level.h"
 
 #include "futils.h"
+#include "profile.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,13 +35,18 @@ tx_result load_game_level_project(const char* filename, game_level_proj* proj)
     char* js;
     size_t len;
 
+    profile_start("load_game_level_project");
     tx_result result = read_file_to_buffer(filename, &js, &len);
 
     if (result != TX_SUCCESS) {
         return result;
     }
 
-    return parse_game_level_project(js, len, proj);
+    result = parse_game_level_project(js, len, proj);
+
+    uint64_t time = profile_stop("load_game_level_project");
+
+    return result;
 }
 
 tx_result free_game_level_project(game_level_proj* proj)
