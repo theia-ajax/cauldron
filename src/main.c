@@ -1,5 +1,6 @@
 
 #include "game_level.h"
+#include "hash.h"
 #include "sokol_gfx.h"
 #include "sprite_draw.h"
 #include "stb_ds.h"
@@ -17,8 +18,6 @@
 
 #define TX_RAND_IMPLEMENTATION
 #include "tx_rand.h"
-
-#define SNAKE_CHUNKS 128
 
 int main(int argc, char* argv[])
 {
@@ -45,15 +44,6 @@ int main(int argc, char* argv[])
 
     game_level_proj proj;
     TX_ASSERT(load_game_level_project("assets/test_level.json", &proj) == TX_SUCCESS);
-
-    vec2 snake_targ[SNAKE_CHUNKS] = {0};
-    vec2 snake_pos[SNAKE_CHUNKS] = {0};
-    vec2 snake_vel[SNAKE_CHUNKS] = {0};
-
-    for (int i = 0; i < SNAKE_CHUNKS; ++i)
-        snake_pos[i] = (vec2){.x = txrng_rangef(0.0f, 32.0f), .y = txrng_rangef(0.0f, 18.0f)};
-    for (int i = 0; i < SNAKE_CHUNKS; ++i)
-        snake_targ[i] = snake_pos[i];
 
     uint64_t last_ticks = SDL_GetPerformanceCounter();
     float time = 0.0f;
@@ -115,66 +105,30 @@ int main(int argc, char* argv[])
             input.x += 1.0f;
         }
 
-        for (int i = SNAKE_CHUNKS - 1; i > 0; --i) {
-            snake_targ[i] = snake_targ[i - 1];
-        }
-        snake_targ[0] = vec2_add(snake_targ[0], vec2_scale(vec2_norm(input), 32.0f * dt));
-        snake_pos[0] = snake_targ[0];
-
-        const float max_spd = 50.0f;
-        for (int i = 1; i < SNAKE_CHUNKS; ++i) {
-            float r_ang = txrng_rangef(0.0f, TX_PI * 2.0f);
-            float r_rad = lerpf(4.0f, 8.0f, nsinf(time / 4.0f)); // txrng_rangef(0.0f, );
-            vec2 offset = (vec2){.x = cosf(r_ang) * r_rad, .y = sinf(r_ang) * r_rad};
-            vec2 delta = vec2_sub(vec2_add(snake_targ[i], offset), snake_pos[i]);
-            float dist = vec2_len(delta);
-            vec2 ndelta = vec2_norm(delta);
-            float accel = 150.0f - txrng_rangef(0.0f, 15.0f);
-            if (vec2_dot(snake_vel[i], delta) < 0) {
-                accel *= 2.0f;
-            }
-            snake_vel[i] = vec2_add(snake_vel[i], vec2_scale(ndelta, accel * dt));
-            snake_vel[i] = vec2_sub(
-                snake_vel[i],
-                vec2_scale(vec2_norm(snake_vel[i]), fminf(2.0f, vec2_len(snake_vel[i]) * dt)));
-            snake_pos[i] = vec2_add(snake_pos[i], vec2_scale(snake_vel[i], dt));
-
-            // for (int j = i + 1; j < SNAKE_CHUNKS; ++j) {
-            //     vec2 d = vec2_sub(snake_pos[i], snake_pos[j]);
-            //     if (vec2_len2(d) < 4) {
-            //         vec2 nd = vec2_norm(d);
-            //         snake_pos[i] = vec2_add(snake_pos[i], vec2_scale(nd, 0.1f * dt));
-            //         snake_pos[j] = vec2_add(snake_pos[j], vec2_scale(nd, -0.1f * dt));
-            //     }
-            // }
-        }
-
-        for (int lid = 0; lid < proj.levels[0].layer_insts_size; ++lid) {
-            game_layer_instance layer = proj.levels[0].layer_insts[lid];
+        for (int lid = 0; lid < arrlen(proj.levels[0].layer_insts); ++lid) {
+            game_layer_inst layer = proj.levels[0].layer_insts[lid];
             for (uint32_t x = 0; x < layer.cell_w; x++) {
                 for (uint32_t y = 0; y < layer.cell_h; y++) {
-                    int id = layer.tiles[x + y * layer.cell_w];
+                    game_tile tile = layer.tiles[x + y * layer.cell_w];
+                    int id = tile.value;
+                    sprite_flip flip = SPRITE_FLIP_NONE;
+                    if ((tile.flags & GAME_TILE_FLAGS_FLIP_X) != 0) {
+                        flip |= SPRITE_FLIP_X;
+                    }
+                    if ((tile.flags & GAME_TILE_FLAGS_FILP_Y) != 0) {
+                        flip |= SPRITE_FLIP_Y;
+                    }
+
                     if (id > 0) {
                         spr_draw(&(sprite_draw_desc){
                             .sprite_id = id,
                             .pos = (vec2){.x = (float)x, .y = (float)y},
+                            .flip = flip,
                         });
                     }
                 }
             }
         }
-
-        for (int i = 127; i >= 0; --i) {
-            spr_draw(&(sprite_draw_desc){
-                .sprite_id = 18,
-                .pos = snake_pos[i],
-                .layer = 1.0f,
-                .origin = (vec2){0.5f, 1.0f},
-            });
-        }
-
-        // printf("pos: %02f, %02f\r", snake_pos[0].x, snake_pos[0].y);
-        // spr_draw((vec3){0, 0, 0});
 
         // render
         int cur_width, cur_height;
