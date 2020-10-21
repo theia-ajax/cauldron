@@ -35,15 +35,19 @@ int main(int argc, char* argv[])
 
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
 
-    TX_ASSERT(gl3wInit() == GL3W_OK);
+    if (gl3wInit() != GL3W_OK) {
+        return 1;
+    }
 
     sg_setup(&(sg_desc){0});
     spr_init();
     txinp_init();
     txrng_seed((uint32_t)time(NULL));
 
-    game_level_proj proj;
-    TX_ASSERT(load_game_level_project("assets/test_level.json", &proj) == TX_SUCCESS);
+    game_level_proj proj = {0};
+    if (load_game_level_project("assets/test_level.json", &proj) != TX_SUCCESS) {
+        return 1;
+    }
 
     uint64_t last_ticks = SDL_GetPerformanceCounter();
     float time = 0.0f;
@@ -109,6 +113,9 @@ int main(int argc, char* argv[])
             game_layer_inst layer = proj.levels[0].layer_insts[lid];
             for (uint32_t x = 0; x < layer.cell_w; x++) {
                 for (uint32_t y = 0; y < layer.cell_h; y++) {
+                    if (layer.type != GAME_LAYER_TYPE_TILES) {
+                        continue;
+                    }
                     game_tile tile = layer.tiles[x + y * layer.cell_w];
                     int id = tile.value;
                     sprite_flip flip = SPRITE_FLIP_NONE;

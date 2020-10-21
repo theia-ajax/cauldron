@@ -41,7 +41,7 @@
                 "-File",
                 "build.ps1",
                 "-Target",
-                "cultist",
+                "cauldron",
                 "-Configuration",
                 "Release"
             ],
@@ -69,7 +69,7 @@
                 "-File",
                 "build.ps1",
                 "-Target",
-                "cultist",
+                "cauldron",
                 "-BuildAction",
                 "Rebuild"
             ],
@@ -97,7 +97,7 @@
                 "-File",
                 "build.ps1",
                 "-Target",
-                "cultist",
+                "cauldron",
                 "-BuildAction",
                 "Clean"
             ],

@@ -27,6 +27,15 @@ typedef enum game_layer_type {
     GAME_LAYER_TYPE_COUNT,
 } game_layer_type;
 
+typedef enum game_layer_source_type {
+    GAME_LAYER_SOURCE_TYPE_INVALID,
+    GAME_LAYER_SOURCE_TYPE_TILES,
+    GAME_LAYER_SOURCE_TYPE_ENTITIES,
+    GAME_LAYER_SOURCE_TYPE_INTGRID,
+    GAME_LAYER_SOURCE_TYPE_AUTOLAYER,
+    GAME_LAYER_SOURCE_TYPE_COUNT,
+} game_layer_source_type;
+
 typedef struct game_layer_inst {
     game_layer_type type;
     uint32_t cell_w;

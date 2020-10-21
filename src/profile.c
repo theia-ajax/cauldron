@@ -22,7 +22,7 @@ profile_record* records = NULL;
 
 uint64_t mark;
 
-void profile_start(const char* name)
+void profile_start(char* name)
 {
     profile_record def = (profile_record){0};
     hmdefaults(records, def);
@@ -34,7 +34,7 @@ void profile_start(const char* name)
     mark = SDL_GetPerformanceCounter();
 }
 
-uint64_t profile_stop(const char* name)
+uint64_t profile_stop(char* name)
 {
     size_t key = stbds_hash_string(name, 42);
     profile_record record = hmgets(records, key);

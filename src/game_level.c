@@ -18,7 +18,7 @@ tx_result parse_tile_layer(const char* js, jsmntok_t* tokens, int tok_id, game_l
 tx_result parse_int_grid_layer(const char* js, jsmntok_t* tokens, int tok_id, game_layer_inst* out);
 tx_result parse_auto_layer(const char* js, jsmntok_t* tokens, int tok_id, game_layer_inst* out);
 
-game_layer_type js_game_layer_type(const char* js, jsmntok_t token);
+game_layer_source_type js_game_layer_type(const char* js, jsmntok_t token);
 bool jseq(const char* js, jsmntok_t token, const char* str);
 bool jsstrncpy(const char* js, jsmntok_t token, char* buffer, size_t len);
 bool jsisbool(const char* js, jsmntok_t token);
@@ -28,7 +28,10 @@ bool jstod(const char* js, jsmntok_t token, double* out);
 bool jstof(const char* js, jsmntok_t token, float* out);
 bool jstoi(const char* js, jsmntok_t token, int* out);
 bool jstob(const char* js, jsmntok_t token, bool* out);
+int jstoi_or(const char* js, jsmntok_t token, int def);
 int jsnextsib(jsmntok_t* tokens, int tok_id);
+jsmntok_t jsget(const char* js, jsmntok_t* tokens, int parent_id, const char* key);
+int jsget_id(const char* js, jsmntok_t* tokens, int parent_id, const char* key);
 
 tx_result load_game_level_project(const char* filename, game_level_proj* proj)
 {
@@ -144,6 +147,15 @@ bool jstob(const char* js, jsmntok_t token, bool* out)
     return false;
 }
 
+int jstoi_or(const char* js, jsmntok_t token, int def)
+{
+    int ret = 0;
+    if (jstoi(js, token, &ret)) {
+        return ret;
+    }
+    return def;
+}
+
 // for a given token id find the next sibling token (token with the same parent id).
 // The behavior is a little different depending on what tok_id refers to:
 //  * key of an object -> the next key in the same object.
@@ -167,12 +179,41 @@ int jsnextsib(jsmntok_t* tokens, int tok_id)
     return (int)tok_len;
 }
 
-game_layer_type js_game_layer_type(const char* js, jsmntok_t token)
+jsmntok_t jsget(const char* js, jsmntok_t* tokens, int parent_id, const char* key)
+{
+    int id = jsget_id(js, tokens, parent_id, key);
+    if (id >= 0) {
+        return tokens[id];
+    }
+    return (jsmntok_t){0};
+}
+
+int jsget_id(const char* js, jsmntok_t* tokens, int parent_id, const char* key)
+{
+    if (parent_id < 0 || parent_id >= arrlen(tokens) || tokens[parent_id].type != JSMN_OBJECT) {
+        return -1;
+    }
+
+    int next = jsnextsib(tokens, parent_id);
+    for (int i = parent_id + 1; i < next; i = jsnextsib(tokens, i)) {
+        if (jseq(js, tokens[i], key)) {
+            return i + 1;
+        }
+    }
+
+    return -1;
+}
+
+game_layer_source_type js_game_layer_type(const char* js, jsmntok_t token)
 {
     if (jseq(js, token, "Tiles")) {
-        return GAME_LAYER_TYPE_TILES;
+        return GAME_LAYER_SOURCE_TYPE_TILES;
     } else if (jseq(js, token, "Entities")) {
-        return GAME_LAYER_TYPE_ENTITIES;
+        return GAME_LAYER_SOURCE_TYPE_ENTITIES;
+    } else if (jseq(js, token, "IntGrid")) {
+        return GAME_LAYER_SOURCE_TYPE_INTGRID;
+    } else if (jseq(js, token, "AutoLayer")) {
+        return GAME_LAYER_SOURCE_TYPE_AUTOLAYER;
     } else {
         return GAME_LAYER_TYPE_INVALID;
     }
@@ -268,23 +309,21 @@ tx_result parse_layer_instance(const char* js, jsmntok_t* tokens, int tok_id, ga
 {
     memset(out, 0, sizeof(game_layer_inst));
 
-    int next = jsnextsib(tokens, tok_id);
+    game_layer_source_type sourceType = js_game_layer_type(js, jsget(js, tokens, tok_id, "__type"));
 
-    int grid_tiles_id = -1;
-    int ents_id = -1;
-    for (int i = tok_id + 1; i < next; i = jsnextsib(tokens, i)) {
-        jsmntok_t key = tokens[i];
-        jsmntok_t val = tokens[i + 1];
-        if (jseq(js, key, "__type")) {
-            out->type = js_game_layer_type(js, val);
-        }
-    }
-
-    switch (out->type) {
-    case GAME_LAYER_TYPE_TILES:
+    switch (sourceType) {
+    case GAME_LAYER_SOURCE_TYPE_TILES:
+        printf("Parsing tile layer...\n");
         return parse_tile_layer(js, tokens, tok_id, out);
-    case GAME_LAYER_TYPE_ENTITIES:
+    case GAME_LAYER_SOURCE_TYPE_INTGRID:
+        printf("Parsing intgrid layer...\n");
+        return parse_int_grid_layer(js, tokens, tok_id, out);
+    case GAME_LAYER_SOURCE_TYPE_ENTITIES:
+        printf("Parsing entity layer...\n");
         return parse_entity_layer(js, tokens, tok_id, out);
+    case GAME_LAYER_SOURCE_TYPE_AUTOLAYER:
+        printf("Parsing autolayer layer...\n");
+        return parse_auto_layer(js, tokens, tok_id, out);
     default:
         return TX_INVALID;
     }
@@ -292,29 +331,11 @@ tx_result parse_layer_instance(const char* js, jsmntok_t* tokens, int tok_id, ga
 
 tx_result parse_tile_layer(const char* js, jsmntok_t* tokens, int tok_id, game_layer_inst* out)
 {
-    int next = jsnextsib(tokens, tok_id);
-
-    int grid_tiles_id = -1;
-    for (int i = tok_id + 1; i < next; i = jsnextsib(tokens, i)) {
-        jsmntok_t key = tokens[i];
-        jsmntok_t val = tokens[i + 1];
-
-        if (jseq(js, key, "__cWid")) {
-            int w;
-            jstoi(js, val, &w);
-            out->cell_w = (uint32_t)w;
-        } else if (jseq(js, key, "__cHei")) {
-            int h;
-            jstoi(js, val, &h);
-            out->cell_h = (uint32_t)h;
-        } else if (jseq(js, key, "__gridSize")) {
-            int s;
-            jstoi(js, val, &s);
-            out->cell_size = (uint32_t)s;
-        } else if (grid_tiles_id < 0 && jseq(js, key, "gridTiles")) {
-            grid_tiles_id = i + 1;
-        }
-    }
+    out->type = GAME_LAYER_TYPE_TILES;
+    out->cell_w = jstoi_or(js, jsget(js, tokens, tok_id, "__cWid"), 0);
+    out->cell_h = jstoi_or(js, jsget(js, tokens, tok_id, "__cHei"), 0);
+    out->cell_size = jstoi_or(js, jsget(js, tokens, tok_id, "__gridSize"), 0);
+    int grid_tiles_id = jsget_id(js, tokens, tok_id, "gridTiles");
 
     if (out->cell_size == 0 || grid_tiles_id < 0) {
         return TX_INVALID;
@@ -322,31 +343,19 @@ tx_result parse_tile_layer(const char* js, jsmntok_t* tokens, int tok_id, game_l
 
     size_t tiles_size = out->cell_w * out->cell_h;
     arrsetlen(out->tiles, tiles_size);
+    memset(out->tiles, 0, sizeof(game_tile) * tiles_size);
 
     int end = jsnextsib(tokens, grid_tiles_id);
     for (int i = grid_tiles_id + 1; i < end; i = jsnextsib(tokens, i)) {
-        jsmntok_t token = tokens[i];
-        if (token.type != JSMN_OBJECT) {
+        if (tokens[i].type != JSMN_OBJECT) {
             break;
         }
-        int next_tile = jsnextsib(tokens, i);
-        int coord_id = -1;
-        int tile_id = -1;
-        for (int j = i + 1; j < next_tile; j = jsnextsib(tokens, j)) {
-            jsmntok_t key = tokens[j];
-            jsmntok_t value = tokens[j + 1];
-            if (coord_id < 0 && jseq(js, key, "coordId")) {
-                jstoi(js, value, &coord_id);
-            } else if (tile_id < 0 && jseq(js, key, "tileId")) {
-                jstoi(js, value, &tile_id);
-            }
-            if (coord_id >= 0 && tile_id >= 0) {
-                break;
-            }
-        }
+
+        int coord_id = jstoi_or(js, jsget(js, tokens, i, "coordId"), -1);
+        int tile_id = jstoi_or(js, jsget(js, tokens, i, "tileId"), -1);
 
         if (coord_id >= 0 && tile_id > 0) {
-            printf("tile[%d]=%d\n", coord_id, tile_id);
+            // printf("tile[%d]=%d\n", coord_id, tile_id);
             out->tiles[coord_id] = (game_tile){
                 .value = tile_id,
                 .flags = GAME_TILE_FLAGS_NONE,
@@ -356,7 +365,93 @@ tx_result parse_tile_layer(const char* js, jsmntok_t* tokens, int tok_id, game_l
     return TX_SUCCESS;
 }
 
+tx_result parse_int_grid_layer(const char* js, jsmntok_t* tokens, int tok_id, game_layer_inst* out)
+{
+    out->type = GAME_LAYER_TYPE_INTGRID;
+    out->cell_w = jstoi_or(js, jsget(js, tokens, tok_id, "__cWid"), 0);
+    out->cell_h = jstoi_or(js, jsget(js, tokens, tok_id, "__cHei"), 0);
+    out->cell_size = jstoi_or(js, jsget(js, tokens, tok_id, "__gridSize"), 0);
+    int int_grid_id = jsget_id(js, tokens, tok_id, "intGrid");
+
+    if (out->cell_size == 0 || int_grid_id < 0) {
+        return TX_INVALID;
+    }
+
+    size_t tiles_size = out->cell_w * out->cell_h;
+    arrsetlen(out->tiles, tiles_size);
+    memset(out->tiles, 0, sizeof(game_tile) * tiles_size);
+
+    int end = jsnextsib(tokens, int_grid_id);
+    for (int i = int_grid_id + 1; i < end; i = jsnextsib(tokens, i)) {
+        if (tokens[i].type != JSMN_OBJECT) {
+            break;
+        }
+
+        int coord_id = jstoi_or(js, jsget(js, tokens, i, "coordId"), -1);
+        int val = jstoi_or(js, jsget(js, tokens, i, "v"), -1);
+
+        if (coord_id >= 0 && val > 0) {
+            // printf("int_grid[%d]=%d\n", coord_id, val);
+            out->tiles[coord_id] = (game_tile){
+                .value = val,
+                .flags = GAME_TILE_FLAGS_NONE,
+            };
+        }
+    }
+    return TX_SUCCESS;
+}
+
+tx_result parse_auto_layer(const char* js, jsmntok_t* tokens, int tok_id, game_layer_inst* out)
+{
+    out->type = GAME_LAYER_TYPE_TILES;
+    out->cell_w = jstoi_or(js, jsget(js, tokens, tok_id, "__cWid"), 0);
+    out->cell_h = jstoi_or(js, jsget(js, tokens, tok_id, "__cHei"), 0);
+    out->cell_size = jstoi_or(js, jsget(js, tokens, tok_id, "__gridSize"), 0);
+    int auto_layer_id = jsget_id(js, tokens, tok_id, "autoTiles");
+
+    if (out->cell_size == 0 || auto_layer_id < 0) {
+        return TX_INVALID;
+    }
+
+    size_t tiles_size = out->cell_w * out->cell_h;
+    arrsetlen(out->tiles, tiles_size);
+    memset(out->tiles, 0, sizeof(game_tile) * tiles_size);
+
+    int end = jsnextsib(tokens, auto_layer_id);
+    int next = end;
+    for (int i = auto_layer_id + 1; i < end; i = next) {
+        if (tokens[i].type != JSMN_OBJECT) {
+            break;
+        }
+
+        next = jsnextsib(tokens, i);
+
+        int results_id = jsget_id(js, tokens, i, "results");
+        for (int j = results_id + 1; j < next; j = jsnextsib(tokens, j)) {
+            int coord_id = jstoi_or(js, jsget(js, tokens, j, "coordId"), -1);
+            int flips = jstoi_or(js, jsget(js, tokens, j, "flips"), 0);
+            int tiles_id = jsget_id(js, tokens, j, "tiles");
+            int tiles_end = jsnextsib(tokens, tiles_id);
+            int tile_id = -1;
+            for (int k = tiles_id + 1; k < tiles_end; k = jsnextsib(tokens, k)) {
+                tile_id = jstoi_or(js, jsget(js, tokens, k, "tileId"), -1);
+                break;
+            }
+
+            if (coord_id >= 0 && tile_id >= 0 && out->tiles[coord_id].value == 0) {
+                // printf("auto_layer[%d]=%d\n", coord_id, tile_id);
+                out->tiles[coord_id] = (game_tile){
+                    .value = tile_id,
+                    .flags = flips,
+                };
+            }
+        }
+    }
+    return TX_SUCCESS;
+}
+
 tx_result parse_entity_layer(const char* js, jsmntok_t* tokens, int tok_id, game_layer_inst* out)
 {
+    out->type = GAME_LAYER_TYPE_ENTITIES;
     return TX_SUCCESS;
 }
