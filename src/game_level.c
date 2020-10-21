@@ -46,6 +46,8 @@ tx_result load_game_level_project(const char* filename, game_level_proj* proj)
 
     uint64_t time = profile_stop("load_game_level_project");
 
+    printf("Loading game level project from '%s' took %llums.", filename, time);
+
     return result;
 }
 
@@ -150,6 +152,7 @@ bool jstob(const char* js, jsmntok_t token, bool* out)
 // In any case if no sibling is found at the current depth continue checking at higher depths.
 // If no more tokens are found then tok_len (arrlen(tokens)) will be returned.
 // tok_id outside of the range [0, tok_len) will yield tok_len
+// REQUIRES JSMN_PARENT_LINKS to be defined so that jsmntok_t contains the parent index.
 int jsnextsib(jsmntok_t* tokens, int tok_id)
 {
     size_t tok_len = arrlen(tokens);
