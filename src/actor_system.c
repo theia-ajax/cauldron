@@ -64,6 +64,7 @@ void actor_system_update(float dt)
 
         const float scan = 0.01f;
         if (phys_solid(left, bottom + scan, mask) || phys_solid(right, bottom + scan, mask)) {
+
             actor->flags |= ACTOR_FLAGS_GROUNDED;
         } else {
             actor->flags &= ~ACTOR_FLAGS_GROUNDED;
