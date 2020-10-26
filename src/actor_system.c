@@ -62,9 +62,8 @@ void actor_system_update(float dt)
 
         uint16_t mask = (actor->vel.y < 0.0f || actor->input.move.y > 0.0f) ? 1 : 3;
 
-        const float scan = 0.01f;
+        const float scan = 0.125f;
         if (phys_solid(left, bottom + scan, mask) || phys_solid(right, bottom + scan, mask)) {
-
             actor->flags |= ACTOR_FLAGS_GROUNDED;
         } else {
             actor->flags &= ~ACTOR_FLAGS_GROUNDED;
@@ -80,8 +79,8 @@ void actor_system_update(float dt)
         actor->vel.x = clampf(actor->vel.x, -8.0f, 8.0f);
         actor->vel.y += phys_get_gravity() * dt;
 
-        if ((actor->flags & ACTOR_FLAGS_GROUNDED) != 0 && actor->vel.y > 0.0f) {
-            actor->vel.y = 0.0f;
+        if ((actor->flags & ACTOR_FLAGS_GROUNDED) != 0 && actor->vel.y > 1.0f) {
+            actor->vel.y = 1.0f;
         }
 
         vec2 delta = vec2_scale(actor->vel, dt);

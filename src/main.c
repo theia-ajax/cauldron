@@ -13,12 +13,18 @@
 #include "tx_types.h"
 #include <GL/gl3w.h>
 #include <SDL2/SDL.h>
+
+#define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
+#include <cimgui.h>
+#include <cimgui_impl.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
 int main(int argc, char* argv[])
 {
+
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -49,6 +55,16 @@ int main(int argc, char* argv[])
 
     game_systems_init(&(game_settings){0});
     game_systems_load_level(&proj.levels[0]);
+
+    igCreateContext(NULL);
+    ImGuiIO* io = igGetIO();
+
+    ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
+    unsigned char* text_pixels = NULL;
+    int text_w, text_h;
+    ImFontAtlas_GetTexDataAsRGBA32(io->Fonts, &text_pixels, &text_w, &text_h, NULL);
 
     uint64_t last_ticks = SDL_GetPerformanceCounter();
     float time = 0.0f;
@@ -89,6 +105,7 @@ int main(int argc, char* argv[])
         last_ticks = ticks;
         uint64_t frequency = SDL_GetPerformanceFrequency();
         float dt = (float)delta_ticks / frequency;
+        dt = min(dt, 0.1f);
         time += dt;
 
         game_systems_update(dt);
@@ -147,8 +164,26 @@ int main(int argc, char* argv[])
         spr_render(cur_width, cur_height);
         sg_commit();
 
+        ImVec2 display_size;
+        display_size.x = 1920;
+        display_size.y = 1080;
+        io->DisplaySize = display_size;
+        io->DeltaTime = 1.0f / 60.0f;
+        igNewFrame();
+
+        static float f = 0.0f;
+        igText("Hello World!");
+        igSliderFloat("float", &f, 0.0f, 1.0f, "%.3f", 1.0f);
+        igText(
+            "Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
+        igShowDemoWindow(NULL);
+
+        igRender();
+
         SDL_GL_SwapWindow(window);
     }
+
+    igDestroyContext(NULL);
 
     game_systems_unload_level();
     game_systems_shutdown();

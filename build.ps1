@@ -220,6 +220,7 @@ if ($steps.do_build) {
     # generate project files
     premake5 "vs$vs_version"
 
+
     # build project files
     Invoke-Expression "& $ms_build_cmd"
 }
