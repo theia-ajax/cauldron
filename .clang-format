@@ -15,7 +15,7 @@ AllowAllParametersOfDeclarationOnNextLine: false
 AccessModifierOffset: -4
 NamespaceIndentation: All
 AllowShortBlocksOnASingleLine: false
-AllowShortIfStatementsOnASingleLine: Never
+AllowShortIfStatementsOnASingleLine: WithoutElse
 AllowShortFunctionsOnASingleLine: None
 AlwaysBreakTemplateDeclarations: true
 DerivePointerAlignment: true

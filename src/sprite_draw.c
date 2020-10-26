@@ -278,7 +278,9 @@ void spr_init()
     };
 }
 
-void spr_shutdown() {}
+void spr_shutdown()
+{
+}
 
 void spr_render(int width, int height)
 {
@@ -289,7 +291,7 @@ void spr_render(int width, int height)
         float view_width = k_canvas_width / pixels_per_meter;
         float view_height = k_canvas_height / pixels_per_meter;
 
-        mat4 view = mat4_look_at((vec3){0, 0, 100}, (vec3){0, 0, -1}, (vec3){0, 1, 0});
+        mat4 view = mat4_look_at((vec3){1, 1, 100}, (vec3){1, 1, -1}, (vec3){0, 1, 0});
         mat4 projection = mat4_ortho(0, view_width, view_height, 0, 0.0f, 250.0f);
         mat4 view_proj = mat4_mul(projection, view);
 
@@ -302,6 +304,7 @@ void spr_render(int width, int height)
                         .val = {0.0f, 0.0f, 0.0f, 1.0f},
                     },
             });
+
         sg_apply_pipeline(canvas.pip);
         sg_apply_bindings(&canvas.bindings);
         uniform_block uniforms = {

@@ -401,12 +401,12 @@ struct {
     uint8_t keys[k_frame_count][TXINP_KEY_COUNT];
 } state;
 
-void txinp_init()
+void txinp_init(void)
 {
     memset(state.keys, 0, sizeof(state.keys));
 }
 
-void txinp_update()
+void txinp_update(void)
 {
     memcpy(&state.keys[k_frame_prev], &state.keys[k_frame_curr], sizeof(state.keys[k_frame_prev]));
 }

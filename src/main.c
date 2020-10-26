@@ -1,23 +1,21 @@
 
 #include "game_level.h"
+#include "game_settings.h"
+#include "game_systems.h"
 #include "hash.h"
 #include "sokol_gfx.h"
 #include "sprite_draw.h"
 #include "stb_ds.h"
 #include "tinyobj_loader_c.h"
+#include "tx_input.h"
 #include "tx_math.h"
+#include "tx_rand.h"
 #include "tx_types.h"
 #include <GL/gl3w.h>
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
-#define TX_INPUT_IMPLEMENTATION
-#include "tx_input.h"
-
-#define TX_RAND_IMPLEMENTATION
-#include "tx_rand.h"
 
 int main(int argc, char* argv[])
 {
@@ -48,6 +46,9 @@ int main(int argc, char* argv[])
     if (load_game_level_project("assets/test_level.json", &proj) != TX_SUCCESS) {
         return 1;
     }
+
+    game_systems_init(&(game_settings){0});
+    game_systems_load_level(&proj.levels[0]);
 
     uint64_t last_ticks = SDL_GetPerformanceCounter();
     float time = 0.0f;
@@ -89,6 +90,9 @@ int main(int argc, char* argv[])
         uint64_t frequency = SDL_GetPerformanceFrequency();
         float dt = (float)delta_ticks / frequency;
         time += dt;
+
+        game_systems_update(dt);
+        game_systems_render();
 
         // update
         vec2 input = {0};
@@ -145,6 +149,9 @@ int main(int argc, char* argv[])
 
         SDL_GL_SwapWindow(window);
     }
+
+    game_systems_unload_level();
+    game_systems_shutdown();
 
     free_game_level_project(&proj);
 

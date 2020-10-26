@@ -10,6 +10,12 @@
 #define TX_MATH_IMPLEMENTATION
 #include "tx_math.h"
 
+#define TX_INPUT_IMPLEMENTATION
+#include "tx_input.h"
+
+#define TX_RAND_IMPLEMENTATION
+#include "tx_rand.h"
+
 #define TINYOBJ_LOADER_C_IMPLEMENTATION
 #include "tinyobj_loader_c.h"
 

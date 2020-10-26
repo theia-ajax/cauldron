@@ -2,11 +2,11 @@
 
 #include "tx_types.h"
 
-typedef struct game_ent_inst {
-    uint32_t ident;
-    uint32_t cell_x;
-    uint32_t cell_y;
-} game_ent_inst;
+typedef struct game_ent_def_inst {
+    uint32_t id;
+    float world_x;
+    float world_y;
+} game_ent_def_inst;
 
 enum game_tile_flags {
     GAME_TILE_FLAGS_NONE = 0,
@@ -42,7 +42,7 @@ typedef struct game_layer_inst {
     uint32_t cell_h;
     uint32_t cell_size;
     game_tile* tiles;
-    game_ent_inst* ents;
+    game_ent_def_inst* ents;
 } game_layer_inst;
 
 typedef struct game_level {

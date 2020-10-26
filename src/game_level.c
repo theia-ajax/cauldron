@@ -1,6 +1,7 @@
 #include "game_level.h"
 
 #include "futils.h"
+#include "hash.h"
 #include "profile.h"
 #include <errno.h>
 #include <stdio.h>
@@ -430,10 +431,11 @@ tx_result parse_auto_layer(const char* js, jsmntok_t* tokens, int tok_id, game_l
         for (int j = results_id + 1; j < next; j = jsnextsib(tokens, j)) {
             int coord_id = jstoi_or(js, jsget(js, tokens, j, "coordId"), -1);
             int flips = jstoi_or(js, jsget(js, tokens, j, "flips"), 0);
-            int tiles_id = jsget_id(js, tokens, j, "tiles");
-            int tiles_end = jsnextsib(tokens, tiles_id);
+
+            int tiles_start = jsget_id(js, tokens, j, "tiles");
+            int tiles_end = jsnextsib(tokens, tiles_start);
             int tile_id = -1;
-            for (int k = tiles_id + 1; k < tiles_end; k = jsnextsib(tokens, k)) {
+            for (int k = tiles_start + 1; k < tiles_end; k = jsnextsib(tokens, k)) {
                 tile_id = jstoi_or(js, jsget(js, tokens, k, "tileId"), -1);
                 break;
             }
@@ -453,5 +455,45 @@ tx_result parse_auto_layer(const char* js, jsmntok_t* tokens, int tok_id, game_l
 tx_result parse_entity_layer(const char* js, jsmntok_t* tokens, int tok_id, game_layer_inst* out)
 {
     out->type = GAME_LAYER_TYPE_ENTITIES;
+    int ent_insts_id = jsget_id(js, tokens, tok_id, "entityInstances");
+
+    if (ent_insts_id < 0) {
+        return TX_INVALID;
+    }
+
+    int ent_count = tokens[ent_insts_id].size;
+    arrsetlen(out->ents, ent_count);
+    memset(out->ents, 0, sizeof(game_ent_def_inst) * ent_count);
+
+    int index = 0;
+    int end = jsnextsib(tokens, ent_insts_id);
+    for (int i = ent_insts_id + 1; i < end; i = jsnextsib(tokens, i)) {
+        if (tokens[i].type != JSMN_OBJECT) {
+            break;
+        }
+
+        jsmntok_t id_tok = jsget(js, tokens, i, "__identifier");
+        if (id_tok.type == JSMN_STRING) {
+            out->ents[index].id = hash_data(js + id_tok.start, id_tok.end - id_tok.start);
+        } else {
+            out->ents[index].id = 0;
+        }
+
+        float world_x_px, world_y_px;
+        jstof(js, jsget(js, tokens, i, "x"), &world_x_px);
+        jstof(js, jsget(js, tokens, i, "y"), &world_y_px);
+
+        out->ents[index].world_x = world_x_px / 8.0f;
+        out->ents[index].world_y = world_y_px / 8.0f;
+
+        printf(
+            "Entity = { id = %lu, x = %0.0f, y = %0.0f }\n",
+            out->ents[index].id,
+            out->ents[index].world_x,
+            out->ents[index].world_y);
+
+        index++;
+    }
+
     return TX_SUCCESS;
 }

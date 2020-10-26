@@ -6,7 +6,7 @@
 #define FNV1A64_OFFSET 14695981039346656037ull
 #define FNV1A64_PRIME 1099511628211ull
 
-inline uint32_t hash_append(uint32_t hash, uint8_t* bytes, size_t len)
+inline uint32_t hash_append(uint32_t hash, const uint8_t* bytes, size_t len)
 {
     TX_ASSERT(bytes);
 
@@ -17,7 +17,7 @@ inline uint32_t hash_append(uint32_t hash, uint8_t* bytes, size_t len)
     return hash;
 }
 
-inline uint32_t hash_data(uint8_t* bytes, size_t len)
+inline uint32_t hash_data(const uint8_t* bytes, size_t len)
 {
     return hash_append(FNV1A32_OFFSET, bytes, len);
 }
