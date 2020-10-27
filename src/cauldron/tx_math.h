@@ -71,6 +71,7 @@ typedef struct matrix4x4 mat4;
 float clampf(const float v, const float min, const float max);
 float lerpf(const float a, const float b, const float t);
 float nsinf(const float t); // normalized sin [0-1] result with normalized input [0-1] (1 tau)
+float signf(const float v); // v < 0 -> -1, v == 0 > 0, v > 0 -> 1
 
 vec2 vec2_add(const vec2 a, const vec2 b);
 vec2 vec2_sub(const vec2 a, const vec2 b);
@@ -169,6 +170,11 @@ float lerpf(const float a, const float b, const float t)
 float nsinf(const float t)
 {
     return (sinf(TX_PI * 2.0f * t) + 1) / 2.0f;
+}
+
+float signf(const float v)
+{
+    return (v == 0.0f) ? 0.0f : (v < 0) ? -1.0f : 1.0f;
 }
 
 // vec2

@@ -39,14 +39,13 @@ void actor_system_unload_level(void)
 void actor_system_update(float dt)
 {
     for (int i = 0; i < arrlen(actors); ++i) {
+        if (!VALID_HANDLE(handles[i])) {
+            continue;
+        }
+
         actor* actor = &actors[i];
 
         const vec2 input_move = actor->input.move;
-
-        float left = actor->pos.x - actor->hsize.x;
-        float right = actor->pos.x + actor->hsize.x;
-        float bottom = actor->pos.y;
-        float top = actor->pos.y - actor->hsize.y * 2.0f;
 
         if (input_move.x > 0) {
             actor->flags &= ~ACTOR_FLAGS_FACING_LEFT;
@@ -60,59 +59,111 @@ void actor_system_update(float dt)
             }
         }
 
-        uint16_t enviro_mask = 1;
-        uint16_t ground_mask = (actor->vel.y < 0.0f || actor->input.move.y > 0.0f) ? 1 : 3;
-
-        const float scan_dist = 0.0625f;
-        if (phys_solid(left, bottom + scan_dist, ground_mask)
-            || phys_solid(right, bottom + scan_dist, ground_mask)) {
-            actor->flags |= ACTOR_FLAGS_GROUNDED;
-        } else {
-            actor->flags &= ~ACTOR_FLAGS_GROUNDED;
-        }
-
         if (actor->input.jump && (actor->flags & ACTOR_FLAGS_GROUNDED) != 0) {
             actor->vel.y = -21.0f;
         }
 
-        ground_mask = (actor->vel.y < 0.0f || actor->input.move.y > 0.0f) ? 1 : 3;
+        if ((actor->flags & ACTOR_FLAGS_GROUNDED) != 0 && actor->vel.y > 0.0f) {
+            actor->vel.y = 0.0f;
+        }
 
         actor->vel.x += 30.0f * dt * input_move.x;
         actor->vel.x = clampf(actor->vel.x, -8.0f, 8.0f);
         actor->vel.y += phys_get_gravity() * dt;
 
-        if ((actor->flags & ACTOR_FLAGS_GROUNDED) != 0 && actor->vel.y > 1.0f) {
-            actor->vel.y = 1.0f;
-        }
-
         vec2 delta = vec2_scale(actor->vel, dt);
+        vec2 new_pos = actor->pos;
+        vec2 new_vel = actor->vel;
 
-        while (delta.x > 0.0f
-               && (phys_solid(right + delta.x, top, enviro_mask)
-                   || phys_solid(right + delta.x, bottom - 0.125f, enviro_mask))) {
-            delta.x = max(delta.x - scan_dist, 0.0f);
+        // while (delta.x > 0.0f
+        //        && (phys_solid(right + delta.x, top, enviro_mask)
+        //            || phys_solid(right + delta.x, bottom - 0.125f, enviro_mask))) {
+        //     delta.x = max(delta.x - scan_dist, 0.0f);
+        // }
+
+        // while (delta.x < 0.0f
+        //        && (phys_solid(left + delta.x, top, enviro_mask)
+        //            || phys_solid(left + delta.x, bottom - 0.125f, enviro_mask))) {
+        //     delta.x = min(delta.x + scan_dist, 0.0f);
+        // }
+
+        actor->flags &= ~ACTOR_FLAGS_GROUNDED;
+
+        // horizontal movement
+        {
+            float check_x = new_pos.x + delta.x + signf(delta.x) * actor->hsize.x;
+            float bottom = new_pos.y - 0.25f;
+            float top = new_pos.y - actor->hsize.y * 1.75f;
+            if (!phys_solid(check_x, bottom, 1) && !phys_solid(check_x, top, 1)) {
+                new_pos.x += delta.x;
+            } else {
+                while (!phys_solid(new_pos.x + signf(delta.x) * actor->hsize.x, bottom, 1)
+                       && !phys_solid(new_pos.x + signf(delta.x) * actor->hsize.x, top, 1)) {
+                    new_pos.x += signf(delta.x) * 0.01f;
+                }
+                new_vel.x = 0.0f;
+            }
         }
 
-        while (delta.x < 0.0f
-               && (phys_solid(left + delta.x, top, enviro_mask)
-                   || phys_solid(left + delta.x, bottom - 0.125f, enviro_mask))) {
-            delta.x = min(delta.x + scan_dist, 0.0f);
+        // vertical movement
+        {
+            float left = new_pos.x - actor->hsize.x * 0.95f;
+            float right = new_pos.x + actor->hsize.x * 0.95f;
+
+            if (delta.y > 0.0f) {
+                // going down
+                uint16_t ground_mask = (actor->vel.y < 0.0f || actor->input.move.y > 0.0f) ? 1 : 3;
+                float bottom = new_pos.y;
+                float top = new_pos.y - actor->hsize.y * 2.0f;
+
+                if (phys_solid(left, bottom + delta.y, ground_mask)
+                    || phys_solid(right, bottom + delta.y, ground_mask)) {
+                    new_vel.y = 0.0f;
+                    actor->flags |= ACTOR_FLAGS_GROUNDED;
+
+                    // snap down
+                    while (!phys_solid(left, new_pos.y, ground_mask)
+                           && !phys_solid(right, new_pos.y, ground_mask)) {
+                        new_pos.y += 0.05f;
+                    }
+
+                    // pop up
+                    while (phys_solid(left, new_pos.y - 0.125f, ground_mask)
+                           || phys_solid(right, new_pos.y - 0.125f, ground_mask)) {
+                        new_pos.y -= 0.05f;
+                    }
+                } else {
+                    new_pos.y += delta.y;
+                }
+            } else {
+                // going up
+                if (phys_solid(left, new_pos.y - delta.y - actor->hsize.y * 2.0f, 1)
+                    || phys_solid(right, new_pos.y - delta.y - actor->hsize.y * 2.0f, 1)) {
+                    new_vel.y = 0.0f;
+                    while (!phys_solid(left, new_pos.y - actor->hsize.y * 2.0f, 1)
+                           && !phys_solid(right, new_pos.y - actor->hsize.y * 2.0f, 1)) {
+                        new_pos.y -= 0.05f;
+                    }
+                } else {
+                    new_pos.y += delta.y;
+                }
+            }
         }
 
-        while (delta.y > 0.0f
-               && (phys_solid(left, bottom + delta.y, ground_mask)
-                   || phys_solid(right, bottom + delta.y, ground_mask))) {
-            delta.y = max(delta.y - scan_dist, 0.0f);
-        }
+        // while (delta.y > 0.0f
+        //        && (phys_solid(left, bottom + delta.y, ground_mask)
+        //            || phys_solid(right, bottom + delta.y, ground_mask))) {
+        //     delta.y = max(delta.y - scan_dist, 0.0f);
+        // }
 
-        while (delta.y < 0.0f
-               && (phys_solid(left, top + delta.y, enviro_mask)
-                   || phys_solid(right, top + delta.y, enviro_mask))) {
-            delta.y = min(delta.y + scan_dist, 0.0f);
-        }
+        // while (delta.y < 0.0f
+        //        && (phys_solid(left, top + delta.y, enviro_mask)
+        //            || phys_solid(right, top + delta.y, enviro_mask))) {
+        //     delta.y = min(delta.y + scan_dist, 0.0f);
+        // }
 
-        actor->pos = vec2_add(delta, actor->pos);
-        actor->vel = vec2_scale(delta, 1.0f / dt);
+        actor->pos = new_pos;
+        actor->vel = new_vel;
     }
 
     /*

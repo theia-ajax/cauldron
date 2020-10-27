@@ -3,6 +3,7 @@
 #include "game_settings.h"
 #include "game_systems.h"
 #include "hash.h"
+#include "player_system.h"
 #include "profile.h"
 #include "sokol_gfx.h"
 #include "sprite_draw.h"
@@ -206,6 +207,14 @@ int main(int argc, char* argv[])
         igBegin("Debug", &dbgui.open, ImGuiWindowFlags_None);
         igText("FPS: %d", dbgui.fps);
         igText("Project Load Time: %0.2fms", dbgui.load_proj_ms);
+
+        actor_handle hactor = get_player_actor(0);
+        actor* actor = actor_get(hactor);
+        if (actor) {
+            igText("Pos: %0.2f, %0.2f", actor->pos.x, actor->pos.y);
+            igText("Vel: %0.2f, %0.2f", actor->vel.x, actor->vel.y);
+        }
+
         igEnd();
 
         igRender();

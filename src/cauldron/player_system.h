@@ -1,5 +1,6 @@
 #pragma once
 
+#include "actor_system.h"
 #include "game_systems_forward.h"
 #include "tx_types.h"
 
@@ -9,3 +10,5 @@ void player_system_load_level(game_level* level);
 void player_system_unload_level(void);
 void player_system_update(float dt);
 void player_system_render(void);
+
+actor_handle get_player_actor(uint32_t pid);

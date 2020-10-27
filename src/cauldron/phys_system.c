@@ -77,7 +77,7 @@ void phys_system_load_level(game_level* level)
     for (size_t i = 0; i < len; ++i) {
         game_tile* coll_tile = &coll_layer->tiles[i];
         uint16_t layer = coll_tile->value;
-        uint16_t flips = coll_tile->flags & 0x3;
+        uint16_t flips = tile_layer->tiles[i].flags & 0x3;
         uint32_t key = tile_flip_key(tile_layer->tiles[i].value, flips);
         tile_phys_ref phys_ref = stbds_hmgets(tile_phys_map, key);
         tiles[i] = (tile_phys){
@@ -113,7 +113,17 @@ bool _phys_shape_solid(phys_tile_shape shape, float nx, float ny)
     case PHYS_TILE_SHAPE_WALL:
         return nx >= 0.375f && nx < 0.625f;
     case PHYS_TILE_SHAPE_SLOPE:
-        return nx >= (1.0f - ny);
+        switch (shape.flips) {
+        default:
+        case 0:
+            return nx >= (1.0f - ny);
+        case 1:
+            return nx <= ny;
+        case 2:
+            return nx >= ny;
+        case 3:
+            return nx <= (1.0f - ny);
+        }
     }
 }
 

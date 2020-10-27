@@ -11,7 +11,7 @@
 	"defaultPivotY": 0,
 	"defaultGridSize": 8,
 	"bgColor": "#7F8093",
-	"nextUid": 80,
+	"nextUid": 82,
 	"minifyJson": false,
 	"exportTiled": false,
 	"defs": {
@@ -33,7 +33,7 @@
 			},
 			{
 				"__type": "AutoLayer",
-				"identifier": "AutoEnvironment",
+				"identifier": "CollisionEnvironment",
 				"type": "AutoLayer",
 				"uid": 19,
 				"gridSize": 8,
@@ -313,7 +313,7 @@
 								"size": 3,
 								"tileIds": [ 61 ],
 								"chance": 1,
-								"pattern": [ 4, 0, 0, 0, 2, 0, 0, 0, 0 ],
+								"pattern": [ 4, 0, 0, -3, 2, -3, 0, 0, 0 ],
 								"flipX": true,
 								"flipY": true,
 								"xModulo": 1,
@@ -505,7 +505,7 @@
 			},
 			{
 				"__type": "IntGrid",
-				"identifier": "EnvironmentData",
+				"identifier": "CollisionData",
 				"type": "IntGrid",
 				"uid": 14,
 				"gridSize": 8,
@@ -607,7 +607,7 @@
 				} ] } ]
 			},
 			{
-				"__identifier": "AutoEnvironment",
+				"__identifier": "CollisionEnvironment",
 				"__type": "AutoLayer",
 				"__cWid": 34,
 				"__cHei": 20,
@@ -696,27 +696,6 @@
 								"__cy": 1,
 								"coordId": 45,
 								"tiles": [ { "tileId": 27, "__x": 88, "__y": 8, "__srcX": 88, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 12,
-								"__cy": 1,
-								"coordId": 46,
-								"tiles": [ { "tileId": 27, "__x": 96, "__y": 8, "__srcX": 88, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 13,
-								"__cy": 1,
-								"coordId": 47,
-								"tiles": [ { "tileId": 27, "__x": 104, "__y": 8, "__srcX": 88, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 14,
-								"__cy": 1,
-								"coordId": 48,
-								"tiles": [ { "tileId": 27, "__x": 112, "__y": 8, "__srcX": 88, "__srcY": 8 } ],
 								"flips": 0
 							},
 							{
@@ -965,6 +944,13 @@
 								"flips": 0
 							},
 							{
+								"__cx": 31,
+								"__cy": 8,
+								"coordId": 303,
+								"tiles": [ { "tileId": 27, "__x": 248, "__y": 64, "__srcX": 88, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 8,
 								"coordId": 304,
@@ -976,6 +962,13 @@
 								"__cy": 9,
 								"coordId": 307,
 								"tiles": [ { "tileId": 27, "__x": 8, "__y": 72, "__srcX": 88, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 9,
+								"coordId": 337,
+								"tiles": [ { "tileId": 27, "__x": 248, "__y": 72, "__srcX": 88, "__srcY": 8 } ],
 								"flips": 0
 							},
 							{
@@ -993,6 +986,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 27, "__x": 240, "__y": 80, "__srcX": 88, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 10,
+								"coordId": 371,
+								"tiles": [ { "tileId": 27, "__x": 248, "__y": 80, "__srcX": 88, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 10,
 								"coordId": 372,
@@ -1004,6 +1011,27 @@
 								"__cy": 11,
 								"coordId": 375,
 								"tiles": [ { "tileId": 27, "__x": 8, "__y": 88, "__srcX": 88, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 27, "__x": 232, "__y": 88, "__srcX": 88, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 27, "__x": 240, "__y": 88, "__srcX": 88, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 11,
+								"coordId": 405,
+								"tiles": [ { "tileId": 27, "__x": 248, "__y": 88, "__srcX": 88, "__srcY": 8 } ],
 								"flips": 0
 							},
 							{
@@ -1203,69 +1231,6 @@
 								"flips": 0
 							},
 							{
-								"__cx": 16,
-								"__cy": 18,
-								"coordId": 628,
-								"tiles": [ { "tileId": 27, "__x": 128, "__y": 144, "__srcX": 88, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 17,
-								"__cy": 18,
-								"coordId": 629,
-								"tiles": [ { "tileId": 27, "__x": 136, "__y": 144, "__srcX": 88, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 27, "__x": 144, "__y": 144, "__srcX": 88, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 27, "__x": 152, "__y": 144, "__srcX": 88, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 27, "__x": 160, "__y": 144, "__srcX": 88, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 27, "__x": 168, "__y": 144, "__srcX": 88, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 22,
-								"__cy": 18,
-								"coordId": 634,
-								"tiles": [ { "tileId": 27, "__x": 176, "__y": 144, "__srcX": 88, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 23,
-								"__cy": 18,
-								"coordId": 635,
-								"tiles": [ { "tileId": 27, "__x": 184, "__y": 144, "__srcX": 88, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 24,
-								"__cy": 18,
-								"coordId": 636,
-								"tiles": [ { "tileId": 27, "__x": 192, "__y": 144, "__srcX": 88, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 25,
 								"__cy": 18,
 								"coordId": 637,
@@ -1411,18 +1376,11 @@
 								"flips": 0
 							},
 							{
-								"__cx": 13,
-								"__cy": 1,
-								"coordId": 47,
-								"tiles": [ { "tileId": 28, "__x": 104, "__y": 8, "__srcX": 96, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 14,
 								"__cy": 1,
 								"coordId": 48,
 								"tiles": [ { "tileId": 28, "__x": 112, "__y": 8, "__srcX": 96, "__srcY": 8 } ],
-								"flips": 0
+								"flips": 1
 							},
 							{
 								"__cx": 15,
@@ -1691,6 +1649,13 @@
 								"flips": 2
 							},
 							{
+								"__cx": 31,
+								"__cy": 7,
+								"coordId": 269,
+								"tiles": [ { "tileId": 28, "__x": 248, "__y": 56, "__srcX": 96, "__srcY": 8 } ],
+								"flips": 3
+							},
+							{
 								"__cx": 32,
 								"__cy": 7,
 								"coordId": 270,
@@ -1702,6 +1667,13 @@
 								"__cy": 8,
 								"coordId": 273,
 								"tiles": [ { "tileId": 28, "__x": 8, "__y": 64, "__srcX": 96, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 8,
+								"coordId": 303,
+								"tiles": [ { "tileId": 28, "__x": 248, "__y": 64, "__srcX": 96, "__srcY": 8 } ],
 								"flips": 0
 							},
 							{
@@ -1719,6 +1691,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 28, "__x": 240, "__y": 72, "__srcX": 96, "__srcY": 8 } ],
+								"flips": 3
+							},
+							{
+								"__cx": 31,
+								"__cy": 9,
+								"coordId": 337,
+								"tiles": [ { "tileId": 28, "__x": 248, "__y": 72, "__srcX": 96, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 9,
 								"coordId": 338,
@@ -1730,6 +1716,27 @@
 								"__cy": 10,
 								"coordId": 341,
 								"tiles": [ { "tileId": 28, "__x": 8, "__y": 80, "__srcX": 96, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 28, "__x": 232, "__y": 80, "__srcX": 96, "__srcY": 8 } ],
+								"flips": 3
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 28, "__x": 240, "__y": 80, "__srcX": 96, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 10,
+								"coordId": 371,
+								"tiles": [ { "tileId": 28, "__x": 248, "__y": 80, "__srcX": 96, "__srcY": 8 } ],
 								"flips": 0
 							},
 							{
@@ -1754,11 +1761,32 @@
 								"flips": 2
 							},
 							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 28, "__x": 224, "__y": 88, "__srcX": 96, "__srcY": 8 } ],
+								"flips": 3
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 28, "__x": 232, "__y": 88, "__srcX": 96, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 28, "__x": 240, "__y": 88, "__srcX": 96, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 11,
 								"coordId": 405,
 								"tiles": [ { "tileId": 28, "__x": 248, "__y": 88, "__srcX": 96, "__srcY": 8 } ],
-								"flips": 3
+								"flips": 0
 							},
 							{
 								"__cx": 32,
@@ -2003,63 +2031,14 @@
 								"__cy": 18,
 								"coordId": 628,
 								"tiles": [ { "tileId": 28, "__x": 128, "__y": 144, "__srcX": 96, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 17,
-								"__cy": 18,
-								"coordId": 629,
-								"tiles": [ { "tileId": 28, "__x": 136, "__y": 144, "__srcX": 96, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 28, "__x": 144, "__y": 144, "__srcX": 96, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 28, "__x": 152, "__y": 144, "__srcX": 96, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 28, "__x": 160, "__y": 144, "__srcX": 96, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 28, "__x": 168, "__y": 144, "__srcX": 96, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 22,
-								"__cy": 18,
-								"coordId": 634,
-								"tiles": [ { "tileId": 28, "__x": 176, "__y": 144, "__srcX": 96, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 23,
-								"__cy": 18,
-								"coordId": 635,
-								"tiles": [ { "tileId": 28, "__x": 184, "__y": 144, "__srcX": 96, "__srcY": 8 } ],
-								"flips": 0
+								"flips": 2
 							},
 							{
 								"__cx": 24,
 								"__cy": 18,
 								"coordId": 636,
 								"tiles": [ { "tileId": 28, "__x": 192, "__y": 144, "__srcX": 96, "__srcY": 8 } ],
-								"flips": 0
+								"flips": 3
 							},
 							{
 								"__cx": 25,
@@ -2204,14 +2183,7 @@
 								"__cy": 1,
 								"coordId": 46,
 								"tiles": [ { "tileId": 45, "__x": 96, "__y": 8, "__srcX": 104, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 13,
-								"__cy": 1,
-								"coordId": 47,
-								"tiles": [ { "tileId": 45, "__x": 104, "__y": 8, "__srcX": 104, "__srcY": 16 } ],
-								"flips": 0
+								"flips": 1
 							},
 							{
 								"__cx": 14,
@@ -2487,6 +2459,13 @@
 								"flips": 0
 							},
 							{
+								"__cx": 31,
+								"__cy": 7,
+								"coordId": 269,
+								"tiles": [ { "tileId": 45, "__x": 248, "__y": 56, "__srcX": 104, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
 								"__cx": 32,
 								"__cy": 7,
 								"coordId": 270,
@@ -2498,6 +2477,13 @@
 								"__cy": 8,
 								"coordId": 273,
 								"tiles": [ { "tileId": 45, "__x": 8, "__y": 64, "__srcX": 104, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 8,
+								"coordId": 303,
+								"tiles": [ { "tileId": 45, "__x": 248, "__y": 64, "__srcX": 104, "__srcY": 16 } ],
 								"flips": 0
 							},
 							{
@@ -2515,6 +2501,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 45, "__x": 240, "__y": 72, "__srcX": 104, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 31,
+								"__cy": 9,
+								"coordId": 337,
+								"tiles": [ { "tileId": 45, "__x": 248, "__y": 72, "__srcX": 104, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 9,
 								"coordId": 338,
@@ -2526,6 +2526,27 @@
 								"__cy": 10,
 								"coordId": 341,
 								"tiles": [ { "tileId": 45, "__x": 8, "__y": 80, "__srcX": 104, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 45, "__x": 232, "__y": 80, "__srcX": 104, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 45, "__x": 240, "__y": 80, "__srcX": 104, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 10,
+								"coordId": 371,
+								"tiles": [ { "tileId": 45, "__x": 248, "__y": 80, "__srcX": 104, "__srcY": 16 } ],
 								"flips": 0
 							},
 							{
@@ -2550,11 +2571,32 @@
 								"flips": 0
 							},
 							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 45, "__x": 224, "__y": 88, "__srcX": 104, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 45, "__x": 232, "__y": 88, "__srcX": 104, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 45, "__x": 240, "__y": 88, "__srcX": 104, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 11,
 								"coordId": 405,
 								"tiles": [ { "tileId": 45, "__x": 248, "__y": 88, "__srcX": 104, "__srcY": 16 } ],
-								"flips": 1
+								"flips": 0
 							},
 							{
 								"__cx": 32,
@@ -2802,60 +2844,11 @@
 								"flips": 0
 							},
 							{
-								"__cx": 17,
-								"__cy": 18,
-								"coordId": 629,
-								"tiles": [ { "tileId": 45, "__x": 136, "__y": 144, "__srcX": 104, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 45, "__x": 144, "__y": 144, "__srcX": 104, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 45, "__x": 152, "__y": 144, "__srcX": 104, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 45, "__x": 160, "__y": 144, "__srcX": 104, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 45, "__x": 168, "__y": 144, "__srcX": 104, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 22,
-								"__cy": 18,
-								"coordId": 634,
-								"tiles": [ { "tileId": 45, "__x": 176, "__y": 144, "__srcX": 104, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 23,
-								"__cy": 18,
-								"coordId": 635,
-								"tiles": [ { "tileId": 45, "__x": 184, "__y": 144, "__srcX": 104, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 24,
 								"__cy": 18,
 								"coordId": 636,
 								"tiles": [ { "tileId": 45, "__x": 192, "__y": 144, "__srcX": 104, "__srcY": 16 } ],
-								"flips": 0
+								"flips": 1
 							},
 							{
 								"__cx": 25,
@@ -3003,18 +2996,11 @@
 								"flips": 0
 							},
 							{
-								"__cx": 13,
-								"__cy": 1,
-								"coordId": 47,
-								"tiles": [ { "tileId": 44, "__x": 104, "__y": 8, "__srcX": 96, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 14,
 								"__cy": 1,
 								"coordId": 48,
 								"tiles": [ { "tileId": 44, "__x": 112, "__y": 8, "__srcX": 96, "__srcY": 16 } ],
-								"flips": 0
+								"flips": 1
 							},
 							{
 								"__cx": 15,
@@ -3290,6 +3276,13 @@
 								"flips": 0
 							},
 							{
+								"__cx": 31,
+								"__cy": 7,
+								"coordId": 269,
+								"tiles": [ { "tileId": 44, "__x": 248, "__y": 56, "__srcX": 96, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
 								"__cx": 32,
 								"__cy": 7,
 								"coordId": 270,
@@ -3301,6 +3294,13 @@
 								"__cy": 8,
 								"coordId": 273,
 								"tiles": [ { "tileId": 44, "__x": 8, "__y": 64, "__srcX": 96, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 8,
+								"coordId": 303,
+								"tiles": [ { "tileId": 44, "__x": 248, "__y": 64, "__srcX": 96, "__srcY": 16 } ],
 								"flips": 0
 							},
 							{
@@ -3318,6 +3318,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 44, "__x": 240, "__y": 72, "__srcX": 96, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 31,
+								"__cy": 9,
+								"coordId": 337,
+								"tiles": [ { "tileId": 44, "__x": 248, "__y": 72, "__srcX": 96, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 9,
 								"coordId": 338,
@@ -3329,6 +3343,27 @@
 								"__cy": 10,
 								"coordId": 341,
 								"tiles": [ { "tileId": 44, "__x": 8, "__y": 80, "__srcX": 96, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 44, "__x": 232, "__y": 80, "__srcX": 96, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 44, "__x": 240, "__y": 80, "__srcX": 96, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 10,
+								"coordId": 371,
+								"tiles": [ { "tileId": 44, "__x": 248, "__y": 80, "__srcX": 96, "__srcY": 16 } ],
 								"flips": 0
 							},
 							{
@@ -3353,11 +3388,32 @@
 								"flips": 0
 							},
 							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 44, "__x": 224, "__y": 88, "__srcX": 96, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 44, "__x": 232, "__y": 88, "__srcX": 96, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 44, "__x": 240, "__y": 88, "__srcX": 96, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 11,
 								"coordId": 405,
 								"tiles": [ { "tileId": 44, "__x": 248, "__y": 88, "__srcX": 96, "__srcY": 16 } ],
-								"flips": 1
+								"flips": 0
 							},
 							{
 								"__cx": 32,
@@ -3605,60 +3661,11 @@
 								"flips": 0
 							},
 							{
-								"__cx": 17,
-								"__cy": 18,
-								"coordId": 629,
-								"tiles": [ { "tileId": 44, "__x": 136, "__y": 144, "__srcX": 96, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 44, "__x": 144, "__y": 144, "__srcX": 96, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 44, "__x": 152, "__y": 144, "__srcX": 96, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 44, "__x": 160, "__y": 144, "__srcX": 96, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 44, "__x": 168, "__y": 144, "__srcX": 96, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 22,
-								"__cy": 18,
-								"coordId": 634,
-								"tiles": [ { "tileId": 44, "__x": 176, "__y": 144, "__srcX": 96, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 23,
-								"__cy": 18,
-								"coordId": 635,
-								"tiles": [ { "tileId": 44, "__x": 184, "__y": 144, "__srcX": 96, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 24,
 								"__cy": 18,
 								"coordId": 636,
 								"tiles": [ { "tileId": 44, "__x": 192, "__y": 144, "__srcX": 96, "__srcY": 16 } ],
-								"flips": 0
+								"flips": 1
 							},
 							{
 								"__cx": 25,
@@ -3803,13 +3810,6 @@
 								"__cy": 1,
 								"coordId": 46,
 								"tiles": [ { "tileId": 43, "__x": 96, "__y": 8, "__srcX": 88, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 13,
-								"__cy": 1,
-								"coordId": 47,
-								"tiles": [ { "tileId": 43, "__x": 104, "__y": 8, "__srcX": 88, "__srcY": 16 } ],
 								"flips": 0
 							},
 							{
@@ -4086,6 +4086,13 @@
 								"flips": 2
 							},
 							{
+								"__cx": 31,
+								"__cy": 7,
+								"coordId": 269,
+								"tiles": [ { "tileId": 43, "__x": 248, "__y": 56, "__srcX": 88, "__srcY": 16 } ],
+								"flips": 2
+							},
+							{
 								"__cx": 32,
 								"__cy": 7,
 								"coordId": 270,
@@ -4097,6 +4104,13 @@
 								"__cy": 8,
 								"coordId": 273,
 								"tiles": [ { "tileId": 43, "__x": 8, "__y": 64, "__srcX": 88, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 8,
+								"coordId": 303,
+								"tiles": [ { "tileId": 43, "__x": 248, "__y": 64, "__srcX": 88, "__srcY": 16 } ],
 								"flips": 0
 							},
 							{
@@ -4114,6 +4128,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 43, "__x": 240, "__y": 72, "__srcX": 88, "__srcY": 16 } ],
+								"flips": 2
+							},
+							{
+								"__cx": 31,
+								"__cy": 9,
+								"coordId": 337,
+								"tiles": [ { "tileId": 43, "__x": 248, "__y": 72, "__srcX": 88, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 9,
 								"coordId": 338,
@@ -4125,6 +4153,27 @@
 								"__cy": 10,
 								"coordId": 341,
 								"tiles": [ { "tileId": 43, "__x": 8, "__y": 80, "__srcX": 88, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 43, "__x": 232, "__y": 80, "__srcX": 88, "__srcY": 16 } ],
+								"flips": 2
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 43, "__x": 240, "__y": 80, "__srcX": 88, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 10,
+								"coordId": 371,
+								"tiles": [ { "tileId": 43, "__x": 248, "__y": 80, "__srcX": 88, "__srcY": 16 } ],
 								"flips": 0
 							},
 							{
@@ -4149,11 +4198,32 @@
 								"flips": 2
 							},
 							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 43, "__x": 224, "__y": 88, "__srcX": 88, "__srcY": 16 } ],
+								"flips": 2
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 43, "__x": 232, "__y": 88, "__srcX": 88, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 43, "__x": 240, "__y": 88, "__srcX": 88, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 11,
 								"coordId": 405,
 								"tiles": [ { "tileId": 43, "__x": 248, "__y": 88, "__srcX": 88, "__srcY": 16 } ],
-								"flips": 2
+								"flips": 0
 							},
 							{
 								"__cx": 32,
@@ -4398,63 +4468,14 @@
 								"__cy": 18,
 								"coordId": 628,
 								"tiles": [ { "tileId": 43, "__x": 128, "__y": 144, "__srcX": 88, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 17,
-								"__cy": 18,
-								"coordId": 629,
-								"tiles": [ { "tileId": 43, "__x": 136, "__y": 144, "__srcX": 88, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 43, "__x": 144, "__y": 144, "__srcX": 88, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 43, "__x": 152, "__y": 144, "__srcX": 88, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 43, "__x": 160, "__y": 144, "__srcX": 88, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 43, "__x": 168, "__y": 144, "__srcX": 88, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 22,
-								"__cy": 18,
-								"coordId": 634,
-								"tiles": [ { "tileId": 43, "__x": 176, "__y": 144, "__srcX": 88, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 23,
-								"__cy": 18,
-								"coordId": 635,
-								"tiles": [ { "tileId": 43, "__x": 184, "__y": 144, "__srcX": 88, "__srcY": 16 } ],
-								"flips": 0
+								"flips": 2
 							},
 							{
 								"__cx": 24,
 								"__cy": 18,
 								"coordId": 636,
 								"tiles": [ { "tileId": 43, "__x": 192, "__y": 144, "__srcX": 88, "__srcY": 16 } ],
-								"flips": 0
+								"flips": 2
 							},
 							{
 								"__cx": 25,
@@ -4599,13 +4620,6 @@
 								"__cy": 1,
 								"coordId": 46,
 								"tiles": [ { "tileId": 42, "__x": 96, "__y": 8, "__srcX": 80, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 13,
-								"__cy": 1,
-								"coordId": 47,
-								"tiles": [ { "tileId": 42, "__x": 104, "__y": 8, "__srcX": 80, "__srcY": 16 } ],
 								"flips": 0
 							},
 							{
@@ -4889,6 +4903,13 @@
 								"flips": 0
 							},
 							{
+								"__cx": 31,
+								"__cy": 7,
+								"coordId": 269,
+								"tiles": [ { "tileId": 42, "__x": 248, "__y": 56, "__srcX": 80, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
 								"__cx": 32,
 								"__cy": 7,
 								"coordId": 270,
@@ -4900,6 +4921,13 @@
 								"__cy": 8,
 								"coordId": 273,
 								"tiles": [ { "tileId": 42, "__x": 8, "__y": 64, "__srcX": 80, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 8,
+								"coordId": 303,
+								"tiles": [ { "tileId": 42, "__x": 248, "__y": 64, "__srcX": 80, "__srcY": 16 } ],
 								"flips": 0
 							},
 							{
@@ -4917,6 +4945,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 42, "__x": 240, "__y": 72, "__srcX": 80, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 31,
+								"__cy": 9,
+								"coordId": 337,
+								"tiles": [ { "tileId": 42, "__x": 248, "__y": 72, "__srcX": 80, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 9,
 								"coordId": 338,
@@ -4928,6 +4970,27 @@
 								"__cy": 10,
 								"coordId": 341,
 								"tiles": [ { "tileId": 42, "__x": 8, "__y": 80, "__srcX": 80, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 42, "__x": 232, "__y": 80, "__srcX": 80, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 42, "__x": 240, "__y": 80, "__srcX": 80, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 10,
+								"coordId": 371,
+								"tiles": [ { "tileId": 42, "__x": 248, "__y": 80, "__srcX": 80, "__srcY": 16 } ],
 								"flips": 0
 							},
 							{
@@ -4952,11 +5015,32 @@
 								"flips": 0
 							},
 							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 42, "__x": 224, "__y": 88, "__srcX": 80, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 42, "__x": 232, "__y": 88, "__srcX": 80, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 42, "__x": 240, "__y": 88, "__srcX": 80, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 11,
 								"coordId": 405,
 								"tiles": [ { "tileId": 42, "__x": 248, "__y": 88, "__srcX": 80, "__srcY": 16 } ],
-								"flips": 1
+								"flips": 0
 							},
 							{
 								"__cx": 32,
@@ -5204,60 +5288,11 @@
 								"flips": 0
 							},
 							{
-								"__cx": 17,
-								"__cy": 18,
-								"coordId": 629,
-								"tiles": [ { "tileId": 42, "__x": 136, "__y": 144, "__srcX": 80, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 42, "__x": 144, "__y": 144, "__srcX": 80, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 42, "__x": 152, "__y": 144, "__srcX": 80, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 42, "__x": 160, "__y": 144, "__srcX": 80, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 42, "__x": 168, "__y": 144, "__srcX": 80, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 22,
-								"__cy": 18,
-								"coordId": 634,
-								"tiles": [ { "tileId": 42, "__x": 176, "__y": 144, "__srcX": 80, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 23,
-								"__cy": 18,
-								"coordId": 635,
-								"tiles": [ { "tileId": 42, "__x": 184, "__y": 144, "__srcX": 80, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 24,
 								"__cy": 18,
 								"coordId": 636,
 								"tiles": [ { "tileId": 42, "__x": 192, "__y": 144, "__srcX": 80, "__srcY": 16 } ],
-								"flips": 0
+								"flips": 1
 							},
 							{
 								"__cx": 25,
@@ -5626,21 +5661,21 @@
 								"__cy": 1,
 								"coordId": 46,
 								"tiles": [ { "tileId": 11, "__x": 96, "__y": 8, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
+								"flips": 2
 							},
 							{
 								"__cx": 13,
 								"__cy": 1,
 								"coordId": 47,
 								"tiles": [ { "tileId": 11, "__x": 104, "__y": 8, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
+								"flips": 2
 							},
 							{
 								"__cx": 14,
 								"__cy": 1,
 								"coordId": 48,
 								"tiles": [ { "tileId": 11, "__x": 112, "__y": 8, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
+								"flips": 2
 							},
 							{
 								"__cx": 15,
@@ -5843,27 +5878,6 @@
 								"__cy": 2,
 								"coordId": 79,
 								"tiles": [ { "tileId": 11, "__x": 88, "__y": 16, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 12,
-								"__cy": 2,
-								"coordId": 80,
-								"tiles": [ { "tileId": 11, "__x": 96, "__y": 16, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 13,
-								"__cy": 2,
-								"coordId": 81,
-								"tiles": [ { "tileId": 11, "__x": 104, "__y": 16, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 14,
-								"__cy": 2,
-								"coordId": 82,
-								"tiles": [ { "tileId": 11, "__x": 112, "__y": 16, "__srcX": 88, "__srcY": 0 } ],
 								"flips": 2
 							},
 							{
@@ -6098,6 +6112,13 @@
 								"flips": 0
 							},
 							{
+								"__cx": 31,
+								"__cy": 7,
+								"coordId": 269,
+								"tiles": [ { "tileId": 11, "__x": 248, "__y": 56, "__srcX": 88, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 7,
 								"coordId": 270,
@@ -6126,6 +6147,13 @@
 								"flips": 2
 							},
 							{
+								"__cx": 31,
+								"__cy": 8,
+								"coordId": 303,
+								"tiles": [ { "tileId": 11, "__x": 248, "__y": 64, "__srcX": 88, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 8,
 								"coordId": 304,
@@ -6140,6 +6168,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 11, "__x": 240, "__y": 72, "__srcX": 88, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 9,
+								"coordId": 337,
+								"tiles": [ { "tileId": 11, "__x": 248, "__y": 72, "__srcX": 88, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 9,
 								"coordId": 338,
@@ -6151,6 +6193,27 @@
 								"__cy": 10,
 								"coordId": 341,
 								"tiles": [ { "tileId": 11, "__x": 8, "__y": 80, "__srcX": 88, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 11, "__x": 232, "__y": 80, "__srcX": 88, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 11, "__x": 240, "__y": 80, "__srcX": 88, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 10,
+								"coordId": 371,
+								"tiles": [ { "tileId": 11, "__x": 248, "__y": 80, "__srcX": 88, "__srcY": 0 } ],
 								"flips": 0
 							},
 							{
@@ -6172,6 +6235,27 @@
 								"__cy": 11,
 								"coordId": 376,
 								"tiles": [ { "tileId": 11, "__x": 16, "__y": 88, "__srcX": 88, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 11, "__x": 224, "__y": 88, "__srcX": 88, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 11, "__x": 232, "__y": 88, "__srcX": 88, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 11, "__x": 240, "__y": 88, "__srcX": 88, "__srcY": 0 } ],
 								"flips": 0
 							},
 							{
@@ -6200,6 +6284,27 @@
 								"__cy": 12,
 								"coordId": 410,
 								"tiles": [ { "tileId": 11, "__x": 16, "__y": 96, "__srcX": 88, "__srcY": 0 } ],
+								"flips": 2
+							},
+							{
+								"__cx": 28,
+								"__cy": 12,
+								"coordId": 436,
+								"tiles": [ { "tileId": 11, "__x": 224, "__y": 96, "__srcX": 88, "__srcY": 0 } ],
+								"flips": 2
+							},
+							{
+								"__cx": 29,
+								"__cy": 12,
+								"coordId": 437,
+								"tiles": [ { "tileId": 11, "__x": 232, "__y": 96, "__srcX": 88, "__srcY": 0 } ],
+								"flips": 2
+							},
+							{
+								"__cx": 30,
+								"__cy": 12,
+								"coordId": 438,
+								"tiles": [ { "tileId": 11, "__x": 240, "__y": 96, "__srcX": 88, "__srcY": 0 } ],
 								"flips": 2
 							},
 							{
@@ -6378,69 +6483,6 @@
 								"flips": 0
 							},
 							{
-								"__cx": 16,
-								"__cy": 17,
-								"coordId": 594,
-								"tiles": [ { "tileId": 11, "__x": 128, "__y": 136, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 17,
-								"__cy": 17,
-								"coordId": 595,
-								"tiles": [ { "tileId": 11, "__x": 136, "__y": 136, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 17,
-								"coordId": 596,
-								"tiles": [ { "tileId": 11, "__x": 144, "__y": 136, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 17,
-								"coordId": 597,
-								"tiles": [ { "tileId": 11, "__x": 152, "__y": 136, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 17,
-								"coordId": 598,
-								"tiles": [ { "tileId": 11, "__x": 160, "__y": 136, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 17,
-								"coordId": 599,
-								"tiles": [ { "tileId": 11, "__x": 168, "__y": 136, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 22,
-								"__cy": 17,
-								"coordId": 600,
-								"tiles": [ { "tileId": 11, "__x": 176, "__y": 136, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 23,
-								"__cy": 17,
-								"coordId": 601,
-								"tiles": [ { "tileId": 11, "__x": 184, "__y": 136, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 24,
-								"__cy": 17,
-								"coordId": 602,
-								"tiles": [ { "tileId": 11, "__x": 192, "__y": 136, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 25,
 								"__cy": 17,
 								"coordId": 603,
@@ -6613,34 +6655,6 @@
 								"__cy": 18,
 								"coordId": 629,
 								"tiles": [ { "tileId": 11, "__x": 136, "__y": 144, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 11, "__x": 144, "__y": 144, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 11, "__x": 152, "__y": 144, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 11, "__x": 160, "__y": 144, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 11, "__x": 168, "__y": 144, "__srcX": 88, "__srcY": 0 } ],
 								"flips": 0
 							},
 							{
@@ -6840,34 +6854,6 @@
 								"flips": 2
 							},
 							{
-								"__cx": 18,
-								"__cy": 19,
-								"coordId": 664,
-								"tiles": [ { "tileId": 11, "__x": 144, "__y": 152, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 19,
-								"__cy": 19,
-								"coordId": 665,
-								"tiles": [ { "tileId": 11, "__x": 152, "__y": 152, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 20,
-								"__cy": 19,
-								"coordId": 666,
-								"tiles": [ { "tileId": 11, "__x": 160, "__y": 152, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 21,
-								"__cy": 19,
-								"coordId": 667,
-								"tiles": [ { "tileId": 11, "__x": 168, "__y": 152, "__srcX": 88, "__srcY": 0 } ],
-								"flips": 2
-							},
-							{
 								"__cx": 22,
 								"__cy": 19,
 								"coordId": 668,
@@ -7038,14 +7024,7 @@
 								"__cy": 1,
 								"coordId": 46,
 								"tiles": [ { "tileId": 26, "__x": 96, "__y": 8, "__srcX": 80, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 13,
-								"__cy": 1,
-								"coordId": 47,
-								"tiles": [ { "tileId": 26, "__x": 104, "__y": 8, "__srcX": 80, "__srcY": 8 } ],
-								"flips": 0
+								"flips": 1
 							},
 							{
 								"__cx": 14,
@@ -7517,6 +7496,13 @@
 								"flips": 1
 							},
 							{
+								"__cx": 30,
+								"__cy": 8,
+								"coordId": 302,
+								"tiles": [ { "tileId": 26, "__x": 240, "__y": 64, "__srcX": 80, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 8,
 								"coordId": 303,
@@ -7557,6 +7543,13 @@
 								"coordId": 308,
 								"tiles": [ { "tileId": 26, "__x": 16, "__y": 72, "__srcX": 80, "__srcY": 8 } ],
 								"flips": 1
+							},
+							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 26, "__x": 240, "__y": 72, "__srcX": 80, "__srcY": 8 } ],
+								"flips": 0
 							},
 							{
 								"__cx": 31,
@@ -7601,6 +7594,20 @@
 								"flips": 1
 							},
 							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 26, "__x": 232, "__y": 80, "__srcX": 80, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 26, "__x": 240, "__y": 80, "__srcX": 80, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 10,
 								"coordId": 371,
@@ -7641,6 +7648,27 @@
 								"coordId": 376,
 								"tiles": [ { "tileId": 26, "__x": 16, "__y": 88, "__srcX": 80, "__srcY": 8 } ],
 								"flips": 1
+							},
+							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 26, "__x": 224, "__y": 88, "__srcX": 80, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 26, "__x": 232, "__y": 88, "__srcX": 80, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 26, "__x": 240, "__y": 88, "__srcX": 80, "__srcY": 8 } ],
+								"flips": 0
 							},
 							{
 								"__cx": 31,
@@ -8074,56 +8102,7 @@
 								"__cy": 18,
 								"coordId": 628,
 								"tiles": [ { "tileId": 26, "__x": 128, "__y": 144, "__srcX": 80, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 17,
-								"__cy": 18,
-								"coordId": 629,
-								"tiles": [ { "tileId": 26, "__x": 136, "__y": 144, "__srcX": 80, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 26, "__x": 144, "__y": 144, "__srcX": 80, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 26, "__x": 152, "__y": 144, "__srcX": 80, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 26, "__x": 160, "__y": 144, "__srcX": 80, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 26, "__x": 168, "__y": 144, "__srcX": 80, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 22,
-								"__cy": 18,
-								"coordId": 634,
-								"tiles": [ { "tileId": 26, "__x": 176, "__y": 144, "__srcX": 80, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 23,
-								"__cy": 18,
-								"coordId": 635,
-								"tiles": [ { "tileId": 26, "__x": 184, "__y": 144, "__srcX": 80, "__srcY": 8 } ],
-								"flips": 0
+								"flips": 1
 							},
 							{
 								"__cx": 24,
@@ -8292,18 +8271,11 @@
 								"flips": 0
 							},
 							{
-								"__cx": 13,
-								"__cy": 1,
-								"coordId": 47,
-								"tiles": [ { "tileId": 30, "__x": 104, "__y": 8, "__srcX": 112, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 14,
 								"__cy": 1,
 								"coordId": 48,
 								"tiles": [ { "tileId": 30, "__x": 112, "__y": 8, "__srcX": 112, "__srcY": 8 } ],
-								"flips": 0
+								"flips": 1
 							},
 							{
 								"__cx": 15,
@@ -8730,7 +8702,7 @@
 								"__cy": 7,
 								"coordId": 269,
 								"tiles": [ { "tileId": 30, "__x": 248, "__y": 56, "__srcX": 112, "__srcY": 8 } ],
-								"flips": 1
+								"flips": 0
 							},
 							{
 								"__cx": 32,
@@ -8768,11 +8740,18 @@
 								"flips": 0
 							},
 							{
+								"__cx": 30,
+								"__cy": 8,
+								"coordId": 302,
+								"tiles": [ { "tileId": 30, "__x": 240, "__y": 64, "__srcX": 112, "__srcY": 8 } ],
+								"flips": 1
+							},
+							{
 								"__cx": 31,
 								"__cy": 8,
 								"coordId": 303,
 								"tiles": [ { "tileId": 30, "__x": 248, "__y": 64, "__srcX": 112, "__srcY": 8 } ],
-								"flips": 1
+								"flips": 0
 							},
 							{
 								"__cx": 32,
@@ -8810,11 +8789,18 @@
 								"flips": 0
 							},
 							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 30, "__x": 240, "__y": 72, "__srcX": 112, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 9,
 								"coordId": 337,
 								"tiles": [ { "tileId": 30, "__x": 248, "__y": 72, "__srcX": 112, "__srcY": 8 } ],
-								"flips": 1
+								"flips": 0
 							},
 							{
 								"__cx": 32,
@@ -8852,11 +8838,25 @@
 								"flips": 0
 							},
 							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 30, "__x": 232, "__y": 80, "__srcX": 112, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 30, "__x": 240, "__y": 80, "__srcX": 112, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 10,
 								"coordId": 371,
 								"tiles": [ { "tileId": 30, "__x": 248, "__y": 80, "__srcX": 112, "__srcY": 8 } ],
-								"flips": 1
+								"flips": 0
 							},
 							{
 								"__cx": 32,
@@ -8891,6 +8891,27 @@
 								"__cy": 11,
 								"coordId": 376,
 								"tiles": [ { "tileId": 30, "__x": 16, "__y": 88, "__srcX": 112, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 30, "__x": 224, "__y": 88, "__srcX": 112, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 30, "__x": 232, "__y": 88, "__srcX": 112, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 30, "__x": 240, "__y": 88, "__srcX": 112, "__srcY": 8 } ],
 								"flips": 0
 							},
 							{
@@ -9325,55 +9346,6 @@
 								"__cy": 18,
 								"coordId": 628,
 								"tiles": [ { "tileId": 30, "__x": 128, "__y": 144, "__srcX": 112, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 17,
-								"__cy": 18,
-								"coordId": 629,
-								"tiles": [ { "tileId": 30, "__x": 136, "__y": 144, "__srcX": 112, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 30, "__x": 144, "__y": 144, "__srcX": 112, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 30, "__x": 152, "__y": 144, "__srcX": 112, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 30, "__x": 160, "__y": 144, "__srcX": 112, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 30, "__x": 168, "__y": 144, "__srcX": 112, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 22,
-								"__cy": 18,
-								"coordId": 634,
-								"tiles": [ { "tileId": 30, "__x": 176, "__y": 144, "__srcX": 112, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 23,
-								"__cy": 18,
-								"coordId": 635,
-								"tiles": [ { "tileId": 30, "__x": 184, "__y": 144, "__srcX": 112, "__srcY": 8 } ],
 								"flips": 0
 							},
 							{
@@ -9977,27 +9949,6 @@
 								"flips": 0
 							},
 							{
-								"__cx": 12,
-								"__cy": 2,
-								"coordId": 80,
-								"tiles": [ { "tileId": 46, "__x": 96, "__y": 16, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 13,
-								"__cy": 2,
-								"coordId": 81,
-								"tiles": [ { "tileId": 46, "__x": 104, "__y": 16, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 14,
-								"__cy": 2,
-								"coordId": 82,
-								"tiles": [ { "tileId": 46, "__x": 112, "__y": 16, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 15,
 								"__cy": 2,
 								"coordId": 83,
@@ -10236,6 +10187,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 25,
+								"__cy": 7,
+								"coordId": 263,
+								"tiles": [ { "tileId": 46, "__x": 200, "__y": 56, "__srcX": 112, "__srcY": 16 } ],
+								"flips": 2
+							},
+							{
+								"__cx": 31,
+								"__cy": 7,
+								"coordId": 269,
+								"tiles": [ { "tileId": 46, "__x": 248, "__y": 56, "__srcX": 112, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
 								"__cx": 32,
 								"__cy": 7,
 								"coordId": 270,
@@ -10264,10 +10229,10 @@
 								"flips": 0
 							},
 							{
-								"__cx": 25,
+								"__cx": 31,
 								"__cy": 8,
-								"coordId": 297,
-								"tiles": [ { "tileId": 46, "__x": 200, "__y": 64, "__srcX": 112, "__srcY": 16 } ],
+								"coordId": 303,
+								"tiles": [ { "tileId": 46, "__x": 248, "__y": 64, "__srcX": 112, "__srcY": 16 } ],
 								"flips": 0
 							},
 							{
@@ -10285,6 +10250,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 46, "__x": 240, "__y": 72, "__srcX": 112, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 31,
+								"__cy": 9,
+								"coordId": 337,
+								"tiles": [ { "tileId": 46, "__x": 248, "__y": 72, "__srcX": 112, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 9,
 								"coordId": 338,
@@ -10296,6 +10275,27 @@
 								"__cy": 10,
 								"coordId": 341,
 								"tiles": [ { "tileId": 46, "__x": 8, "__y": 80, "__srcX": 112, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 46, "__x": 232, "__y": 80, "__srcX": 112, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 46, "__x": 240, "__y": 80, "__srcX": 112, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 10,
+								"coordId": 371,
+								"tiles": [ { "tileId": 46, "__x": 248, "__y": 80, "__srcX": 112, "__srcY": 16 } ],
 								"flips": 0
 							},
 							{
@@ -10320,11 +10320,32 @@
 								"flips": 0
 							},
 							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 46, "__x": 224, "__y": 88, "__srcX": 112, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 46, "__x": 232, "__y": 88, "__srcX": 112, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 46, "__x": 240, "__y": 88, "__srcX": 112, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 11,
 								"coordId": 405,
 								"tiles": [ { "tileId": 46, "__x": 248, "__y": 88, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 1
+								"flips": 0
 							},
 							{
 								"__cx": 32,
@@ -10362,11 +10383,32 @@
 								"flips": 3
 							},
 							{
+								"__cx": 27,
+								"__cy": 12,
+								"coordId": 435,
+								"tiles": [ { "tileId": 46, "__x": 216, "__y": 96, "__srcX": 112, "__srcY": 16 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 28,
+								"__cy": 12,
+								"coordId": 436,
+								"tiles": [ { "tileId": 46, "__x": 224, "__y": 96, "__srcX": 112, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 12,
+								"coordId": 437,
+								"tiles": [ { "tileId": 46, "__x": 232, "__y": 96, "__srcX": 112, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 30,
 								"__cy": 12,
 								"coordId": 438,
 								"tiles": [ { "tileId": 46, "__x": 240, "__y": 96, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 1
+								"flips": 0
 							},
 							{
 								"__cx": 31,
@@ -10551,69 +10593,6 @@
 								"flips": 2
 							},
 							{
-								"__cx": 16,
-								"__cy": 17,
-								"coordId": 594,
-								"tiles": [ { "tileId": 46, "__x": 128, "__y": 136, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 17,
-								"__cy": 17,
-								"coordId": 595,
-								"tiles": [ { "tileId": 46, "__x": 136, "__y": 136, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 18,
-								"__cy": 17,
-								"coordId": 596,
-								"tiles": [ { "tileId": 46, "__x": 144, "__y": 136, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 19,
-								"__cy": 17,
-								"coordId": 597,
-								"tiles": [ { "tileId": 46, "__x": 152, "__y": 136, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 20,
-								"__cy": 17,
-								"coordId": 598,
-								"tiles": [ { "tileId": 46, "__x": 160, "__y": 136, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 21,
-								"__cy": 17,
-								"coordId": 599,
-								"tiles": [ { "tileId": 46, "__x": 168, "__y": 136, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 22,
-								"__cy": 17,
-								"coordId": 600,
-								"tiles": [ { "tileId": 46, "__x": 176, "__y": 136, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 23,
-								"__cy": 17,
-								"coordId": 601,
-								"tiles": [ { "tileId": 46, "__x": 184, "__y": 136, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 24,
-								"__cy": 17,
-								"coordId": 602,
-								"tiles": [ { "tileId": 46, "__x": 192, "__y": 136, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
 								"__cx": 25,
 								"__cy": 17,
 								"coordId": 603,
@@ -10786,56 +10765,28 @@
 								"__cy": 18,
 								"coordId": 629,
 								"tiles": [ { "tileId": 46, "__x": 136, "__y": 144, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 46, "__x": 144, "__y": 144, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 46, "__x": 152, "__y": 144, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 46, "__x": 160, "__y": 144, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 46, "__x": 168, "__y": 144, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 0
+								"flips": 2
 							},
 							{
 								"__cx": 22,
 								"__cy": 18,
 								"coordId": 634,
 								"tiles": [ { "tileId": 46, "__x": 176, "__y": 144, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 0
+								"flips": 2
 							},
 							{
 								"__cx": 23,
 								"__cy": 18,
 								"coordId": 635,
 								"tiles": [ { "tileId": 46, "__x": 184, "__y": 144, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 0
+								"flips": 2
 							},
 							{
 								"__cx": 24,
 								"__cy": 18,
 								"coordId": 636,
 								"tiles": [ { "tileId": 46, "__x": 192, "__y": 144, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 0
+								"flips": 1
 							},
 							{
 								"__cx": 25,
@@ -11020,25 +10971,11 @@
 								"flips": 0
 							},
 							{
-								"__cx": 19,
-								"__cy": 19,
-								"coordId": 665,
-								"tiles": [ { "tileId": 46, "__x": 152, "__y": 152, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 19,
-								"coordId": 666,
-								"tiles": [ { "tileId": 46, "__x": 160, "__y": 152, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 21,
 								"__cy": 19,
 								"coordId": 667,
 								"tiles": [ { "tileId": 46, "__x": 168, "__y": 152, "__srcX": 112, "__srcY": 16 } ],
-								"flips": 0
+								"flips": 1
 							},
 							{
 								"__cx": 22,
@@ -11204,13 +11141,6 @@
 								"__cy": 1,
 								"coordId": 46,
 								"tiles": [ { "tileId": 12, "__x": 96, "__y": 8, "__srcX": 96, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 13,
-								"__cy": 1,
-								"coordId": 47,
-								"tiles": [ { "tileId": 12, "__x": 104, "__y": 8, "__srcX": 96, "__srcY": 0 } ],
 								"flips": 0
 							},
 							{
@@ -11494,6 +11424,13 @@
 								"flips": 0
 							},
 							{
+								"__cx": 31,
+								"__cy": 7,
+								"coordId": 269,
+								"tiles": [ { "tileId": 12, "__x": 248, "__y": 56, "__srcX": 96, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 7,
 								"coordId": 270,
@@ -11505,6 +11442,13 @@
 								"__cy": 8,
 								"coordId": 273,
 								"tiles": [ { "tileId": 12, "__x": 8, "__y": 64, "__srcX": 96, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 8,
+								"coordId": 303,
+								"tiles": [ { "tileId": 12, "__x": 248, "__y": 64, "__srcX": 96, "__srcY": 0 } ],
 								"flips": 0
 							},
 							{
@@ -11522,6 +11466,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 12, "__x": 240, "__y": 72, "__srcX": 96, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 9,
+								"coordId": 337,
+								"tiles": [ { "tileId": 12, "__x": 248, "__y": 72, "__srcX": 96, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 9,
 								"coordId": 338,
@@ -11533,6 +11491,27 @@
 								"__cy": 10,
 								"coordId": 341,
 								"tiles": [ { "tileId": 12, "__x": 8, "__y": 80, "__srcX": 96, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 12, "__x": 232, "__y": 80, "__srcX": 96, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 12, "__x": 240, "__y": 80, "__srcX": 96, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 10,
+								"coordId": 371,
+								"tiles": [ { "tileId": 12, "__x": 248, "__y": 80, "__srcX": 96, "__srcY": 0 } ],
 								"flips": 0
 							},
 							{
@@ -11554,6 +11533,27 @@
 								"__cy": 11,
 								"coordId": 376,
 								"tiles": [ { "tileId": 12, "__x": 16, "__y": 88, "__srcX": 96, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 12, "__x": 224, "__y": 88, "__srcX": 96, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 12, "__x": 232, "__y": 88, "__srcX": 96, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 12, "__x": 240, "__y": 88, "__srcX": 96, "__srcY": 0 } ],
 								"flips": 0
 							},
 							{
@@ -11806,55 +11806,6 @@
 								"__cy": 18,
 								"coordId": 628,
 								"tiles": [ { "tileId": 12, "__x": 128, "__y": 144, "__srcX": 96, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 17,
-								"__cy": 18,
-								"coordId": 629,
-								"tiles": [ { "tileId": 12, "__x": 136, "__y": 144, "__srcX": 96, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 12, "__x": 144, "__y": 144, "__srcX": 96, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 12, "__x": 152, "__y": 144, "__srcX": 96, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 12, "__x": 160, "__y": 144, "__srcX": 96, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 12, "__x": 168, "__y": 144, "__srcX": 96, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 22,
-								"__cy": 18,
-								"coordId": 634,
-								"tiles": [ { "tileId": 12, "__x": 176, "__y": 144, "__srcX": 96, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 23,
-								"__cy": 18,
-								"coordId": 635,
-								"tiles": [ { "tileId": 12, "__x": 184, "__y": 144, "__srcX": 96, "__srcY": 0 } ],
 								"flips": 0
 							},
 							{
@@ -12238,7 +12189,7 @@
 								"__cy": 1,
 								"coordId": 47,
 								"tiles": [ { "tileId": 59, "__x": 104, "__y": 8, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 0
+								"flips": 2
 							},
 							{
 								"__cx": 14,
@@ -12448,27 +12399,6 @@
 								"__cy": 2,
 								"coordId": 79,
 								"tiles": [ { "tileId": 59, "__x": 88, "__y": 16, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 12,
-								"__cy": 2,
-								"coordId": 80,
-								"tiles": [ { "tileId": 59, "__x": 96, "__y": 16, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 13,
-								"__cy": 2,
-								"coordId": 81,
-								"tiles": [ { "tileId": 59, "__x": 104, "__y": 16, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 14,
-								"__cy": 2,
-								"coordId": 82,
-								"tiles": [ { "tileId": 59, "__x": 112, "__y": 16, "__srcX": 88, "__srcY": 24 } ],
 								"flips": 2
 							},
 							{
@@ -12710,6 +12640,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 25,
+								"__cy": 7,
+								"coordId": 263,
+								"tiles": [ { "tileId": 59, "__x": 200, "__y": 56, "__srcX": 88, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 7,
+								"coordId": 269,
+								"tiles": [ { "tileId": 59, "__x": 248, "__y": 56, "__srcX": 88, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 7,
 								"coordId": 270,
@@ -12738,11 +12682,11 @@
 								"flips": 2
 							},
 							{
-								"__cx": 25,
+								"__cx": 31,
 								"__cy": 8,
-								"coordId": 297,
-								"tiles": [ { "tileId": 59, "__x": 200, "__y": 64, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 2
+								"coordId": 303,
+								"tiles": [ { "tileId": 59, "__x": 248, "__y": 64, "__srcX": 88, "__srcY": 24 } ],
+								"flips": 0
 							},
 							{
 								"__cx": 32,
@@ -12759,6 +12703,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 59, "__x": 240, "__y": 72, "__srcX": 88, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 9,
+								"coordId": 337,
+								"tiles": [ { "tileId": 59, "__x": 248, "__y": 72, "__srcX": 88, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 9,
 								"coordId": 338,
@@ -12770,6 +12728,27 @@
 								"__cy": 10,
 								"coordId": 341,
 								"tiles": [ { "tileId": 59, "__x": 8, "__y": 80, "__srcX": 88, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 59, "__x": 232, "__y": 80, "__srcX": 88, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 59, "__x": 240, "__y": 80, "__srcX": 88, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 10,
+								"coordId": 371,
+								"tiles": [ { "tileId": 59, "__x": 248, "__y": 80, "__srcX": 88, "__srcY": 24 } ],
 								"flips": 0
 							},
 							{
@@ -12791,6 +12770,27 @@
 								"__cy": 11,
 								"coordId": 376,
 								"tiles": [ { "tileId": 59, "__x": 16, "__y": 88, "__srcX": 88, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 59, "__x": 224, "__y": 88, "__srcX": 88, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 59, "__x": 232, "__y": 88, "__srcX": 88, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 59, "__x": 240, "__y": 88, "__srcX": 88, "__srcY": 24 } ],
 								"flips": 0
 							},
 							{
@@ -12841,6 +12841,27 @@
 								"coordId": 423,
 								"tiles": [ { "tileId": 59, "__x": 120, "__y": 96, "__srcX": 88, "__srcY": 24 } ],
 								"flips": 0
+							},
+							{
+								"__cx": 27,
+								"__cy": 12,
+								"coordId": 435,
+								"tiles": [ { "tileId": 59, "__x": 216, "__y": 96, "__srcX": 88, "__srcY": 24 } ],
+								"flips": 2
+							},
+							{
+								"__cx": 28,
+								"__cy": 12,
+								"coordId": 436,
+								"tiles": [ { "tileId": 59, "__x": 224, "__y": 96, "__srcX": 88, "__srcY": 24 } ],
+								"flips": 2
+							},
+							{
+								"__cx": 29,
+								"__cy": 12,
+								"coordId": 437,
+								"tiles": [ { "tileId": 59, "__x": 232, "__y": 96, "__srcX": 88, "__srcY": 24 } ],
+								"flips": 2
 							},
 							{
 								"__cx": 30,
@@ -13032,69 +13053,6 @@
 								"flips": 0
 							},
 							{
-								"__cx": 16,
-								"__cy": 17,
-								"coordId": 594,
-								"tiles": [ { "tileId": 59, "__x": 128, "__y": 136, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 17,
-								"__cy": 17,
-								"coordId": 595,
-								"tiles": [ { "tileId": 59, "__x": 136, "__y": 136, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 17,
-								"coordId": 596,
-								"tiles": [ { "tileId": 59, "__x": 144, "__y": 136, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 17,
-								"coordId": 597,
-								"tiles": [ { "tileId": 59, "__x": 152, "__y": 136, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 17,
-								"coordId": 598,
-								"tiles": [ { "tileId": 59, "__x": 160, "__y": 136, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 17,
-								"coordId": 599,
-								"tiles": [ { "tileId": 59, "__x": 168, "__y": 136, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 22,
-								"__cy": 17,
-								"coordId": 600,
-								"tiles": [ { "tileId": 59, "__x": 176, "__y": 136, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 23,
-								"__cy": 17,
-								"coordId": 601,
-								"tiles": [ { "tileId": 59, "__x": 184, "__y": 136, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 24,
-								"__cy": 17,
-								"coordId": 602,
-								"tiles": [ { "tileId": 59, "__x": 192, "__y": 136, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 25,
 								"__cy": 17,
 								"coordId": 603,
@@ -13267,34 +13225,6 @@
 								"__cy": 18,
 								"coordId": 629,
 								"tiles": [ { "tileId": 59, "__x": 136, "__y": 144, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 59, "__x": 144, "__y": 144, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 59, "__x": 152, "__y": 144, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 59, "__x": 160, "__y": 144, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 59, "__x": 168, "__y": 144, "__srcX": 88, "__srcY": 24 } ],
 								"flips": 0
 							},
 							{
@@ -13501,20 +13431,6 @@
 								"flips": 2
 							},
 							{
-								"__cx": 19,
-								"__cy": 19,
-								"coordId": 665,
-								"tiles": [ { "tileId": 59, "__x": 152, "__y": 152, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 20,
-								"__cy": 19,
-								"coordId": 666,
-								"tiles": [ { "tileId": 59, "__x": 160, "__y": 152, "__srcX": 88, "__srcY": 24 } ],
-								"flips": 2
-							},
-							{
 								"__cx": 21,
 								"__cy": 19,
 								"coordId": 667,
@@ -13692,13 +13608,6 @@
 								"__cy": 1,
 								"coordId": 46,
 								"tiles": [ { "tileId": 58, "__x": 96, "__y": 8, "__srcX": 80, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 13,
-								"__cy": 1,
-								"coordId": 47,
-								"tiles": [ { "tileId": 58, "__x": 104, "__y": 8, "__srcX": 80, "__srcY": 24 } ],
 								"flips": 0
 							},
 							{
@@ -14171,6 +14080,13 @@
 								"flips": 1
 							},
 							{
+								"__cx": 30,
+								"__cy": 8,
+								"coordId": 302,
+								"tiles": [ { "tileId": 58, "__x": 240, "__y": 64, "__srcX": 80, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 8,
 								"coordId": 303,
@@ -14211,6 +14127,13 @@
 								"coordId": 308,
 								"tiles": [ { "tileId": 58, "__x": 16, "__y": 72, "__srcX": 80, "__srcY": 24 } ],
 								"flips": 1
+							},
+							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 58, "__x": 240, "__y": 72, "__srcX": 80, "__srcY": 24 } ],
+								"flips": 0
 							},
 							{
 								"__cx": 31,
@@ -14255,6 +14178,20 @@
 								"flips": 1
 							},
 							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 58, "__x": 232, "__y": 80, "__srcX": 80, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 58, "__x": 240, "__y": 80, "__srcX": 80, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 10,
 								"coordId": 371,
@@ -14294,6 +14231,27 @@
 								"__cy": 11,
 								"coordId": 376,
 								"tiles": [ { "tileId": 58, "__x": 16, "__y": 88, "__srcX": 80, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 58, "__x": 224, "__y": 88, "__srcX": 80, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 58, "__x": 232, "__y": 88, "__srcX": 80, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 58, "__x": 240, "__y": 88, "__srcX": 80, "__srcY": 24 } ],
 								"flips": 0
 							},
 							{
@@ -14731,55 +14689,6 @@
 								"flips": 0
 							},
 							{
-								"__cx": 17,
-								"__cy": 18,
-								"coordId": 629,
-								"tiles": [ { "tileId": 58, "__x": 136, "__y": 144, "__srcX": 80, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 58, "__x": 144, "__y": 144, "__srcX": 80, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 58, "__x": 152, "__y": 144, "__srcX": 80, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 58, "__x": 160, "__y": 144, "__srcX": 80, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 58, "__x": 168, "__y": 144, "__srcX": 80, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 22,
-								"__cy": 18,
-								"coordId": 634,
-								"tiles": [ { "tileId": 58, "__x": 176, "__y": 144, "__srcX": 80, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 23,
-								"__cy": 18,
-								"coordId": 635,
-								"tiles": [ { "tileId": 58, "__x": 184, "__y": 144, "__srcX": 80, "__srcY": 24 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 24,
 								"__cy": 18,
 								"coordId": 636,
@@ -14855,6 +14764,20 @@
 						"ruleId": 79,
 						"results": [
 							{
+								"__cx": 12,
+								"__cy": 2,
+								"coordId": 80,
+								"tiles": [ { "tileId": 61, "__x": 96, "__y": 16, "__srcX": 104, "__srcY": 24 } ],
+								"flips": 3
+							},
+							{
+								"__cx": 14,
+								"__cy": 2,
+								"coordId": 82,
+								"tiles": [ { "tileId": 61, "__x": 112, "__y": 16, "__srcX": 104, "__srcY": 24 } ],
+								"flips": 2
+							},
+							{
 								"__cx": 3,
 								"__cy": 3,
 								"coordId": 105,
@@ -14877,10 +14800,24 @@
 							},
 							{
 								"__cx": 25,
-								"__cy": 7,
-								"coordId": 263,
-								"tiles": [ { "tileId": 61, "__x": 200, "__y": 56, "__srcX": 104, "__srcY": 24 } ],
-								"flips": 1
+								"__cy": 8,
+								"coordId": 297,
+								"tiles": [ { "tileId": 61, "__x": 200, "__y": 64, "__srcX": 104, "__srcY": 24 } ],
+								"flips": 3
+							},
+							{
+								"__cx": 29,
+								"__cy": 9,
+								"coordId": 335,
+								"tiles": [ { "tileId": 61, "__x": 232, "__y": 72, "__srcX": 104, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 28,
+								"__cy": 10,
+								"coordId": 368,
+								"tiles": [ { "tileId": 61, "__x": 224, "__y": 80, "__srcX": 104, "__srcY": 24 } ],
+								"flips": 0
 							},
 							{
 								"__cx": 3,
@@ -14890,10 +14827,38 @@
 								"flips": 1
 							},
 							{
-								"__cx": 30,
+								"__cx": 27,
 								"__cy": 11,
-								"coordId": 404,
-								"tiles": [ { "tileId": 61, "__x": 240, "__y": 88, "__srcX": 104, "__srcY": 24 } ],
+								"coordId": 401,
+								"tiles": [ { "tileId": 61, "__x": 216, "__y": 88, "__srcX": 104, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 16,
+								"__cy": 17,
+								"coordId": 594,
+								"tiles": [ { "tileId": 61, "__x": 128, "__y": 136, "__srcX": 104, "__srcY": 24 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 24,
+								"__cy": 17,
+								"coordId": 602,
+								"tiles": [ { "tileId": 61, "__x": 192, "__y": 136, "__srcX": 104, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 18,
+								"__cy": 18,
+								"coordId": 630,
+								"tiles": [ { "tileId": 61, "__x": 144, "__y": 144, "__srcX": 104, "__srcY": 24 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 21,
+								"__cy": 18,
+								"coordId": 633,
+								"tiles": [ { "tileId": 61, "__x": 168, "__y": 144, "__srcX": 104, "__srcY": 24 } ],
 								"flips": 0
 							}
 						]
@@ -14983,14 +14948,14 @@
 								"__cy": 1,
 								"coordId": 46,
 								"tiles": [ { "tileId": 10, "__x": 96, "__y": 8, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 0
+								"flips": 1
 							},
 							{
 								"__cx": 13,
 								"__cy": 1,
 								"coordId": 47,
 								"tiles": [ { "tileId": 10, "__x": 104, "__y": 8, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 0
+								"flips": 2
 							},
 							{
 								"__cx": 14,
@@ -15200,27 +15165,6 @@
 								"__cy": 2,
 								"coordId": 79,
 								"tiles": [ { "tileId": 10, "__x": 88, "__y": 16, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 12,
-								"__cy": 2,
-								"coordId": 80,
-								"tiles": [ { "tileId": 10, "__x": 96, "__y": 16, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 13,
-								"__cy": 2,
-								"coordId": 81,
-								"tiles": [ { "tileId": 10, "__x": 104, "__y": 16, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 14,
-								"__cy": 2,
-								"coordId": 82,
-								"tiles": [ { "tileId": 10, "__x": 112, "__y": 16, "__srcX": 80, "__srcY": 0 } ],
 								"flips": 2
 							},
 							{
@@ -15532,6 +15476,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 25,
+								"__cy": 7,
+								"coordId": 263,
+								"tiles": [ { "tileId": 10, "__x": 200, "__y": 56, "__srcX": 80, "__srcY": 0 } ],
+								"flips": 1
+							},
+							{
+								"__cx": 30,
+								"__cy": 7,
+								"coordId": 268,
+								"tiles": [ { "tileId": 10, "__x": 240, "__y": 56, "__srcX": 80, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 7,
 								"coordId": 269,
@@ -15581,11 +15539,11 @@
 								"flips": 2
 							},
 							{
-								"__cx": 25,
+								"__cx": 30,
 								"__cy": 8,
-								"coordId": 297,
-								"tiles": [ { "tileId": 10, "__x": 200, "__y": 64, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 3
+								"coordId": 302,
+								"tiles": [ { "tileId": 10, "__x": 240, "__y": 64, "__srcX": 80, "__srcY": 0 } ],
+								"flips": 0
 							},
 							{
 								"__cx": 31,
@@ -15616,6 +15574,13 @@
 								"flips": 1
 							},
 							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 10, "__x": 240, "__y": 72, "__srcX": 80, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 9,
 								"coordId": 337,
@@ -15644,6 +15609,20 @@
 								"flips": 1
 							},
 							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 10, "__x": 232, "__y": 80, "__srcX": 80, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 10, "__x": 240, "__y": 80, "__srcX": 80, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 10,
 								"coordId": 371,
@@ -15669,6 +15648,27 @@
 								"__cy": 11,
 								"coordId": 376,
 								"tiles": [ { "tileId": 10, "__x": 16, "__y": 88, "__srcX": 80, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 10, "__x": 224, "__y": 88, "__srcX": 80, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 10, "__x": 232, "__y": 88, "__srcX": 80, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 10, "__x": 240, "__y": 88, "__srcX": 80, "__srcY": 0 } ],
 								"flips": 0
 							},
 							{
@@ -15719,6 +15719,27 @@
 								"coordId": 424,
 								"tiles": [ { "tileId": 10, "__x": 128, "__y": 96, "__srcX": 80, "__srcY": 0 } ],
 								"flips": 1
+							},
+							{
+								"__cx": 27,
+								"__cy": 12,
+								"coordId": 435,
+								"tiles": [ { "tileId": 10, "__x": 216, "__y": 96, "__srcX": 80, "__srcY": 0 } ],
+								"flips": 2
+							},
+							{
+								"__cx": 28,
+								"__cy": 12,
+								"coordId": 436,
+								"tiles": [ { "tileId": 10, "__x": 224, "__y": 96, "__srcX": 80, "__srcY": 0 } ],
+								"flips": 2
+							},
+							{
+								"__cx": 29,
+								"__cy": 12,
+								"coordId": 437,
+								"tiles": [ { "tileId": 10, "__x": 232, "__y": 96, "__srcX": 80, "__srcY": 0 } ],
+								"flips": 2
 							},
 							{
 								"__cx": 30,
@@ -16015,69 +16036,6 @@
 								"flips": 0
 							},
 							{
-								"__cx": 16,
-								"__cy": 17,
-								"coordId": 594,
-								"tiles": [ { "tileId": 10, "__x": 128, "__y": 136, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 17,
-								"__cy": 17,
-								"coordId": 595,
-								"tiles": [ { "tileId": 10, "__x": 136, "__y": 136, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 17,
-								"coordId": 596,
-								"tiles": [ { "tileId": 10, "__x": 144, "__y": 136, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 17,
-								"coordId": 597,
-								"tiles": [ { "tileId": 10, "__x": 152, "__y": 136, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 17,
-								"coordId": 598,
-								"tiles": [ { "tileId": 10, "__x": 160, "__y": 136, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 17,
-								"coordId": 599,
-								"tiles": [ { "tileId": 10, "__x": 168, "__y": 136, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 22,
-								"__cy": 17,
-								"coordId": 600,
-								"tiles": [ { "tileId": 10, "__x": 176, "__y": 136, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 23,
-								"__cy": 17,
-								"coordId": 601,
-								"tiles": [ { "tileId": 10, "__x": 184, "__y": 136, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 24,
-								"__cy": 17,
-								"coordId": 602,
-								"tiles": [ { "tileId": 10, "__x": 192, "__y": 136, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 25,
 								"__cy": 17,
 								"coordId": 603,
@@ -16250,34 +16208,6 @@
 								"__cy": 18,
 								"coordId": 629,
 								"tiles": [ { "tileId": 10, "__x": 136, "__y": 144, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 10, "__x": 144, "__y": 144, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 10, "__x": 152, "__y": 144, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 10, "__x": 160, "__y": 144, "__srcX": 80, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 10, "__x": 168, "__y": 144, "__srcX": 80, "__srcY": 0 } ],
 								"flips": 0
 							},
 							{
@@ -16664,27 +16594,6 @@
 								"flips": 0
 							},
 							{
-								"__cx": 12,
-								"__cy": 2,
-								"coordId": 80,
-								"tiles": [ { "tileId": 47, "__x": 96, "__y": 16, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 13,
-								"__cy": 2,
-								"coordId": 81,
-								"tiles": [ { "tileId": 47, "__x": 104, "__y": 16, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 14,
-								"__cy": 2,
-								"coordId": 82,
-								"tiles": [ { "tileId": 47, "__x": 112, "__y": 16, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 15,
 								"__cy": 2,
 								"coordId": 83,
@@ -16993,11 +16902,25 @@
 								"flips": 0
 							},
 							{
+								"__cx": 25,
+								"__cy": 7,
+								"coordId": 263,
+								"tiles": [ { "tileId": 47, "__x": 200, "__y": 56, "__srcX": 120, "__srcY": 16 } ],
+								"flips": 2
+							},
+							{
+								"__cx": 30,
+								"__cy": 7,
+								"coordId": 268,
+								"tiles": [ { "tileId": 47, "__x": 240, "__y": 56, "__srcX": 120, "__srcY": 16 } ],
+								"flips": 3
+							},
+							{
 								"__cx": 31,
 								"__cy": 7,
 								"coordId": 269,
 								"tiles": [ { "tileId": 47, "__x": 248, "__y": 56, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 1
+								"flips": 0
 							},
 							{
 								"__cx": 32,
@@ -17042,18 +16965,18 @@
 								"flips": 0
 							},
 							{
-								"__cx": 25,
+								"__cx": 30,
 								"__cy": 8,
-								"coordId": 297,
-								"tiles": [ { "tileId": 47, "__x": 200, "__y": 64, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 0
+								"coordId": 302,
+								"tiles": [ { "tileId": 47, "__x": 240, "__y": 64, "__srcX": 120, "__srcY": 16 } ],
+								"flips": 1
 							},
 							{
 								"__cx": 31,
 								"__cy": 8,
 								"coordId": 303,
 								"tiles": [ { "tileId": 47, "__x": 248, "__y": 64, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 1
+								"flips": 0
 							},
 							{
 								"__cx": 32,
@@ -17077,11 +17000,18 @@
 								"flips": 0
 							},
 							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 47, "__x": 240, "__y": 72, "__srcX": 120, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 9,
 								"coordId": 337,
 								"tiles": [ { "tileId": 47, "__x": 248, "__y": 72, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 1
+								"flips": 0
 							},
 							{
 								"__cx": 32,
@@ -17105,11 +17035,25 @@
 								"flips": 0
 							},
 							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 47, "__x": 232, "__y": 80, "__srcX": 120, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 47, "__x": 240, "__y": 80, "__srcX": 120, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 10,
 								"coordId": 371,
 								"tiles": [ { "tileId": 47, "__x": 248, "__y": 80, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 1
+								"flips": 0
 							},
 							{
 								"__cx": 32,
@@ -17130,6 +17074,27 @@
 								"__cy": 11,
 								"coordId": 376,
 								"tiles": [ { "tileId": 47, "__x": 16, "__y": 88, "__srcX": 120, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 47, "__x": 224, "__y": 88, "__srcX": 120, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 47, "__x": 232, "__y": 88, "__srcX": 120, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 47, "__x": 240, "__y": 88, "__srcX": 120, "__srcY": 16 } ],
 								"flips": 0
 							},
 							{
@@ -17187,6 +17152,27 @@
 								"coordId": 424,
 								"tiles": [ { "tileId": 47, "__x": 128, "__y": 96, "__srcX": 120, "__srcY": 16 } ],
 								"flips": 2
+							},
+							{
+								"__cx": 27,
+								"__cy": 12,
+								"coordId": 435,
+								"tiles": [ { "tileId": 47, "__x": 216, "__y": 96, "__srcX": 120, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 28,
+								"__cy": 12,
+								"coordId": 436,
+								"tiles": [ { "tileId": 47, "__x": 224, "__y": 96, "__srcX": 120, "__srcY": 16 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 12,
+								"coordId": 437,
+								"tiles": [ { "tileId": 47, "__x": 232, "__y": 96, "__srcX": 120, "__srcY": 16 } ],
+								"flips": 0
 							},
 							{
 								"__cx": 30,
@@ -17483,69 +17469,6 @@
 								"flips": 2
 							},
 							{
-								"__cx": 16,
-								"__cy": 17,
-								"coordId": 594,
-								"tiles": [ { "tileId": 47, "__x": 128, "__y": 136, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 17,
-								"__cy": 17,
-								"coordId": 595,
-								"tiles": [ { "tileId": 47, "__x": 136, "__y": 136, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 18,
-								"__cy": 17,
-								"coordId": 596,
-								"tiles": [ { "tileId": 47, "__x": 144, "__y": 136, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 19,
-								"__cy": 17,
-								"coordId": 597,
-								"tiles": [ { "tileId": 47, "__x": 152, "__y": 136, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 20,
-								"__cy": 17,
-								"coordId": 598,
-								"tiles": [ { "tileId": 47, "__x": 160, "__y": 136, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 21,
-								"__cy": 17,
-								"coordId": 599,
-								"tiles": [ { "tileId": 47, "__x": 168, "__y": 136, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 22,
-								"__cy": 17,
-								"coordId": 600,
-								"tiles": [ { "tileId": 47, "__x": 176, "__y": 136, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 23,
-								"__cy": 17,
-								"coordId": 601,
-								"tiles": [ { "tileId": 47, "__x": 184, "__y": 136, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
-								"__cx": 24,
-								"__cy": 17,
-								"coordId": 602,
-								"tiles": [ { "tileId": 47, "__x": 192, "__y": 136, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 2
-							},
-							{
 								"__cx": 25,
 								"__cy": 17,
 								"coordId": 603,
@@ -17718,49 +17641,21 @@
 								"__cy": 18,
 								"coordId": 629,
 								"tiles": [ { "tileId": 47, "__x": 136, "__y": 144, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 47, "__x": 144, "__y": 144, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 47, "__x": 152, "__y": 144, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 47, "__x": 160, "__y": 144, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 47, "__x": 168, "__y": 144, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 0
+								"flips": 2
 							},
 							{
 								"__cx": 22,
 								"__cy": 18,
 								"coordId": 634,
 								"tiles": [ { "tileId": 47, "__x": 176, "__y": 144, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 0
+								"flips": 2
 							},
 							{
 								"__cx": 23,
 								"__cy": 18,
 								"coordId": 635,
 								"tiles": [ { "tileId": 47, "__x": 184, "__y": 144, "__srcX": 120, "__srcY": 16 } ],
-								"flips": 0
+								"flips": 2
 							},
 							{
 								"__cx": 24,
@@ -18356,27 +18251,6 @@
 								"flips": 0
 							},
 							{
-								"__cx": 12,
-								"__cy": 2,
-								"coordId": 80,
-								"tiles": [ { "tileId": 14, "__x": 96, "__y": 16, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 13,
-								"__cy": 2,
-								"coordId": 81,
-								"tiles": [ { "tileId": 14, "__x": 104, "__y": 16, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 14,
-								"__cy": 2,
-								"coordId": 82,
-								"tiles": [ { "tileId": 14, "__x": 112, "__y": 16, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 15,
 								"__cy": 2,
 								"coordId": 83,
@@ -18636,6 +18510,27 @@
 								"flips": 0
 							},
 							{
+								"__cx": 25,
+								"__cy": 7,
+								"coordId": 263,
+								"tiles": [ { "tileId": 14, "__x": 200, "__y": 56, "__srcX": 112, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 26,
+								"__cy": 7,
+								"coordId": 264,
+								"tiles": [ { "tileId": 14, "__x": 208, "__y": 56, "__srcX": 112, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 7,
+								"coordId": 269,
+								"tiles": [ { "tileId": 14, "__x": 248, "__y": 56, "__srcX": 112, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 7,
 								"coordId": 270,
@@ -18671,17 +18566,10 @@
 								"flips": 0
 							},
 							{
-								"__cx": 25,
+								"__cx": 31,
 								"__cy": 8,
-								"coordId": 297,
-								"tiles": [ { "tileId": 14, "__x": 200, "__y": 64, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 26,
-								"__cy": 8,
-								"coordId": 298,
-								"tiles": [ { "tileId": 14, "__x": 208, "__y": 64, "__srcX": 112, "__srcY": 0 } ],
+								"coordId": 303,
+								"tiles": [ { "tileId": 14, "__x": 248, "__y": 64, "__srcX": 112, "__srcY": 0 } ],
 								"flips": 0
 							},
 							{
@@ -18699,6 +18587,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 14, "__x": 240, "__y": 72, "__srcX": 112, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 9,
+								"coordId": 337,
+								"tiles": [ { "tileId": 14, "__x": 248, "__y": 72, "__srcX": 112, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 32,
 								"__cy": 9,
 								"coordId": 338,
@@ -18710,6 +18612,27 @@
 								"__cy": 10,
 								"coordId": 341,
 								"tiles": [ { "tileId": 14, "__x": 8, "__y": 80, "__srcX": 112, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 14, "__x": 232, "__y": 80, "__srcX": 112, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 14, "__x": 240, "__y": 80, "__srcX": 112, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 31,
+								"__cy": 10,
+								"coordId": 371,
+								"tiles": [ { "tileId": 14, "__x": 248, "__y": 80, "__srcX": 112, "__srcY": 0 } ],
 								"flips": 0
 							},
 							{
@@ -18731,6 +18654,27 @@
 								"__cy": 11,
 								"coordId": 376,
 								"tiles": [ { "tileId": 14, "__x": 16, "__y": 88, "__srcX": 112, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 14, "__x": 224, "__y": 88, "__srcX": 112, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 14, "__x": 232, "__y": 88, "__srcX": 112, "__srcY": 0 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 14, "__x": 240, "__y": 88, "__srcX": 112, "__srcY": 0 } ],
 								"flips": 0
 							},
 							{
@@ -19196,69 +19140,6 @@
 								"flips": 0
 							},
 							{
-								"__cx": 16,
-								"__cy": 17,
-								"coordId": 594,
-								"tiles": [ { "tileId": 14, "__x": 128, "__y": 136, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 17,
-								"__cy": 17,
-								"coordId": 595,
-								"tiles": [ { "tileId": 14, "__x": 136, "__y": 136, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 17,
-								"coordId": 596,
-								"tiles": [ { "tileId": 14, "__x": 144, "__y": 136, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 17,
-								"coordId": 597,
-								"tiles": [ { "tileId": 14, "__x": 152, "__y": 136, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 17,
-								"coordId": 598,
-								"tiles": [ { "tileId": 14, "__x": 160, "__y": 136, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 17,
-								"coordId": 599,
-								"tiles": [ { "tileId": 14, "__x": 168, "__y": 136, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 22,
-								"__cy": 17,
-								"coordId": 600,
-								"tiles": [ { "tileId": 14, "__x": 176, "__y": 136, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 23,
-								"__cy": 17,
-								"coordId": 601,
-								"tiles": [ { "tileId": 14, "__x": 184, "__y": 136, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 24,
-								"__cy": 17,
-								"coordId": 602,
-								"tiles": [ { "tileId": 14, "__x": 192, "__y": 136, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 25,
 								"__cy": 17,
 								"coordId": 603,
@@ -19431,34 +19312,6 @@
 								"__cy": 18,
 								"coordId": 629,
 								"tiles": [ { "tileId": 14, "__x": 136, "__y": 144, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 14, "__x": 144, "__y": 144, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 14, "__x": 152, "__y": 144, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 14, "__x": 160, "__y": 144, "__srcX": 112, "__srcY": 0 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 14, "__x": 168, "__y": 144, "__srcX": 112, "__srcY": 0 } ],
 								"flips": 0
 							},
 							{
@@ -19856,13 +19709,6 @@
 								"__cy": 1,
 								"coordId": 46,
 								"tiles": [ { "tileId": 31, "__x": 96, "__y": 8, "__srcX": 120, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 13,
-								"__cy": 1,
-								"coordId": 47,
-								"tiles": [ { "tileId": 31, "__x": 104, "__y": 8, "__srcX": 120, "__srcY": 8 } ],
 								"flips": 0
 							},
 							{
@@ -20335,6 +20181,13 @@
 								"flips": 0
 							},
 							{
+								"__cx": 30,
+								"__cy": 8,
+								"coordId": 302,
+								"tiles": [ { "tileId": 31, "__x": 240, "__y": 64, "__srcX": 120, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 8,
 								"coordId": 303,
@@ -20374,6 +20227,13 @@
 								"__cy": 9,
 								"coordId": 308,
 								"tiles": [ { "tileId": 31, "__x": 16, "__y": 72, "__srcX": 120, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 9,
+								"coordId": 336,
+								"tiles": [ { "tileId": 31, "__x": 240, "__y": 72, "__srcX": 120, "__srcY": 8 } ],
 								"flips": 0
 							},
 							{
@@ -20419,6 +20279,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 29,
+								"__cy": 10,
+								"coordId": 369,
+								"tiles": [ { "tileId": 31, "__x": 232, "__y": 80, "__srcX": 120, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 10,
+								"coordId": 370,
+								"tiles": [ { "tileId": 31, "__x": 240, "__y": 80, "__srcX": 120, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 31,
 								"__cy": 10,
 								"coordId": 371,
@@ -20458,6 +20332,27 @@
 								"__cy": 11,
 								"coordId": 376,
 								"tiles": [ { "tileId": 31, "__x": 16, "__y": 88, "__srcX": 120, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 28,
+								"__cy": 11,
+								"coordId": 402,
+								"tiles": [ { "tileId": 31, "__x": 224, "__y": 88, "__srcX": 120, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 11,
+								"coordId": 403,
+								"tiles": [ { "tileId": 31, "__x": 232, "__y": 88, "__srcX": 120, "__srcY": 8 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 30,
+								"__cy": 11,
+								"coordId": 404,
+								"tiles": [ { "tileId": 31, "__x": 240, "__y": 88, "__srcX": 120, "__srcY": 8 } ],
 								"flips": 0
 							},
 							{
@@ -20909,55 +20804,6 @@
 								"flips": 0
 							},
 							{
-								"__cx": 17,
-								"__cy": 18,
-								"coordId": 629,
-								"tiles": [ { "tileId": 31, "__x": 136, "__y": 144, "__srcX": 120, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 18,
-								"__cy": 18,
-								"coordId": 630,
-								"tiles": [ { "tileId": 31, "__x": 144, "__y": 144, "__srcX": 120, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 19,
-								"__cy": 18,
-								"coordId": 631,
-								"tiles": [ { "tileId": 31, "__x": 152, "__y": 144, "__srcX": 120, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 20,
-								"__cy": 18,
-								"coordId": 632,
-								"tiles": [ { "tileId": 31, "__x": 160, "__y": 144, "__srcX": 120, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 21,
-								"__cy": 18,
-								"coordId": 633,
-								"tiles": [ { "tileId": 31, "__x": 168, "__y": 144, "__srcX": 120, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 22,
-								"__cy": 18,
-								"coordId": 634,
-								"tiles": [ { "tileId": 31, "__x": 176, "__y": 144, "__srcX": 120, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
-								"__cx": 23,
-								"__cy": 18,
-								"coordId": 635,
-								"tiles": [ { "tileId": 31, "__x": 184, "__y": 144, "__srcX": 120, "__srcY": 8 } ],
-								"flips": 0
-							},
-							{
 								"__cx": 24,
 								"__cy": 18,
 								"coordId": 636,
@@ -21054,6 +20900,13 @@
 								"flips": 0
 							},
 							{
+								"__cx": 27,
+								"__cy": 7,
+								"coordId": 265,
+								"tiles": [ { "tileId": 13, "__x": 216, "__y": 56, "__srcX": 104, "__srcY": 0 } ],
+								"flips": 1
+							},
+							{
 								"__cx": 8,
 								"__cy": 8,
 								"coordId": 280,
@@ -21065,13 +20918,6 @@
 								"__cy": 8,
 								"coordId": 282,
 								"tiles": [ { "tileId": 13, "__x": 80, "__y": 64, "__srcX": 104, "__srcY": 0 } ],
-								"flips": 1
-							},
-							{
-								"__cx": 27,
-								"__cy": 8,
-								"coordId": 299,
-								"tiles": [ { "tileId": 13, "__x": 216, "__y": 64, "__srcX": 104, "__srcY": 0 } ],
 								"flips": 1
 							},
 							{
@@ -21133,6 +20979,20 @@
 								"flips": 0
 							},
 							{
+								"__cx": 28,
+								"__cy": 7,
+								"coordId": 266,
+								"tiles": [ { "tileId": 60, "__x": 224, "__y": 56, "__srcX": 96, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
+								"__cx": 29,
+								"__cy": 7,
+								"coordId": 267,
+								"tiles": [ { "tileId": 60, "__x": 232, "__y": 56, "__srcX": 96, "__srcY": 24 } ],
+								"flips": 0
+							},
+							{
 								"__cx": 17,
 								"__cy": 12,
 								"coordId": 425,
@@ -21182,7 +21042,7 @@
 				"entityInstances": []
 			},
 			{
-				"__identifier": "EnvironmentData",
+				"__identifier": "CollisionData",
 				"__type": "IntGrid",
 				"__cWid": 34,
 				"__cHei": 20,
@@ -21273,7 +21133,6 @@
 					{ "coordId": 78, "v": 1 },
 					{ "coordId": 79, "v": 1 },
 					{ "coordId": 80, "v": 1 },
-					{ "coordId": 81, "v": 1 },
 					{ "coordId": 82, "v": 1 },
 					{ "coordId": 83, "v": 1 },
 					{ "coordId": 84, "v": 1 },
@@ -21298,6 +21157,7 @@
 					{ "coordId": 103, "v": 1 },
 					{ "coordId": 104, "v": 1 },
 					{ "coordId": 105, "v": 1 },
+					{ "coordId": 115, "v": 3 },
 					{ "coordId": 132, "v": 1 },
 					{ "coordId": 133, "v": 1 },
 					{ "coordId": 134, "v": 1 },
@@ -21306,6 +21166,7 @@
 					{ "coordId": 137, "v": 1 },
 					{ "coordId": 138, "v": 1 },
 					{ "coordId": 140, "v": 3 },
+					{ "coordId": 141, "v": 3 },
 					{ "coordId": 161, "v": 3 },
 					{ "coordId": 165, "v": 3 },
 					{ "coordId": 167, "v": 1 },
@@ -21336,7 +21197,6 @@
 					{ "coordId": 226, "v": 1 },
 					{ "coordId": 227, "v": 1 },
 					{ "coordId": 228, "v": 1 },
-					{ "coordId": 230, "v": 3 },
 					{ "coordId": 235, "v": 1 },
 					{ "coordId": 236, "v": 1 },
 					{ "coordId": 237, "v": 1 },
@@ -21347,6 +21207,11 @@
 					{ "coordId": 261, "v": 1 },
 					{ "coordId": 262, "v": 1 },
 					{ "coordId": 263, "v": 1 },
+					{ "coordId": 264, "v": 1 },
+					{ "coordId": 265, "v": 1 },
+					{ "coordId": 266, "v": 2 },
+					{ "coordId": 267, "v": 2 },
+					{ "coordId": 268, "v": 1 },
 					{ "coordId": 269, "v": 1 },
 					{ "coordId": 270, "v": 1 },
 					{ "coordId": 271, "v": 1 },
@@ -21360,14 +21225,18 @@
 					{ "coordId": 295, "v": 1 },
 					{ "coordId": 296, "v": 1 },
 					{ "coordId": 297, "v": 1 },
-					{ "coordId": 298, "v": 1 },
-					{ "coordId": 299, "v": 1 },
+					{ "coordId": 300, "v": 3 },
+					{ "coordId": 302, "v": 1 },
 					{ "coordId": 303, "v": 1 },
 					{ "coordId": 304, "v": 1 },
 					{ "coordId": 305, "v": 1 },
 					{ "coordId": 306, "v": 1 },
 					{ "coordId": 307, "v": 1 },
 					{ "coordId": 308, "v": 1 },
+					{ "coordId": 332, "v": 3 },
+					{ "coordId": 333, "v": 3 },
+					{ "coordId": 335, "v": 1 },
+					{ "coordId": 336, "v": 1 },
 					{ "coordId": 337, "v": 1 },
 					{ "coordId": 338, "v": 1 },
 					{ "coordId": 339, "v": 1 },
@@ -21375,7 +21244,10 @@
 					{ "coordId": 341, "v": 1 },
 					{ "coordId": 342, "v": 1 },
 					{ "coordId": 344, "v": 3 },
-					{ "coordId": 369, "v": 3 },
+					{ "coordId": 366, "v": 3 },
+					{ "coordId": 368, "v": 1 },
+					{ "coordId": 369, "v": 1 },
+					{ "coordId": 370, "v": 1 },
 					{ "coordId": 371, "v": 1 },
 					{ "coordId": 372, "v": 1 },
 					{ "coordId": 373, "v": 1 },
@@ -21383,6 +21255,9 @@
 					{ "coordId": 375, "v": 1 },
 					{ "coordId": 376, "v": 1 },
 					{ "coordId": 377, "v": 1 },
+					{ "coordId": 401, "v": 1 },
+					{ "coordId": 402, "v": 1 },
+					{ "coordId": 403, "v": 1 },
 					{ "coordId": 404, "v": 1 },
 					{ "coordId": 405, "v": 1 },
 					{ "coordId": 406, "v": 1 },
@@ -21470,6 +21345,8 @@
 					{ "coordId": 546, "v": 1 },
 					{ "coordId": 555, "v": 1 },
 					{ "coordId": 556, "v": 1 },
+					{ "coordId": 561, "v": 3 },
+					{ "coordId": 567, "v": 3 },
 					{ "coordId": 575, "v": 1 },
 					{ "coordId": 576, "v": 1 },
 					{ "coordId": 577, "v": 1 },
@@ -21490,13 +21367,8 @@
 					{ "coordId": 592, "v": 1 },
 					{ "coordId": 593, "v": 1 },
 					{ "coordId": 594, "v": 1 },
-					{ "coordId": 595, "v": 1 },
-					{ "coordId": 596, "v": 1 },
-					{ "coordId": 597, "v": 1 },
-					{ "coordId": 598, "v": 1 },
-					{ "coordId": 599, "v": 1 },
-					{ "coordId": 600, "v": 1 },
-					{ "coordId": 601, "v": 1 },
+					{ "coordId": 597, "v": 3 },
+					{ "coordId": 598, "v": 3 },
 					{ "coordId": 602, "v": 1 },
 					{ "coordId": 603, "v": 1 },
 					{ "coordId": 604, "v": 1 },
@@ -21526,8 +21398,6 @@
 					{ "coordId": 628, "v": 1 },
 					{ "coordId": 629, "v": 1 },
 					{ "coordId": 630, "v": 1 },
-					{ "coordId": 631, "v": 1 },
-					{ "coordId": 632, "v": 1 },
 					{ "coordId": 633, "v": 1 },
 					{ "coordId": 634, "v": 1 },
 					{ "coordId": 635, "v": 1 },

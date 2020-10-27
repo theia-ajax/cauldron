@@ -72,3 +72,12 @@ void player_system_update(float dt)
 void player_system_render(void)
 {
 }
+
+actor_handle get_player_actor(uint32_t pid)
+{
+    if (VALID_INDEX(pid, 4)) {
+        return players[pid].actor;
+    } else {
+        return INVALID_HANDLE(actor);
+    }
+}
