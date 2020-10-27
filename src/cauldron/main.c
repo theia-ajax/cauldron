@@ -3,6 +3,7 @@
 #include "game_settings.h"
 #include "game_systems.h"
 #include "hash.h"
+#include "profile.h"
 #include "sokol_gfx.h"
 #include "sprite_draw.h"
 #include "stb_ds.h"
@@ -22,22 +23,39 @@
 #include <stdlib.h>
 #include <time.h>
 
+struct debug_ui {
+    bool open;
+    int fps;
+    float load_proj_ms;
+};
+
+struct debug_ui dbgui = {
+    .open = true,
+};
+
+enum {
+    WINDOW_WIDTH = 1280,
+    WINDOW_HEIGHT = 720,
+};
+
 int main(int argc, char* argv[])
 {
-
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
     SDL_Window* window = SDL_CreateWindow(
         "cauldron",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        1280,
-        720,
+        WINDOW_WIDTH,
+        WINDOW_HEIGHT,
         SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+
+    SDL_GL_SetSwapInterval(0);
 
     if (gl3wInit() != GL3W_OK) {
         return 1;
@@ -52,6 +70,9 @@ int main(int argc, char* argv[])
     if (load_game_level_project("assets/test_level.json", &proj) != TX_SUCCESS) {
         return 1;
     }
+
+    uint64_t load_ticks = profile_get_last_ticks("load_game_level_project");
+    dbgui.load_proj_ms = (float)(load_ticks * 1000) / SDL_GetPerformanceFrequency();
 
     game_systems_init(&(game_settings){0});
     game_systems_load_level(&proj.levels[0]);
@@ -70,7 +91,9 @@ int main(int argc, char* argv[])
 
     uint64_t last_ticks = SDL_GetPerformanceCounter();
     float time = 0.0f;
+    float next_sec = time + 1.0f;
     bool is_running = true;
+    int frames_this_sec = 0;
     while (is_running) {
         txinp_update();
 
@@ -110,6 +133,13 @@ int main(int argc, char* argv[])
         float dt = (float)delta_ticks / frequency;
         dt = min(dt, 0.1f);
         time += dt;
+        ++frames_this_sec;
+
+        if (time >= next_sec) {
+            next_sec += 1.0f;
+            dbgui.fps = frames_this_sec;
+            frames_this_sec = 0;
+        }
 
         game_systems_update(dt);
         game_systems_render();
@@ -167,16 +197,16 @@ int main(int argc, char* argv[])
         spr_render(cur_width, cur_height);
         sg_commit();
 
-        ImVec2 display_size;
-        display_size.x = 1920;
-        display_size.y = 1080;
-        io->DisplaySize = display_size;
-        io->DeltaTime = 1.0f / 60.0f;
+        io->DisplaySize = (ImVec2){.x = WINDOW_WIDTH, .y = WINDOW_HEIGHT};
+        io->DeltaTime = dt;
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame(window);
         igNewFrame();
 
-        igShowDemoWindow(NULL);
+        igBegin("Debug", &dbgui.open, ImGuiWindowFlags_None);
+        igText("FPS: %d", dbgui.fps);
+        igText("Project Load Time: %0.2fms", dbgui.load_proj_ms);
+        igEnd();
 
         igRender();
         ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());

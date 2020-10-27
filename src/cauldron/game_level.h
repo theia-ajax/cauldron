@@ -15,8 +15,8 @@ enum game_tile_flags {
 };
 
 typedef struct game_tile {
-    uint32_t value;
-    uint32_t flags;
+    uint16_t value;
+    uint16_t flags;
 } game_tile;
 
 typedef enum game_layer_type {

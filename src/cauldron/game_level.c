@@ -353,12 +353,12 @@ tx_result parse_tile_layer(const char* js, jsmntok_t* tokens, int tok_id, game_l
         }
 
         int coord_id = jstoi_or(js, jsget(js, tokens, i, "coordId"), -1);
-        int tile_id = jstoi_or(js, jsget(js, tokens, i, "tileId"), -1);
+        int tile_id = jstoi_or(js, jsget(js, tokens, i, "tileId"), 0);
 
         if (coord_id >= 0 && tile_id > 0) {
             // printf("tile[%d]=%d\n", coord_id, tile_id);
             out->tiles[coord_id] = (game_tile){
-                .value = tile_id,
+                .value = (uint16_t)tile_id,
                 .flags = GAME_TILE_FLAGS_NONE,
             };
         }
@@ -389,12 +389,12 @@ tx_result parse_int_grid_layer(const char* js, jsmntok_t* tokens, int tok_id, ga
         }
 
         int coord_id = jstoi_or(js, jsget(js, tokens, i, "coordId"), -1);
-        int val = jstoi_or(js, jsget(js, tokens, i, "v"), -1);
+        int val = jstoi_or(js, jsget(js, tokens, i, "v"), 0);
 
         if (coord_id >= 0 && val > 0) {
             // printf("int_grid[%d]=%d\n", coord_id, val);
             out->tiles[coord_id] = (game_tile){
-                .value = val,
+                .value = (uint16_t)val,
                 .flags = GAME_TILE_FLAGS_NONE,
             };
         }
@@ -434,16 +434,16 @@ tx_result parse_auto_layer(const char* js, jsmntok_t* tokens, int tok_id, game_l
 
             int tiles_start = jsget_id(js, tokens, j, "tiles");
             int tiles_end = jsnextsib(tokens, tiles_start);
-            int tile_id = -1;
+            int tile_id = 0;
             for (int k = tiles_start + 1; k < tiles_end; k = jsnextsib(tokens, k)) {
-                tile_id = jstoi_or(js, jsget(js, tokens, k, "tileId"), -1);
+                tile_id = jstoi_or(js, jsget(js, tokens, k, "tileId"), 0);
                 break;
             }
 
-            if (coord_id >= 0 && tile_id >= 0 && out->tiles[coord_id].value == 0) {
+            if (coord_id >= 0 && tile_id > 0 && out->tiles[coord_id].value == 0) {
                 // printf("auto_layer[%d]=%d\n", coord_id, tile_id);
                 out->tiles[coord_id] = (game_tile){
-                    .value = tile_id,
+                    .value = (uint16_t)tile_id,
                     .flags = flips,
                 };
             }

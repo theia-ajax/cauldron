@@ -60,10 +60,12 @@ void actor_system_update(float dt)
             }
         }
 
-        uint16_t mask = (actor->vel.y < 0.0f || actor->input.move.y > 0.0f) ? 1 : 3;
+        uint16_t enviro_mask = 1;
+        uint16_t ground_mask = (actor->vel.y < 0.0f || actor->input.move.y > 0.0f) ? 1 : 3;
 
-        const float scan = 0.125f;
-        if (phys_solid(left, bottom + scan, mask) || phys_solid(right, bottom + scan, mask)) {
+        const float scan_dist = 0.0625f;
+        if (phys_solid(left, bottom + scan_dist, ground_mask)
+            || phys_solid(right, bottom + scan_dist, ground_mask)) {
             actor->flags |= ACTOR_FLAGS_GROUNDED;
         } else {
             actor->flags &= ~ACTOR_FLAGS_GROUNDED;
@@ -73,7 +75,7 @@ void actor_system_update(float dt)
             actor->vel.y = -21.0f;
         }
 
-        mask = (actor->vel.y < 0.0f || actor->input.move.y > 0.0f) ? 1 : 3;
+        ground_mask = (actor->vel.y < 0.0f || actor->input.move.y > 0.0f) ? 1 : 3;
 
         actor->vel.x += 30.0f * dt * input_move.x;
         actor->vel.x = clampf(actor->vel.x, -8.0f, 8.0f);
@@ -86,27 +88,27 @@ void actor_system_update(float dt)
         vec2 delta = vec2_scale(actor->vel, dt);
 
         while (delta.x > 0.0f
-               && (phys_solid(right + delta.x, top, mask)
-                   || phys_solid(right + delta.x, bottom, mask))) {
-            delta.x = max(delta.x - 0.125f / 2.0f, 0.0f);
+               && (phys_solid(right + delta.x, top, enviro_mask)
+                   || phys_solid(right + delta.x, bottom - 0.125f, enviro_mask))) {
+            delta.x = max(delta.x - scan_dist, 0.0f);
         }
 
         while (delta.x < 0.0f
-               && (phys_solid(left + delta.x, top, mask)
-                   || phys_solid(left + delta.x, bottom, mask))) {
-            delta.x = min(delta.x + 0.125f / 2.0f, 0.0f);
+               && (phys_solid(left + delta.x, top, enviro_mask)
+                   || phys_solid(left + delta.x, bottom - 0.125f, enviro_mask))) {
+            delta.x = min(delta.x + scan_dist, 0.0f);
         }
 
         while (delta.y > 0.0f
-               && (phys_solid(left, bottom + delta.y, mask)
-                   || phys_solid(right, bottom + delta.y, mask))) {
-            delta.y = max(delta.y - 0.125f / 2.0f, 0.0f);
+               && (phys_solid(left, bottom + delta.y, ground_mask)
+                   || phys_solid(right, bottom + delta.y, ground_mask))) {
+            delta.y = max(delta.y - scan_dist, 0.0f);
         }
 
-        while (
-            delta.y < 0.0f
-            && (phys_solid(left, top + delta.y, mask) || phys_solid(right, top + delta.y, mask))) {
-            delta.y = min(delta.y + 0.125f / 2.0f, 0.0f);
+        while (delta.y < 0.0f
+               && (phys_solid(left, top + delta.y, enviro_mask)
+                   || phys_solid(right, top + delta.y, enviro_mask))) {
+            delta.y = min(delta.y + scan_dist, 0.0f);
         }
 
         actor->pos = vec2_add(delta, actor->pos);

@@ -29,6 +29,7 @@ void profile_start(char* name)
     size_t key = stbds_hash_string(name, 42);
     profile_record record = hmgets(records, key);
     record.mark = SDL_GetPerformanceCounter();
+    record.key = key;
     hmputs(records, record);
 
     mark = SDL_GetPerformanceCounter();
@@ -39,9 +40,19 @@ uint64_t profile_stop(char* name)
     size_t key = stbds_hash_string(name, 42);
     profile_record record = hmgets(records, key);
     uint64_t delta = SDL_GetPerformanceCounter() - mark;
-    record.deltas[record.index] = delta;
     record.index = (record.index + 1) % PROFILE_RING_BUFFER_LEN;
+    record.deltas[record.index] = delta;
     hmputs(records, record);
 
     return (delta * 1000) / SDL_GetPerformanceFrequency();
+}
+
+uint64_t profile_get_last_ticks(char* name)
+{
+    size_t key = stbds_hash_string(name, 42);
+    if (hmgeti(records, key) >= 0) {
+        profile_record* r = &hmgets(records, key);
+        return r->deltas[r->index];
+    }
+    return 0;
 }
