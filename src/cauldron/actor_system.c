@@ -226,7 +226,7 @@ void actor_system_update(float dt)
         }
 
         if (input_move.y > 0.0f) {
-            actor->platform_timer = 0.05f;
+            actor->platform_timer = 0.1f;
         }
 
         actor->vel.x += 30.0f * dt * input_move.x;

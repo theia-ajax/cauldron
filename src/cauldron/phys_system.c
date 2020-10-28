@@ -109,7 +109,7 @@ bool _phys_shape_solid(phys_tile_shape shape, float nx, float ny)
     case PHYS_TILE_SHAPE_FULL_TILE:
         return true;
     case PHYS_TILE_SHAPE_PLATFORM:
-        return ny <= 0.25f;
+        return ny <= 0.3755f;
     case PHYS_TILE_SHAPE_WALL:
         return nx >= 0.375f && nx < 0.625f;
     case PHYS_TILE_SHAPE_SLOPE:
