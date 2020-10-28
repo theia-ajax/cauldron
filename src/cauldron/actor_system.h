@@ -14,11 +14,13 @@ void actor_system_unload_level(void);
 void actor_system_update(float dt);
 void actor_system_render(void);
 
-// system structures
+// public system structures
 
 enum actor_flags {
     ACTOR_FLAGS_FACING_LEFT = 1 << 0,
-    ACTOR_FLAGS_GROUNDED = 1 << 1,
+    ACTOR_FLAGS_CONTACT_GROUND = 1 << 1,
+    ACTOR_FLAGS_CONTACT_WALL = 1 << 2,
+    ACTOR_FLAGS_CONTACT_CEILING = 1 << 3,
 };
 
 typedef struct actor {
@@ -41,7 +43,7 @@ typedef struct actor_desc {
     uint32_t sprite_id;
 } actor_desc;
 
-// system interface
+// public system interface
 
 actor_handle actor_create(actor_desc* desc);
 void actor_destroy(actor_handle handle);

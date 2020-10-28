@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
 
-    SDL_GL_SetSwapInterval(0);
+    SDL_GL_SetSwapInterval(1);
 
     if (gl3wInit() != GL3W_OK) {
         return 1;
