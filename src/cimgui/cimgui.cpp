@@ -7,6 +7,7 @@
 #include "./imgui/misc/freetype/imgui_freetype.h"
 #endif
 #include "./imgui/imgui_internal.h"
+#include "./imgui/imgui_extensions.h"
 #include "cimgui.h"
 
 
@@ -3917,6 +3918,15 @@ CIMGUI_API void ImVector_ImWchar_Init(ImVector_ImWchar* p)
 CIMGUI_API void ImVector_ImWchar_UnInit(ImVector_ImWchar* p)
 {
 	p->~ImVector<ImWchar>();
+}
+
+CIMGUI_API void igBeginGroupPanel(const char* name, const ImVec2 size)
+{
+    ImGui::BeginGroupPanel(name, size);
+}
+CIMGUI_API void igEndGroupPanel()
+{
+    ImGui::EndGroupPanel();
 }
 
 

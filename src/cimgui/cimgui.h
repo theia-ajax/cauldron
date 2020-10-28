@@ -2821,6 +2821,9 @@ CIMGUI_API void ImGuiTextBuffer_appendf(struct ImGuiTextBuffer *buffer, const ch
 //for getting FLT_MAX in bindings
 CIMGUI_API float igGET_FLT_MAX();
 
+CIMGUI_API void igBeginGroupPanel(const char* name, const ImVec2 size);
+CIMGUI_API void igEndGroupPanel();
+
 
 CIMGUI_API ImVector_ImWchar* ImVector_ImWchar_create();
 CIMGUI_API void ImVector_ImWchar_destroy(ImVector_ImWchar* self);

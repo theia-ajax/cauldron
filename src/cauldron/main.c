@@ -25,12 +25,24 @@
 #include <time.h>
 
 struct debug_ui {
+    bool show;
     bool open;
     int fps;
     float load_proj_ms;
 };
 
 struct debug_ui dbgui = {
+    .show = true,
+    .open = true,
+};
+
+struct config_ui {
+    bool show;
+    bool open;
+};
+
+struct config_ui configui = {
+    .show = false,
     .open = true,
 };
 
@@ -124,6 +136,14 @@ int main(int argc, char* argv[])
             }
         }
 
+        if (txinp_get_key_down(TXINP_KEY_F11) && txinp_get_key(TXINP_KEY_LSHIFT)) {
+            configui.show = !configui.show;
+        }
+
+        if (txinp_get_key_down(TXINP_KEY_F12) && txinp_get_key(TXINP_KEY_LSHIFT)) {
+            dbgui.show = !dbgui.show;
+        }
+
         // time
         uint64_t ticks = SDL_GetPerformanceCounter();
         uint64_t delta_ticks = ticks - last_ticks;
@@ -204,18 +224,28 @@ int main(int argc, char* argv[])
         ImGui_ImplSDL2_NewFrame(window);
         igNewFrame();
 
-        igBegin("Debug", &dbgui.open, ImGuiWindowFlags_None);
-        igText("FPS: %d", dbgui.fps);
-        igText("Project Load Time: %0.2fms", dbgui.load_proj_ms);
+        if (dbgui.show) {
+            igBegin("Debug", &dbgui.open, ImGuiWindowFlags_None);
+            igText("FPS: %d", dbgui.fps);
+            igText("Project Load Time: %0.2fms", dbgui.load_proj_ms);
 
-        actor_handle hactor = get_player_actor(0);
-        actor* actor = actor_get(hactor);
-        if (actor) {
-            igText("Pos: %0.2f, %0.2f", actor->pos.x, actor->pos.y);
-            igText("Vel: %0.2f, %0.2f", actor->vel.x, actor->vel.y);
+            actor_handle hactor = get_player_actor(0);
+            actor* actor = actor_get(hactor);
+            if (actor) {
+                igText("Pos: %0.2f, %0.2f", actor->pos.x, actor->pos.y);
+                igText("Vel: %0.2f, %0.2f", actor->vel.x, actor->vel.y);
+                igText("Jump Forgive: %0.2f", actor->jump_forgive_timer);
+            }
+
+            igEnd();
         }
 
-        igEnd();
+        // config ui
+        if (configui.show) {
+            igBegin("config", &configui.open, ImGuiWindowFlags_None);
+            game_systems_config_ui();
+            igEnd();
+        }
 
         igRender();
         ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());

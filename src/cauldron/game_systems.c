@@ -6,25 +6,40 @@
 #include "phys_system.h"
 #include "player_system.h"
 
-#define GAME_SYSTEM_FUNC_NAME(sys, func) sys##_system_##func
+#define GAME_SYS_FUNC(sys, func) sys##_system_##func
 
 #define GAME_SYSTEM(sys)                                                                           \
-    (game_system)                                                                                  \
-    {                                                                                              \
-        .init = GAME_SYSTEM_FUNC_NAME(sys, init),                                                  \
-        .shutdown = GAME_SYSTEM_FUNC_NAME(sys, shutdown),                                          \
-        .load_level = GAME_SYSTEM_FUNC_NAME(sys, load_level),                                      \
-        .unload_level = GAME_SYSTEM_FUNC_NAME(sys, unload_level),                                  \
-        .update = GAME_SYSTEM_FUNC_NAME(sys, update),                                              \
-        .render = GAME_SYSTEM_FUNC_NAME(sys, render),                                              \
-    }
+    ((game_system){                                                                                \
+        .name = #sys "_system",                                                                    \
+        .init = GAME_SYS_FUNC(sys, init),                                                          \
+        .shutdown = GAME_SYS_FUNC(sys, shutdown),                                                  \
+        .load_level = GAME_SYS_FUNC(sys, load_level),                                              \
+        .unload_level = GAME_SYS_FUNC(sys, unload_level),                                          \
+        .update = GAME_SYS_FUNC(sys, update),                                                      \
+        .render = GAME_SYS_FUNC(sys, render),                                                      \
+        .config_ui = NULL,                                                                         \
+        .debug_ui = NULL,                                                                          \
+    })
+
+#define GAME_SYSTEM_DEBUG(sys)                                                                     \
+    ((game_system){                                                                                \
+        .name = #sys "_system",                                                                    \
+        .init = GAME_SYS_FUNC(sys, init),                                                          \
+        .shutdown = GAME_SYS_FUNC(sys, shutdown),                                                  \
+        .load_level = GAME_SYS_FUNC(sys, load_level),                                              \
+        .unload_level = GAME_SYS_FUNC(sys, unload_level),                                          \
+        .update = GAME_SYS_FUNC(sys, update),                                                      \
+        .render = GAME_SYS_FUNC(sys, render),                                                      \
+        .config_ui = GAME_SYS_FUNC(sys, config_ui),                                                \
+        .debug_ui = GAME_SYS_FUNC(sys, debug_ui),                                                  \
+    })
 
 game_system* g_game_systems;
 
 void game_systems_init(game_settings* settings)
 {
     arrput(g_game_systems, GAME_SYSTEM(player));
-    arrput(g_game_systems, GAME_SYSTEM(actor));
+    arrput(g_game_systems, GAME_SYSTEM_DEBUG(actor));
     arrput(g_game_systems, GAME_SYSTEM(phys));
 
     for (int i = 0; i < arrlen(g_game_systems); ++i) {
@@ -75,6 +90,29 @@ void game_systems_render(void)
     for (int i = 0; i < arrlen(g_game_systems); ++i) {
         if (g_game_systems[i].render) {
             g_game_systems[i].render();
+        }
+    }
+}
+
+#define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
+#include <cimgui.h>
+
+void game_systems_config_ui(void)
+{
+    for (int i = 0; i < arrlen(g_game_systems); ++i) {
+        if (g_game_systems[i].config_ui) {
+            if (igCollapsingHeaderTreeNodeFlags(g_game_systems[i].name, ImGuiTreeNodeFlags_None)) {
+                g_game_systems[i].config_ui();
+            }
+        }
+    }
+}
+
+void game_systems_debug_ui(void)
+{
+    for (int i = 0; i < arrlen(g_game_systems); ++i) {
+        if (g_game_systems[i].debug_ui) {
+            g_game_systems[i].debug_ui();
         }
     }
 }
