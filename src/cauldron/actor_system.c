@@ -68,7 +68,7 @@ struct actor_move_result actor_calc_move(actor* actor, float dt)
 
         if (delta.y > 0.0f) {
             // going down
-            uint16_t ground_mask = (actor->vel.y < 0.0f || actor->input.move.y > 0.0f) ? 1 : 3;
+            uint16_t ground_mask = (actor->vel.y < 0.0f || actor->platform_timer > 0.0f) ? 1 : 3;
             float bottom = new_pos.y;
             float top = new_pos.y - actor->hsize.y * 2.0f;
 
@@ -199,33 +199,39 @@ void actor_system_update(float dt)
 
         actor* actor = &actors[i];
 
-        {
-            const vec2 input_move = actor->input.move;
-
-            if (input_move.x > 0) {
-                actor->flags &= ~ACTOR_FLAGS_FACING_LEFT;
-            } else if (input_move.x < 0) {
-                actor->flags |= ACTOR_FLAGS_FACING_LEFT;
-            } else {
-                if (actor->vel.x < 0) {
-                    actor->vel.x = min(actor->vel.x + 10.0f * dt, 0);
-                } else if (actor->vel.x > 0) {
-                    actor->vel.x = max(actor->vel.x - 10.0f * dt, 0);
-                }
-            }
-
-            if ((actor->flags & ACTOR_FLAGS_CONTACT_GROUND) != 0) {
-                actor->vel.y = 8.0f;
-
-                if (actor->input.jump) {
-                    actor->vel.y = -21.0f;
-                }
-            }
-
-            actor->vel.x += 30.0f * dt * input_move.x;
-            actor->vel.x = clampf(actor->vel.x, -8.0f, 8.0f);
-            actor->vel.y += phys_get_gravity() * dt;
+        if (actor->platform_timer > 0.0f) {
+            actor->platform_timer -= dt;
         }
+
+        const vec2 input_move = actor->input.move;
+
+        if (input_move.x > 0) {
+            actor->flags &= ~ACTOR_FLAGS_FACING_LEFT;
+        } else if (input_move.x < 0) {
+            actor->flags |= ACTOR_FLAGS_FACING_LEFT;
+        } else {
+            if (actor->vel.x < 0) {
+                actor->vel.x = min(actor->vel.x + 10.0f * dt, 0);
+            } else if (actor->vel.x > 0) {
+                actor->vel.x = max(actor->vel.x - 10.0f * dt, 0);
+            }
+        }
+
+        if ((actor->flags & ACTOR_FLAGS_CONTACT_GROUND) != 0) {
+            actor->vel.y = 8.0f;
+
+            if (actor->input.jump) {
+                actor->vel.y = -21.0f;
+            }
+        }
+
+        if (input_move.y > 0.0f) {
+            actor->platform_timer = 0.05f;
+        }
+
+        actor->vel.x += 30.0f * dt * input_move.x;
+        actor->vel.x = clampf(actor->vel.x, -8.0f, 8.0f);
+        actor->vel.y += phys_get_gravity() * dt;
 
         struct actor_move_result move_result = actor_calc_move(actor, dt);
 

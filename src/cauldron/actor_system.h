@@ -29,6 +29,7 @@ typedef struct actor {
     vec2 hsize;
     uint32_t flags;
     uint32_t sprite_id;
+    float platform_timer;
     struct {
         vec2 move;
         bool jump;
