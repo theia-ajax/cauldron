@@ -34,19 +34,17 @@ struct debug_ui dbgui = {
     .open = true,
 };
 
-enum {
-    WINDOW_WIDTH = 1280,
-    WINDOW_HEIGHT = 720,
-};
-
 int main(int argc, char* argv[])
 {
+    load_game_settings(NULL);
+    const game_settings* settings = get_game_settings();
+
     SDL_Window* window = SDL_CreateWindow(
         "cauldron",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        WINDOW_WIDTH,
-        WINDOW_HEIGHT,
+        settings->options.video.display_width,
+        settings->options.video.display_height,
         SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -56,7 +54,7 @@ int main(int argc, char* argv[])
 
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
 
-    SDL_GL_SetSwapInterval(0);
+    SDL_GL_SetSwapInterval((settings->options.video.enable_vsync) ? 1 : 0);
 
     if (gl3wInit() != GL3W_OK) {
         return 1;
@@ -198,7 +196,9 @@ int main(int argc, char* argv[])
         spr_render(cur_width, cur_height);
         sg_commit();
 
-        io->DisplaySize = (ImVec2){.x = WINDOW_WIDTH, .y = WINDOW_HEIGHT};
+        int win_w, win_h;
+        SDL_GetWindowSize(window, &win_w, &win_h);
+        io->DisplaySize = (ImVec2){.x = (float)win_w, .y = (float)win_h};
         io->DeltaTime = dt;
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame(window);
