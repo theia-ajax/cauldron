@@ -224,7 +224,7 @@ void actor_system_update(float dt)
 
             actor->vel.x += 30.0f * dt * input_move.x;
             actor->vel.x = clampf(actor->vel.x, -8.0f, 8.0f);
-            actor->vel.y += phys_get_gravity() * dt / 10.0f;
+            actor->vel.y += phys_get_gravity() * dt;
         }
 
         struct actor_move_result move_result = actor_calc_move(actor, dt);
