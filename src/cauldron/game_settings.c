@@ -48,6 +48,9 @@ bool load_game_settings(const char* file_override)
 
             settings.options.video.enable_vsync =
                 jstob_or(js, jsget(js, tokens, video_opt_id, "enable_vsync"), false);
+
+            settings.options.video.frame_limit =
+                jstoi_or(js, jsget(js, tokens, video_opt_id, "frame_limit"), 0);
         }
     }
 

@@ -145,12 +145,18 @@ int main(int argc, char* argv[])
         }
 
         // time
+        uint64_t frequency = SDL_GetPerformanceFrequency();
         uint64_t ticks = SDL_GetPerformanceCounter();
         uint64_t delta_ticks = ticks - last_ticks;
+
+        while (settings->options.video.frame_limit > 0
+               && (float)delta_ticks / frequency < 1.0f / settings->options.video.frame_limit) {
+            ticks = SDL_GetPerformanceCounter();
+            delta_ticks = ticks - last_ticks;
+        }
+
         last_ticks = ticks;
-        uint64_t frequency = SDL_GetPerformanceFrequency();
         float dt = (float)delta_ticks / frequency;
-        dt = min(dt, 0.1f);
         time += dt;
         ++frames_this_sec;
 

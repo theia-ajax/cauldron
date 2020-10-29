@@ -8,6 +8,7 @@ typedef struct game_settings {
             int display_width;
             int display_height;
             bool enable_vsync;
+            int frame_limit;
         } video;
     } options;
 } game_settings;

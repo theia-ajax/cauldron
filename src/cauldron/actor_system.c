@@ -159,9 +159,9 @@ void push_free_index(uint32_t index)
     arrput(free_stack, index);
 }
 
-actor_handle actor_make_handle(uint32_t index)
+actor_handle actor_make_handle(uint32_t index, uint32_t gen)
 {
-    return (actor_handle){(actors_gen << 16) + (index & 0xFFFF)};
+    return (actor_handle){(gen << 16) + (index & 0xFFFF)};
 }
 
 uint32_t actor_handle_index(actor_handle handle)
@@ -327,7 +327,7 @@ actor_handle actor_create(actor_desc* desc)
     if (desc) {
         uint32_t index;
         if (pop_free_index(&index)) {
-            handles[index] = actor_make_handle(index);
+            handles[index] = actor_make_handle(index, actors_gen);
             actors[index] = (actor){
                 .pos = desc->pos,
                 .hsize = desc->hsize,

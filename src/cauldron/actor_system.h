@@ -24,6 +24,12 @@ typedef struct actor_system_conf {
     // how much time after the actor becomes ungrounded is the actor still allowed to jump as if
     // they are grounded.
     float jump_ungrounded_time;
+
+    float jump_force;
+    float max_speed;
+    float move_accel;
+    float grav_scale;
+    float step_height;
 } actor_system_conf;
 
 // public system structures
