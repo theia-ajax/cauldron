@@ -56,3 +56,13 @@ uint64_t profile_get_last_ticks(char* name)
     }
     return 0;
 }
+
+uint64_t get_ticks()
+{
+    return SDL_GetPerformanceCounter();
+}
+
+uint64_t get_frequency()
+{
+    return SDL_GetPerformanceFrequency();
+}

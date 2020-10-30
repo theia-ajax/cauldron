@@ -1,6 +1,8 @@
 #pragma once
 
 #include "tx_types.h"
+#include <float.h>
+#include <limits.h>
 #include <math.h>
 
 #define TX_PI 3.14159265358979f
@@ -86,6 +88,7 @@ vec2 vec2_clamp(const vec2 a, const vec2 min, const vec2 max);
 vec2 vec2_lerp(const vec2 a, const vec2 b, const float t);
 vec3 vec2_vec3(const vec2 v);
 vec2 vec2_clamp_len(const vec2 v, const float l);
+vec2 vec2_abs(const vec2 v);
 
 vec3 vec3_add(const vec3 a, const vec3 b);
 vec3 vec3_sub(const vec3 a, const vec3 b);
@@ -101,6 +104,7 @@ vec3 vec3_lerp(const vec3 a, const vec3 b, const float t);
 vec3 vec3_cross(const vec3 a, const vec3 b);
 vec3 vec3_reflect(const vec3 v, const vec3 n);
 vec3 vec3_clamp_len(const vec3 v, const float l);
+vec3 vec3_abs(const vec3 v);
 
 vec4 vec4_add(const vec4 a, const vec4 b);
 vec4 vec4_sub(const vec4 a, const vec4 b);
@@ -115,6 +119,7 @@ vec4 vec4_clamp(const vec4 a, const vec4 min, const vec4 max);
 vec4 vec4_lerp(const vec4 a, const vec4 b, const float t);
 vec4 vec4_cross(const vec4 a, const vec4 b);
 vec4 vec4_reflect(const vec4 v, const vec4 n);
+vec4 vec4_abs(const vec4 v);
 
 mat4 mat4_identity();
 vec4 mat4_row(const mat4 m, uint32_t i);
@@ -156,6 +161,8 @@ quat quat_from_mat4x4(const mat4 m);
 // Implementation
 #ifdef TX_MATH_IMPLEMENTATION
 
+#pragma region Basic Math Implementation
+
 // math utilities
 float clampf(const float v, const float min, const float max)
 {
@@ -177,7 +184,9 @@ float signf(const float v)
     return (v == 0.0f) ? 0.0f : (v < 0) ? -1.0f : 1.0f;
 }
 
-// vec2
+#pragma endregion
+
+#pragma region Vec2 Implementation
 vec2 vec2_add(const vec2 a, const vec2 b)
 {
     return (vec2){
@@ -273,7 +282,16 @@ vec2 vec2_clamp_len(const vec2 v, const float l)
     return v;
 }
 
-// vec3
+vec2 vec2_abs(const vec2 v)
+{
+    return (vec2){
+        .x = fabsf(v.x),
+        .y = fabsf(v.y),
+    };
+}
+#pragma endregion
+
+#pragma region Vec3 Implementation
 vec3 vec3_add(const vec3 a, const vec3 b)
 {
     return (vec3){
@@ -386,7 +404,17 @@ vec3 vec3_clamp_len(const vec3 v, const float l)
     return v;
 }
 
-// vec4
+vec3 vec3_abs(const vec3 v)
+{
+    return (vec3){
+        .x = fabsf(v.x),
+        .y = fabsf(v.y),
+        .z = fabsf(v.z),
+    };
+}
+#pragma endregion
+
+#pragma region Vec4 Implementation
 vec4 vec4_add(const vec4 a, const vec4 b)
 {
     return (vec4){
@@ -499,7 +527,19 @@ vec4 vec4_reflect(const vec4 v, const vec4 n)
     };
 }
 
-// mat4
+vec4 vec4_abs(const vec4 v)
+{
+    return (vec4){
+        .x = fabsf(v.x),
+        .y = fabsf(v.y),
+        .z = fabsf(v.z),
+        .w = fabsf(v.w),
+    };
+}
+
+#pragma endregion
+
+#pragma region Mat4 Implementation
 mat4 mat4_identity()
 {
     return (mat4){
@@ -899,8 +939,9 @@ mat4 mat4_arcball(const mat4 m, const vec2 a, const vec2 b, float s)
     const float radians = acosf(vec3_dot(a3, b3)) * s;
     return mat4_rotate(m, c.x, c.y, c.z, radians);
 }
+#pragma endregion
 
-// quat
+#pragma region Quat Implementation
 quat quat_identity()
 {
     // 0, 0, 0, 1
@@ -1025,4 +1066,6 @@ quat quat_from_mat4(const mat4 m)
         .w = m.m[i2][i1] - m.m[i1][i2] / (2.0f * r),
     };
 }
+#pragma endregion
+
 #endif // TX_MATH_IMPL

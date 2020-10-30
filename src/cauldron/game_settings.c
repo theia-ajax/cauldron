@@ -6,7 +6,7 @@
 
 game_settings settings = {0};
 
-const game_settings* get_game_settings()
+game_settings* const get_game_settings()
 {
     return &settings;
 }

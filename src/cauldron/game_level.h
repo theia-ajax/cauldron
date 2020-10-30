@@ -47,6 +47,7 @@ typedef struct game_layer_inst {
 
 typedef struct game_level {
     game_layer_inst* layer_insts;
+    uint32_t name_id;
 } game_level;
 
 typedef struct game_level_proj {

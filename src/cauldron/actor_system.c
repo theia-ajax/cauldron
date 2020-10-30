@@ -1,6 +1,7 @@
 #include "actor_system.h"
 #include "game_settings.h"
 #include "phys_system.h"
+#include "profile.h"
 #include "sprite_draw.h"
 #include "stb_ds.h"
 #include "tx_math.h"
@@ -40,98 +41,124 @@ struct actor_move_result actor_calc_move(actor* actor, float dt)
     const bool was_contact_wall = (actor->flags & ActorFlags_OnWall) != 0;
     const bool was_contact_ceiling = (actor->flags & ActorFlags_OnCeiling) != 0;
 
-    vec2 delta = vec2_scale(actor->vel, dt);
+    const float max_step_dist = 0.1f;
+    const float solid_scan_dist = 0.01f;
+
+    vec2 total_delta = vec2_scale(actor->vel, dt);
     vec2 new_pos = actor->pos;
     vec2 new_vel = actor->vel;
     uint8_t move_flags = ActorMoveResultFlags_None;
+    vec2 remaining_delta = vec2_abs(total_delta);
+    int safety_valve = 100;
 
-    // horizontal movement
-    {
-        float check_x = new_pos.x + delta.x + signf(delta.x) * actor->hsize.x;
-        float bottom = new_pos.y - 0.25f;
-        float top = new_pos.y - actor->hsize.y * 1.75f;
-        float center = new_pos.y - actor->hsize.y;
-        if (!phys_solid(check_x, center, 1) /* && !phys_solid(check_x, top, 1)*/) {
-            new_pos.x += delta.x;
-            if (was_contact_wall) {
-                move_flags |= ActorMoveResultFlags_LeftWall;
-            }
-        } else {
-            while (!phys_solid(new_pos.x + signf(delta.x) * actor->hsize.x, center, 1)
-                   /* && !phys_solid(new_pos.x + signf(delta.x) * actor->hsize.x, top, 1) */) {
-                new_pos.x += signf(delta.x) * 0.01f;
-            }
-            new_vel.x = 0.0f;
-            move_flags |= ActorMoveResultFlags_StayWall;
-            if (!was_contact_wall) {
-                move_flags |= ActorMoveResultFlags_HitWall;
+    while ((remaining_delta.x > FLT_EPSILON || remaining_delta.y > FLT_EPSILON)
+           && safety_valve-- > 0) {
+        vec2 dir = vec2_norm(total_delta);
+        float remaining_dist = vec2_len(remaining_delta);
+        float dist_to_travel = fminf(max_step_dist, remaining_dist);
+        vec2 delta = vec2_scale(dir, dist_to_travel);
+
+        // horizontal movement
+        {
+            float check_x = new_pos.x + delta.x + signf(delta.x) * actor->hsize.x;
+            float bottom = new_pos.y - 0.25f;
+            float top = new_pos.y - actor->hsize.y * 1.75f;
+            float center = new_pos.y - actor->hsize.y;
+            if (!phys_solid(check_x, center, 1) /* && !phys_solid(check_x, top, 1)*/) {
+                new_pos.x += delta.x;
+                remaining_delta.x -= fabsf(delta.x);
+            } else {
+                while (!phys_solid(new_pos.x + signf(delta.x) * actor->hsize.x, center, 1)
+                       /* && !phys_solid(new_pos.x + signf(delta.x) * actor->hsize.x, top, 1) */) {
+                    new_pos.x += signf(delta.x) * solid_scan_dist;
+                }
+                new_vel.x = 0.0f;
+                remaining_delta.x = 0.0f;
+                move_flags |= ActorMoveResultFlags_StayWall;
+                if (!was_contact_wall) {
+                    move_flags |= ActorMoveResultFlags_HitWall;
+                }
             }
         }
-    }
 
-    // vertical movement
-    {
-        float left = new_pos.x - actor->hsize.x * 0.95f;
-        float right = new_pos.x + actor->hsize.x * 0.95f;
+        // vertical movement
+        {
+            float left = new_pos.x - actor->hsize.x * 0.95f;
+            float right = new_pos.x + actor->hsize.x * 0.95f;
 
-        if (delta.y >= 0.0f) {
-            // going down
-            uint16_t ground_mask = (actor->vel.y < 0.0f || actor->platform_timer > 0.0f) ? 1 : 3;
-            float bottom = new_pos.y;
-            float top = new_pos.y - actor->hsize.y * 2.0f;
+            if (delta.y >= 0.0f) {
+                // going down
+                uint16_t ground_mask =
+                    (actor->vel.y < 0.0f || actor->platform_timer > 0.0f) ? 1 : 3;
+                float bottom = new_pos.y;
+                float top = new_pos.y - actor->hsize.y * 2.0f;
 
-            if (phys_solid(left, bottom + delta.y, ground_mask)
-                || phys_solid(right, bottom + delta.y, ground_mask)) {
-                actor->flags |= ActorFlags_OnGround;
+                if (phys_solid(left, bottom + delta.y, ground_mask)
+                    || phys_solid(right, bottom + delta.y, ground_mask)) {
+                    actor->flags |= ActorFlags_OnGround;
 
-                // snap down
-                while (!phys_solid(left, new_pos.y, ground_mask)
-                       && !phys_solid(right, new_pos.y, ground_mask)) {
-                    new_pos.y += 0.05f;
-                }
+                    // snap down
+                    while (!phys_solid(left, new_pos.y, ground_mask)
+                           && !phys_solid(right, new_pos.y, ground_mask)) {
+                        new_pos.y += solid_scan_dist;
+                    }
 
-                // pop up
-                while (phys_solid(left, new_pos.y - 0.125f, ground_mask)
-                       || phys_solid(right, new_pos.y - 0.125f, ground_mask)
-                       || phys_solid(new_pos.x, new_pos.y, ground_mask)) {
-                    new_pos.y -= 0.05f;
-                }
+                    // pop up
+                    while (phys_solid(left, new_pos.y - 0.125f, ground_mask)
+                           || phys_solid(right, new_pos.y - 0.125f, ground_mask)
+                           || phys_solid(new_pos.x, new_pos.y, ground_mask)) {
+                        new_pos.y -= solid_scan_dist;
+                    }
 
-                move_flags |= ActorMoveResultFlags_StayGround;
-                if (!was_contact_ground) {
-                    move_flags |= ActorMoveResultFlags_HitGround;
+                    remaining_delta.y = 0.0f;
+                    move_flags |= ActorMoveResultFlags_StayGround;
+                    if (!was_contact_ground) {
+                        move_flags |= ActorMoveResultFlags_HitGround;
+                    }
+                } else {
+                    new_pos.y += delta.y;
+                    remaining_delta.y -= fabsf(delta.y);
+                    if (was_contact_ground && new_vel.y > 0.0f) {
+                        new_vel.y = 0.0f;
+                    }
                 }
             } else {
-                new_pos.y += delta.y;
-                if (was_contact_ground && new_vel.y > 0.0f) {
+                // going up
+                if (phys_solid(left, new_pos.y - delta.y - actor->hsize.y * 2.0f, 1)
+                    || phys_solid(right, new_pos.y - delta.y - actor->hsize.y * 2.0f, 1)) {
+
+                    // find contact point
+                    while (!phys_solid(left, new_pos.y - actor->hsize.y * 2.0f, 1)
+                           && !phys_solid(right, new_pos.y - actor->hsize.y * 2.0f, 1)) {
+                        new_pos.y -= solid_scan_dist;
+                    }
+
                     new_vel.y = 0.0f;
+                    remaining_delta.y = 0.0f;
+                    move_flags |= ActorMoveResultFlags_StayCeiling;
+                    if (!was_contact_ceiling) {
+                        move_flags |= ActorMoveResultFlags_HitCeiling;
+                    }
+                } else {
+                    new_pos.y += delta.y;
+                    remaining_delta.y -= fabsf(delta.y);
                 }
-            }
-        } else {
-            // going up
-            if (phys_solid(left, new_pos.y - delta.y - actor->hsize.y * 2.0f, 1)
-                || phys_solid(right, new_pos.y - delta.y - actor->hsize.y * 2.0f, 1)) {
-                new_vel.y = 0.0f;
-                while (!phys_solid(left, new_pos.y - actor->hsize.y * 2.0f, 1)
-                       && !phys_solid(right, new_pos.y - actor->hsize.y * 2.0f, 1)) {
-                    new_pos.y -= 0.05f;
-                }
-
-                move_flags |= ActorMoveResultFlags_StayCeiling;
-                if (!was_contact_ceiling) {
-                    move_flags |= ActorMoveResultFlags_HitCeiling;
-                }
-            } else {
-                new_pos.y += delta.y;
             }
         }
 
+        if (was_contact_wall && (move_flags & ActorMoveResultFlags_StayWall) == 0) {
+            move_flags |= ActorMoveResultFlags_LeftWall;
+        }
         if (was_contact_ground && (move_flags & ActorMoveResultFlags_StayGround) == 0) {
             move_flags |= ActorMoveResultFlags_LeftGround;
         }
         if (was_contact_ceiling && (move_flags & ActorMoveResultFlags_StayCeiling) == 0) {
             move_flags |= ActorMoveResultFlags_LeftCeiling;
         }
+    }
+
+    if (safety_valve <= 0) {
+        printf("actor move safety valve limit exceeded.\n");
     }
 
     return (struct actor_move_result){
@@ -225,7 +252,6 @@ void actor_system_update(float dt)
 
         // update timers
         if (actor->platform_timer > 0.0f) actor->platform_timer -= dt;
-        if (actor->jump_forgive_timer > 0.0f) actor->jump_forgive_timer -= dt;
 
         const vec2 input_move = actor->input.move;
 
@@ -248,15 +274,21 @@ void actor_system_update(float dt)
         actor->vel.x += 30.0f * dt * input_move.x;
         actor->vel.x = clampf(actor->vel.x, -8.0f, 8.0f);
 
-        if ((actor->flags & ActorFlags_OnGround) != 0) {
+        if ((actor->flags & ActorFlags_OnGround) != 0 && actor->vel.y > 0.0f) {
             actor->vel.y = 8.0f;
         } else {
-            actor->vel.y += phys_get_gravity() * dt;
+            const float gravity = 1.0f; // phys_get_gravity();
+            actor->vel.y += gravity * dt;
         }
 
         if (actor->jump_forgive_timer > 0.0f) {
+            actor->jump_forgive_timer -= dt;
             if (actor->input.jump) {
-                actor->vel.y = -21.0f;
+                actor->vel.y = -1.0f;
+                actor->track_jump.enable = true;
+                actor->track_jump.start_time = get_ticks();
+                actor->track_jump.start_y = actor->pos.y;
+                actor->track_jump.min_y = FLT_MAX;
             }
         }
 
@@ -275,6 +307,25 @@ void actor_system_update(float dt)
 
         actor->pos = move_result.new_pos;
         actor->vel = move_result.new_vel;
+
+        if (actor->track_jump.enable) {
+            if (actor->pos.y < actor->track_jump.min_y) {
+                actor->track_jump.min_y = actor->pos.y;
+            }
+            if ((move_result.flags & ActorMoveResultFlags_HitGround) != 0) {
+                actor->track_jump.enable = false;
+
+                float jump_height = actor->pos.y - actor->track_jump.min_y;
+                uint64_t jump_time =
+                    (get_ticks() - actor->track_jump.start_time) * 1000 / get_frequency();
+
+                printf(
+                    "Jump\n\tStart Y:\t%0.3f\n\tHeight:\t\t%0.3f\n\tTime:\t\t%llums\n\n",
+                    actor->track_jump.start_y,
+                    jump_height,
+                    jump_time);
+            }
+        }
     }
 }
 

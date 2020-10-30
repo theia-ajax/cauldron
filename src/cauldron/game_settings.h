@@ -13,5 +13,5 @@ typedef struct game_settings {
     } options;
 } game_settings;
 
-const game_settings* get_game_settings();
+game_settings* const get_game_settings();
 bool load_game_settings(const char* file_override);

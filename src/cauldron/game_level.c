@@ -34,7 +34,7 @@ tx_result load_game_level_project(const char* filename, game_level_proj* proj)
 
     uint64_t time = profile_stop("load_game_level_project");
 
-    printf("Loading game level project from '%s' took %llums.", filename, time);
+    printf("Loading game level project from '%s' took %llums.\n", filename, time);
 
     return result;
 }
@@ -129,22 +129,15 @@ tx_result parse_level(const char* js, jsmntok_t* tokens, int tok_id, game_level*
 {
     memset(out, 0, sizeof(game_level));
 
-    int found = -1;
+    jsmntok_t name_tok = jsget(js, tokens, tok_id, "identifier");
+    out->name_id = hash_data(js + name_tok.start, name_tok.end - name_tok.start);
 
-    for (int i = tok_id; i < arrlen(tokens); ++i) {
-        jsmntok_t token = tokens[i];
+    int layer_inst_id = jsget_id(js, tokens, tok_id, "layerInstances");
 
-        if (jseq(js, token, "layerInstances")) {
-            found = i;
-            break;
-        }
-    }
-
-    if (found < 0 || found >= arrlen(tokens) - 1) {
+    if (layer_inst_id < 0) {
         return TX_INVALID;
     }
 
-    int layer_inst_id = found + 1;
     jsmntok_t layer_inst_tok = tokens[layer_inst_id];
 
     if (layer_inst_tok.type != JSMN_ARRAY) {

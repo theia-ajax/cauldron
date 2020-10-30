@@ -28,6 +28,7 @@ struct debug_ui {
     bool show;
     bool open;
     int fps;
+    int frame_limit;
     float load_proj_ms;
 };
 
@@ -49,7 +50,7 @@ struct config_ui configui = {
 int main(int argc, char* argv[])
 {
     load_game_settings(NULL);
-    const game_settings* settings = get_game_settings();
+    game_settings* const settings = get_game_settings();
 
     SDL_Window* window = SDL_CreateWindow(
         "cauldron",
@@ -148,15 +149,18 @@ int main(int argc, char* argv[])
         uint64_t frequency = SDL_GetPerformanceFrequency();
         uint64_t ticks = SDL_GetPerformanceCounter();
         uint64_t delta_ticks = ticks - last_ticks;
+        int frame_limit = settings->options.video.frame_limit;
+        uint64_t min_frame_delta_ticks = (frame_limit > 0) ? frequency / frame_limit : 0;
+        uint64_t over_ticks = 0;
 
-        while (settings->options.video.frame_limit > 0
-               && (float)delta_ticks / frequency < 1.0f / settings->options.video.frame_limit) {
+        while (settings->options.video.frame_limit > 0 && delta_ticks < min_frame_delta_ticks) {
             ticks = SDL_GetPerformanceCounter();
             delta_ticks = ticks - last_ticks;
+            over_ticks = delta_ticks - min_frame_delta_ticks;
         }
 
-        last_ticks = ticks;
-        float dt = (float)delta_ticks / frequency;
+        last_ticks = ticks - over_ticks;
+        float dt = (float)(delta_ticks - over_ticks) / frequency;
         time += dt;
         ++frames_this_sec;
 
@@ -233,6 +237,14 @@ int main(int argc, char* argv[])
         if (dbgui.show) {
             igBegin("Debug", &dbgui.open, ImGuiWindowFlags_None);
             igText("FPS: %d", dbgui.fps);
+            igText("dt: %0.5f", dt);
+            igSliderInt(
+                "Frame Limit",
+                &settings->options.video.frame_limit,
+                0,
+                144,
+                "%d FPS",
+                ImGuiSliderFlags_AlwaysClamp);
             igText("Project Load Time: %0.2fms", dbgui.load_proj_ms);
 
             actor_handle hactor = get_player_actor(0);
@@ -248,8 +260,9 @@ int main(int argc, char* argv[])
 
         // config ui
         if (configui.show) {
-            igBegin("config", &configui.open, ImGuiWindowFlags_None);
-            game_systems_config_ui();
+            if (igBegin("config", &configui.show, ImGuiWindowFlags_None)) {
+                game_systems_config_ui();
+            }
             igEnd();
         }
 

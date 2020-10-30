@@ -38,7 +38,7 @@ void player_system_load_level(game_level* level)
                 if (ent_def->id == key) {
                     actor_handle handle = actor_create(&(actor_desc){
                         .pos = {.x = ent_def->world_x, .y = ent_def->world_y},
-                        .hsize = {.x = 0.45f, .y = 0.48f},
+                        .hsize = {.x = 0.45f, .y = 0.495f},
                         .sprite_id = 1,
                     });
                     players[0].actor = handle;

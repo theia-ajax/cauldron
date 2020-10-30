@@ -3,8 +3,8 @@
         "video": {
             "display_width": 1280,
             "display_height": 720,
-            "enable_vsync": true,
-            "frame_limit": 60
+            "enable_vsync": false,
+            "frame_limit": 0
         }
     }
 }

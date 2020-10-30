@@ -53,6 +53,12 @@ typedef struct actor {
         vec2 move;
         bool jump;
     } input;
+    struct {
+        bool enable;
+        float start_y;
+        uint64_t start_time;
+        float min_y;
+    } track_jump;
 } actor;
 
 DEFINE_HANDLE(actor);
