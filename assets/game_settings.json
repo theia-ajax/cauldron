@@ -1,8 +1,8 @@
 {
     "options": {
         "video": {
-            "display_width": 1280,
-            "display_height": 720,
+            "display_width": 2240,
+            "display_height": 1260,
             "enable_vsync": true,
             "frame_limit": 0
         }
