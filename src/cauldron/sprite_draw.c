@@ -17,6 +17,7 @@ struct sprite {
 
 typedef struct uniform_block {
     mat4 view_proj;
+    float sprite_size;
 } uniform_block;
 
 #define K_MAX_SPRITES 16384
@@ -33,8 +34,8 @@ sg_image atlas;
 uint32_t sprite_ct;
 float pixels_per_meter = 8.0f;
 
-const uint32_t k_canvas_width = 256;
-const uint32_t k_canvas_height = 144;
+const uint32_t k_canvas_width = 256 * 2;
+const uint32_t k_canvas_height = 144 * 2;
 
 struct {
     sg_shader shader;
@@ -118,6 +119,7 @@ void spr_init()
                     .uniforms =
                         {
                             [0] = {.name = "view_proj", .type = SG_UNIFORMTYPE_MAT4},
+                            [1] = {.name = "sprite_size", .type = SG_UNIFORMTYPE_FLOAT},
                         },
                 },
             .fs.images[0] = {.name = "atlas", .type = SG_IMAGETYPE_2D},
@@ -309,6 +311,7 @@ void spr_render(int width, int height)
         sg_apply_bindings(&canvas.bindings);
         uniform_block uniforms = {
             .view_proj = view_proj,
+            .sprite_size = 2.0f,
         };
         sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, &uniforms, sizeof(uniform_block));
         sg_draw(0, 6, sprite_ct);
