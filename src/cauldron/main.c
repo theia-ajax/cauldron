@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
             }
 
             // float rt = lag / ms_per_update;
-            float rt = (dbgui.enable_render_interp) ? lag : 0.0f;
+            float rt = (dbgui.enable_render_interp) ? lag / ms_per_update : 0.0f;
             game_systems_render(rt);
         } else if (dbgui.update_mode == UpdateMode_VariableFrameRate) {
             update_count = 1;
