@@ -38,6 +38,7 @@ struct debug_ui {
     bool enable_render_interp;
     int fps;
     int frame_limit;
+    int update_frequency;
     update_mode update_mode;
     int maximum_updates;
     float load_proj_ms;
@@ -48,6 +49,7 @@ struct debug_ui dbgui = {
     .open = true,
     .update_mode = UpdateMode_FixedFrameRate,
     .maximum_updates = 30,
+    .update_frequency = 240,
 };
 
 struct config_ui {
@@ -195,7 +197,8 @@ int main(int argc, char* argv[])
         if (dbgui.update_mode == UpdateMode_FixedFrameRate) {
             lag += dt;
 
-            const float ms_per_update = 1.0f / 240.0f;
+            dbgui.update_frequency = min(max(dbgui.update_frequency, 1), 500);
+            const float ms_per_update = 1.0f / dbgui.update_frequency;
 
             while (lag >= ms_per_update && update_count < dbgui.maximum_updates) {
                 game_systems_update(ms_per_update);
@@ -259,16 +262,24 @@ int main(int argc, char* argv[])
         if (dbgui.show) {
             igBegin("Debug", &dbgui.open, ImGuiWindowFlags_NoNavInputs);
             igText("FPS: %d", dbgui.fps);
-            igText("Update Count: %d", update_count);
-            igInputInt("Maximum Updates", &dbgui.maximum_updates, 1, 5, ImGuiInputTextFlags_None);
             igCheckbox("Enable Render Interp", &dbgui.enable_render_interp);
+            igInputInt("Frame Limit", &dbgui.frame_limit, 1, 10, ImGuiInputTextFlags_None);
             if (igButton(update_mode_names[(int)dbgui.update_mode], (ImVec2){0})) {
                 dbgui.update_mode =
                     (update_mode)mod((int)dbgui.update_mode + 1, (int)UpdateMode_Count);
             }
-            igInputInt("Frame Limit", &dbgui.frame_limit, 1, 10, ImGuiInputTextFlags_None);
-            igSliderInt("", &dbgui.frame_limit, 0, 144, "%d FPS", ImGuiSliderFlags_AlwaysClamp);
-            igText("Project Load Time: %0.2fms", dbgui.load_proj_ms);
+
+            if (dbgui.update_mode == UpdateMode_FixedFrameRate) {
+                igInputInt(
+                    "Update Frequency (Hz)",
+                    &dbgui.update_frequency,
+                    1,
+                    10,
+                    ImGuiInputTextFlags_None);
+                igInputInt(
+                    "Maximum Updates", &dbgui.maximum_updates, 1, 5, ImGuiInputTextFlags_None);
+                igText("Update Count: %d", update_count);
+            }
 
             actor_handle hactor = get_player_actor(0);
             actor* actor = actor_get(hactor);
