@@ -13,6 +13,62 @@ actor_handle* handles = NULL;
 uint32_t* free_stack = NULL;
 uint16_t actors_gen = 1;
 
+actor_jump_report current_jump_report;
+actor_jump_report* saved_jump_reports = NULL;
+
+void start_jump_report(void)
+{
+    TX_ASSERT(!current_jump_report.track_enabled);
+
+    current_jump_report.track_enabled = true;
+    current_jump_report.current_frame = 0;
+
+    if (current_jump_report.jump_frames) {
+        arrfree(current_jump_report.jump_frames);
+        current_jump_report.jump_frames = NULL;
+    }
+}
+
+void jump_record_frame(float pos_y, float vel_y, float acl_y, float dt)
+{
+    if (!current_jump_report.track_enabled) {
+        return;
+    }
+
+    arrput(
+        current_jump_report.jump_frames,
+        ((actor_jump_frame_report){
+            .frame = current_jump_report.current_frame,
+            .ticks = get_ticks(),
+            .pos_y = pos_y,
+            .vel_y = vel_y,
+            .acl_y = acl_y,
+            .dt = dt,
+        }));
+
+    current_jump_report.current_frame++;
+}
+
+void end_jump_report(void)
+{
+    current_jump_report.track_enabled = false;
+}
+
+void save_last_jump_report(void)
+{
+    if (!current_jump_report.track_enabled) {
+        actor_jump_frame_report* copy = NULL;
+        size_t len = arrlen(current_jump_report.jump_frames);
+        arrsetlen(copy, len);
+        for (int i = 0; i < len; ++i) {
+            copy[i] = current_jump_report.jump_frames[i];
+        }
+        actor_jump_report jr = current_jump_report;
+        jr.jump_frames = copy;
+        arrput(saved_jump_reports, jr);
+    }
+}
+
 actor_system_conf config;
 
 // private system interface and structs
@@ -49,7 +105,7 @@ struct actor_move_result actor_calc_move(actor* actor, float dt)
     vec2 new_vel = actor->vel;
     uint8_t move_flags = ActorMoveResultFlags_None;
     vec2 remaining_delta = vec2_abs(total_delta);
-    int safety_valve = 100;
+    int safety_valve = 1000;
 
     while ((remaining_delta.x > FLT_EPSILON || remaining_delta.y > FLT_EPSILON)
            && safety_valve-- > 0) {
@@ -250,6 +306,8 @@ void actor_system_update(float dt)
 
         actor* actor = &actors[i];
 
+        actor->last_pos = actor->pos;
+
         // update timers
         if (actor->platform_timer > 0.0f) actor->platform_timer -= dt;
 
@@ -276,21 +334,20 @@ void actor_system_update(float dt)
 
         if ((actor->flags & ActorFlags_OnGround) != 0 && actor->vel.y > 0.0f) {
             actor->vel.y = 8.0f;
+            end_jump_report();
         } else {
-            const float gravity = 1.0f; // phys_get_gravity();
-            actor->vel.y += gravity * dt;
+            actor->vel.y += phys_get_gravity() * dt;
         }
 
         if (actor->jump_forgive_timer > 0.0f) {
             actor->jump_forgive_timer -= dt;
             if (actor->input.jump) {
-                actor->vel.y = -1.0f;
-                actor->track_jump.enable = true;
-                actor->track_jump.start_time = get_ticks();
-                actor->track_jump.start_y = actor->pos.y;
-                actor->track_jump.min_y = FLT_MAX;
+                actor->vel.y = -18.0f;
+                start_jump_report();
             }
         }
+
+        jump_record_frame(actor->pos.y, actor->vel.y, phys_get_gravity(), dt);
 
         struct actor_move_result move_result = actor_calc_move(actor, dt);
 
@@ -329,7 +386,7 @@ void actor_system_update(float dt)
     }
 }
 
-void actor_system_render(void)
+void actor_system_render(float rt)
 {
     for (int i = 0; i < arrlen(actors); ++i) {
         actor* actor = &actors[i];
@@ -337,9 +394,11 @@ void actor_system_render(void)
         sprite_flip flip =
             ((actor->flags & ActorFlags_FacingLeft) != 0) ? SPRITE_FLIP_X : SPRITE_FLIP_NONE;
 
+        vec2 delta = vec2_sub(actor->pos, actor->last_pos);
+
         spr_draw(&(sprite_draw_desc){
             .sprite_id = actor->sprite_id,
-            .pos = actor->pos,
+            .pos = vec2_add(actor->pos, vec2_scale(delta, rt)),
             .origin = {.x = 0.5f, .y = 1.0f},
             .layer = -5.0f,
             .flip = flip,
@@ -369,8 +428,63 @@ void actor_system_config_ui(void)
         ImGuiInputTextFlags_None);
 }
 
+void jump_report_ui(actor_jump_report* report)
+{
+    for (int i = 0; i < arrlen(report->jump_frames); ++i) {
+        actor_jump_frame_report frame = report->jump_frames[i];
+        float pd = 0.0f;
+        if (i > 0) {
+            pd = frame.pos_y - report->jump_frames[i - 1].pos_y;
+        }
+        igText("p:%0.5f v:%0.5f pd:%0.5f m:%f", frame.pos_y, frame.vel_y, pd, pd / frame.dt);
+
+        // igText(
+        //     "%d : time:%llu p:%0.2f v:%0.2f a:%0.2f dt:%f",
+        //     frame.frame,
+        //     frame.ticks,
+        //     frame.pos_y,
+        //     frame.vel_y,
+        //     frame.acl_y,
+        //     frame.dt);
+    }
+
+    igSeparator();
+}
+
 void actor_system_debug_ui(void)
 {
+    // igBegin("Jumps", NULL, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+
+    // igBeginChildStr(
+    //     "Current Report",
+    //     (ImVec2){igGetWindowContentRegionWidth() * 0.25f, 0},
+    //     true,
+    //     ImGuiWindowFlags_None);
+    // {
+    //     if (igButton("Save Last", (ImVec2){0})) {
+    //         save_last_jump_report();
+    //     }
+
+    //     jump_report_ui(&current_jump_report);
+    // }
+    // igEndChild();
+
+    // igSameLine(0.0f, -1.0f);
+
+    // igBeginChildStr("Saved Reports", (ImVec2){0}, true, ImGuiWindowFlags_None);
+    // {
+    //     size_t len = arrlen(saved_jump_reports);
+    //     static int cur_idx = 0;
+
+    //     if (len > 0) {
+    //         igInputInt("Saved Id", &cur_idx, 1, 10, ImGuiInputTextFlags_None);
+    //         cur_idx = mod(cur_idx, (int)len);
+    //         jump_report_ui(&saved_jump_reports[cur_idx]);
+    //     }
+    // }
+    // igEndChild();
+
+    // igEnd();
 }
 
 actor_handle actor_create(actor_desc* desc)

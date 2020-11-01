@@ -69,7 +69,7 @@ void player_system_update(float dt)
     }
 }
 
-void player_system_render(void)
+void player_system_render(float rt)
 {
 }
 

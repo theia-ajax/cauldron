@@ -8,7 +8,7 @@ typedef void (*game_system_shutdown)(void);
 typedef void (*game_system_load_level)(game_level* level);
 typedef void (*game_system_unload_level)(void);
 typedef void (*game_system_update)(float);
-typedef void (*game_system_render)(void);
+typedef void (*game_system_render)(float);
 typedef void (*game_system_config_ui)(void);
 typedef void (*game_system_debug_ui)(void);
 
@@ -29,7 +29,7 @@ void game_systems_shutdown(void);
 void game_systems_load_level(game_level* level);
 void game_systems_unload_level(void);
 void game_systems_update(float dt);
-void game_systems_render(void);
+void game_systems_render(float rt);
 void game_systems_config_ui(void);
 void game_systems_debug_ui(void);
 

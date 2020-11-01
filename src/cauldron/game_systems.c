@@ -85,11 +85,11 @@ void game_systems_update(float dt)
     }
 }
 
-void game_systems_render(void)
+void game_systems_render(float rt)
 {
     for (int i = 0; i < arrlen(g_game_systems); ++i) {
         if (g_game_systems[i].render) {
-            g_game_systems[i].render();
+            g_game_systems[i].render(rt);
         }
     }
 }

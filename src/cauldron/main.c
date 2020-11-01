@@ -24,17 +24,30 @@
 #include <stdlib.h>
 #include <time.h>
 
+typedef enum update_mode {
+    UpdateMode_VariableFrameRate,
+    UpdateMode_FixedFrameRate,
+    UpdateMode_Count,
+} update_mode;
+
+char* update_mode_names[UpdateMode_Count] = {"Variable", "Fixed"};
+
 struct debug_ui {
     bool show;
     bool open;
+    bool enable_render_interp;
     int fps;
     int frame_limit;
+    update_mode update_mode;
+    int maximum_updates;
     float load_proj_ms;
 };
 
 struct debug_ui dbgui = {
     .show = true,
     .open = true,
+    .update_mode = UpdateMode_FixedFrameRate,
+    .maximum_updates = 30,
 };
 
 struct config_ui {
@@ -50,7 +63,10 @@ struct config_ui configui = {
 int main(int argc, char* argv[])
 {
     load_game_settings(NULL);
+
     game_settings* const settings = get_game_settings();
+
+    dbgui.frame_limit = settings->options.video.frame_limit;
 
     SDL_Window* window = SDL_CreateWindow(
         "cauldron",
@@ -104,10 +120,10 @@ int main(int argc, char* argv[])
     uint64_t last_ticks = SDL_GetPerformanceCounter();
     float time = 0.0f;
     float next_sec = time + 1.0f;
+    float lag = 0.0f;
     bool is_running = true;
     int frames_this_sec = 0;
     while (is_running) {
-        txinp_update();
 
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -145,51 +161,57 @@ int main(int argc, char* argv[])
             dbgui.show = !dbgui.show;
         }
 
-        // time
-        uint64_t frequency = SDL_GetPerformanceFrequency();
-        uint64_t ticks = SDL_GetPerformanceCounter();
+        int update_count = 0;
+        uint64_t frequency = get_frequency();
+        uint64_t ticks = get_ticks();
         uint64_t delta_ticks = ticks - last_ticks;
-        int frame_limit = settings->options.video.frame_limit;
-        uint64_t min_frame_delta_ticks = (frame_limit > 0) ? frequency / frame_limit : 0;
-        uint64_t over_ticks = 0;
+        last_ticks = ticks;
 
-        while (settings->options.video.frame_limit > 0 && delta_ticks < min_frame_delta_ticks) {
-            ticks = SDL_GetPerformanceCounter();
-            delta_ticks = ticks - last_ticks;
+        int frame_limit = dbgui.frame_limit;
+        if (frame_limit > 0) {
+            uint64_t min_frame_delta_ticks = frequency / frame_limit;
+            uint64_t over_ticks = 0;
+
+            while (delta_ticks < min_frame_delta_ticks) {
+                ticks = get_ticks();
+                delta_ticks = ticks - last_ticks;
+            }
             over_ticks = delta_ticks - min_frame_delta_ticks;
+            last_ticks = ticks - over_ticks;
+            delta_ticks -= over_ticks;
         }
 
-        last_ticks = ticks - over_ticks;
-        float dt = (float)(delta_ticks - over_ticks) / frequency;
-        time += dt;
         ++frames_this_sec;
-
         if (time >= next_sec) {
             next_sec += 1.0f;
             dbgui.fps = frames_this_sec;
             frames_this_sec = 0;
         }
 
-        game_systems_update(dt);
-        game_systems_render();
+        float dt = (float)delta_ticks / frequency;
+        time += dt;
 
-        // update
-        vec2 input = {0};
+        // time
+        if (dbgui.update_mode == UpdateMode_FixedFrameRate) {
+            lag += dt;
 
-        if (txinp_get_key(TXINP_KEY_UP)) {
-            input.y -= 1.0f;
-        }
+            const float ms_per_update = 1.0f / 240.0f;
 
-        if (txinp_get_key(TXINP_KEY_DOWN)) {
-            input.y += 1.0f;
-        }
+            while (lag >= ms_per_update && update_count < dbgui.maximum_updates) {
+                game_systems_update(ms_per_update);
+                ++update_count;
+                lag -= ms_per_update;
+                txinp_update();
+            }
 
-        if (txinp_get_key(TXINP_KEY_LEFT)) {
-            input.x -= 1.0f;
-        }
-
-        if (txinp_get_key(TXINP_KEY_RIGHT)) {
-            input.x += 1.0f;
+            // float rt = lag / ms_per_update;
+            float rt = (dbgui.enable_render_interp) ? lag : 0.0f;
+            game_systems_render(rt);
+        } else if (dbgui.update_mode == UpdateMode_VariableFrameRate) {
+            update_count = 1;
+            game_systems_update(dt);
+            txinp_update();
+            game_systems_render(0.0f);
         }
 
         for (int lid = 0; lid < arrlen(proj.levels[0].layer_insts); ++lid) {
@@ -235,16 +257,17 @@ int main(int argc, char* argv[])
         igNewFrame();
 
         if (dbgui.show) {
-            igBegin("Debug", &dbgui.open, ImGuiWindowFlags_None);
+            igBegin("Debug", &dbgui.open, ImGuiWindowFlags_NoNavInputs);
             igText("FPS: %d", dbgui.fps);
-            igText("dt: %0.5f", dt);
-            igSliderInt(
-                "Frame Limit",
-                &settings->options.video.frame_limit,
-                0,
-                144,
-                "%d FPS",
-                ImGuiSliderFlags_AlwaysClamp);
+            igText("Update Count: %d", update_count);
+            igInputInt("Maximum Updates", &dbgui.maximum_updates, 1, 5, ImGuiInputTextFlags_None);
+            igCheckbox("Enable Render Interp", &dbgui.enable_render_interp);
+            if (igButton(update_mode_names[(int)dbgui.update_mode], (ImVec2){0})) {
+                dbgui.update_mode =
+                    (update_mode)mod((int)dbgui.update_mode + 1, (int)UpdateMode_Count);
+            }
+            igInputInt("Frame Limit", &dbgui.frame_limit, 1, 10, ImGuiInputTextFlags_None);
+            igSliderInt("", &dbgui.frame_limit, 0, 144, "%d FPS", ImGuiSliderFlags_AlwaysClamp);
             igText("Project Load Time: %0.2fms", dbgui.load_proj_ms);
 
             actor_handle hactor = get_player_actor(0);
@@ -265,6 +288,8 @@ int main(int argc, char* argv[])
             }
             igEnd();
         }
+
+        game_systems_debug_ui();
 
         igRender();
         ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());

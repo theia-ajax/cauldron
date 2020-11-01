@@ -12,7 +12,7 @@ void actor_system_shutdown(void);
 void actor_system_load_level(game_level* level);
 void actor_system_unload_level(void);
 void actor_system_update(float dt);
-void actor_system_render(void);
+void actor_system_render(float rt);
 void actor_system_config_ui(void);
 void actor_system_debug_ui(void);
 
@@ -34,6 +34,21 @@ typedef struct actor_system_conf {
 
 // public system structures
 
+typedef struct actor_jump_frame_report {
+    uint32_t frame; // current frame
+    uint64_t ticks;
+    float pos_y; // frame y position
+    float vel_y; // frame y velocity
+    float acl_y; // frame y acceleration (gravity)
+    float dt;    // frame delta time
+} actor_jump_frame_report;
+
+typedef struct actor_jump_report {
+    bool track_enabled;
+    uint32_t current_frame;
+    actor_jump_frame_report* jump_frames; // stbds_arr
+} actor_jump_report;
+
 enum actor_flags {
     ActorFlags_FacingLeft = 1 << 0,
     ActorFlags_OnGround = 1 << 1,
@@ -43,6 +58,7 @@ enum actor_flags {
 
 typedef struct actor {
     vec2 pos;
+    vec2 last_pos;
     vec2 vel;
     vec2 hsize;
     uint32_t flags;

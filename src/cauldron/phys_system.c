@@ -98,7 +98,7 @@ void phys_system_update(float dt)
 {
 }
 
-void phys_system_render(void)
+void phys_system_render(float rt)
 {
 }
 
