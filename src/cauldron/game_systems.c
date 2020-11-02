@@ -3,6 +3,8 @@
 #include "stb_ds.h"
 
 #include "actor_system.h"
+#include "bot_system.h"
+#include "entity_system.h"
 #include "phys_system.h"
 #include "player_system.h"
 
@@ -38,7 +40,9 @@ game_system* g_game_systems;
 
 void game_systems_init(game_settings* settings)
 {
+    arrput(g_game_systems, GAME_SYSTEM(entity));
     arrput(g_game_systems, GAME_SYSTEM(player));
+    arrput(g_game_systems, GAME_SYSTEM(bot));
     arrput(g_game_systems, GAME_SYSTEM_DEBUG(actor));
     arrput(g_game_systems, GAME_SYSTEM(phys));
 

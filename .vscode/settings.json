@@ -2,7 +2,13 @@
     "files.associations": {
         "cmath": "c",
         "cstddef": "c",
-        "ios": "c"
+        "ios": "c",
+        "type_traits": "c",
+        "memory": "cpp",
+        "system_error": "cpp",
+        "vector": "cpp",
+        "xstring": "cpp",
+        "compare": "c"
     },
     "cmake.configureOnOpen": true
 }

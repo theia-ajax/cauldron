@@ -28,4 +28,5 @@
 #define JSMN_PARENT_LINKS
 #include "jsmn.h"
 
+#define HASH_IMPLEMENTATION
 #include "hash.h"

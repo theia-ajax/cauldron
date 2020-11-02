@@ -6,7 +6,7 @@
 #include <math.h>
 
 #define TX_PI 3.14159265358979f
-#define TX_EPSILON 1e-4f;
+#define TX_EPSILON 1e-6f
 
 struct vector2 {
     union {
@@ -74,6 +74,9 @@ float clampf(const float v, const float min, const float max);
 float lerpf(const float a, const float b, const float t);
 float nsinf(const float t); // normalized sin [0-1] result with normalized input [0-1] (1 tau)
 float signf(const float v); // v < 0 -> -1, v == 0 > 0, v > 0 -> 1
+#define abs(v) ((v) < 0) ? (-(v)) : (v)
+#define approx(a, b) ((abs(a - b)) < TX_EPSILON)
+#define near_zero(v) approx(v, 0)
 #define mod(a, b) ((((a) % (b)) + (b)) % (b))
 
 vec2 vec2_add(const vec2 a, const vec2 b);

@@ -7,18 +7,88 @@
 #include "tx_math.h"
 #include <stdio.h>
 
+// private system interface and structs
+enum actor_move_result_flags {
+    ActorMoveResultFlags_None = 0,
+    ActorMoveResultFlags_StayGround = 1 << 0,
+    ActorMoveResultFlags_StayWall = 1 << 1,
+    ActorMoveResultFlags_StayCeiling = 1 << 2,
+    ActorMoveResultFlags_HitGround = 1 << 3,
+    ActorMoveResultFlags_HitWall = 1 << 4,
+    ActorMoveResultFlags_HitCeiling = 1 << 5,
+    ActorMoveResultFlags_LeftGround = 1 << 6,
+    ActorMoveResultFlags_LeftWall = 1 << 7,
+    ActorMoveResultFlags_LeftCeiling = 1 << 8,
+};
+
+struct actor_move_result {
+    vec2 new_pos;
+    vec2 new_vel;
+    uint16_t flags;
+};
+
+typedef struct actor_system_conf {
+    // how much time after the actor has input a platform-drop input do we keep platform-drop mode
+    // on
+    float platform_drop_time;
+
+    // how much time after the actor becomes ungrounded is the actor still allowed to jump as if
+    // they are grounded.
+    float jump_ungrounded_time;
+
+    float jump_force;
+    float max_speed;
+    float move_accel;
+    float grav_scale;
+    float step_height;
+} actor_system_conf;
+
+typedef struct actor_jump_frame_report {
+    uint32_t frame; // current frame
+    uint64_t ticks;
+    float pos_y; // frame y position
+    float vel_y; // frame y velocity
+    float acl_y; // frame y acceleration (gravity)
+    float dt;    // frame delta time
+} actor_jump_frame_report;
+
+typedef struct actor_jump_report {
+    bool track_enabled;
+    uint32_t current_frame;
+    actor_jump_frame_report* jump_frames; // stbds_arr
+} actor_jump_report;
+
 // private system state
 actor* actors = NULL;
-actor_handle* handles = NULL;
+actor_handle* actor_handles = NULL;
 uint32_t* free_stack = NULL;
 uint16_t actors_gen = 1;
+actor_system_conf config;
 
 actor_jump_report current_jump_report;
 actor_jump_report* saved_jump_reports = NULL;
 
+HANDLE(actor) * actor_system_get_handles()
+{
+    return actor_handles;
+}
+
+size_t actor_system_get_handles_len()
+{
+    return arrlen(actor_handles);
+}
+
+// private system interface
+
+void start_jump_report(void);
+void jump_record_frame(float pos_y, float vel_y, float acl_y, float dt);
+void end_jump_report(void);
+
 void start_jump_report(void)
 {
-    TX_ASSERT(!current_jump_report.track_enabled);
+    if (!current_jump_report.track_enabled) {
+        end_jump_report();
+    }
 
     current_jump_report.track_enabled = true;
     current_jump_report.current_frame = 0;
@@ -69,29 +139,7 @@ void save_last_jump_report(void)
     }
 }
 
-actor_system_conf config;
-
-// private system interface and structs
-enum actor_move_result_flags {
-    ActorMoveResultFlags_None = 0,
-    ActorMoveResultFlags_StayGround = 1 << 0,
-    ActorMoveResultFlags_StayWall = 1 << 1,
-    ActorMoveResultFlags_StayCeiling = 1 << 2,
-    ActorMoveResultFlags_HitGround = 1 << 3,
-    ActorMoveResultFlags_HitWall = 1 << 4,
-    ActorMoveResultFlags_HitCeiling = 1 << 5,
-    ActorMoveResultFlags_LeftGround = 1 << 6,
-    ActorMoveResultFlags_LeftWall = 1 << 7,
-    ActorMoveResultFlags_LeftCeiling = 1 << 8,
-};
-
-struct actor_move_result {
-    vec2 new_pos;
-    vec2 new_vel;
-    uint16_t flags;
-};
-
-struct actor_move_result actor_calc_move(actor* actor, float dt)
+struct actor_move_result actor_calc_move(const actor* actor, float dt)
 {
     const bool was_contact_ground = (actor->flags & ActorFlags_OnGround) != 0;
     const bool was_contact_wall = (actor->flags & ActorFlags_OnWall) != 0;
@@ -103,7 +151,7 @@ struct actor_move_result actor_calc_move(actor* actor, float dt)
     vec2 total_delta = vec2_scale(actor->vel, dt);
     vec2 new_pos = actor->pos;
     vec2 new_vel = actor->vel;
-    uint8_t move_flags = ActorMoveResultFlags_None;
+    uint16_t move_flags = ActorMoveResultFlags_None;
     vec2 remaining_delta = vec2_abs(total_delta);
     int safety_valve = 1000;
 
@@ -151,8 +199,6 @@ struct actor_move_result actor_calc_move(actor* actor, float dt)
 
                 if (phys_solid(left, bottom + delta.y, ground_mask)
                     || phys_solid(right, bottom + delta.y, ground_mask)) {
-                    actor->flags |= ActorFlags_OnGround;
-
                     // snap down
                     while (!phys_solid(left, new_pos.y, ground_mask)
                            && !phys_solid(right, new_pos.y, ground_mask)) {
@@ -242,26 +288,6 @@ void push_free_index(uint32_t index)
     arrput(free_stack, index);
 }
 
-actor_handle actor_make_handle(uint32_t index, uint32_t gen)
-{
-    return (actor_handle){(gen << 16) + (index & 0xFFFF)};
-}
-
-uint32_t actor_handle_index(actor_handle handle)
-{
-    return handle.value & 0xFFFF;
-}
-
-inline uint16_t actor_handle_gen(actor_handle handle)
-{
-    return (uint16_t)(handle.value >> 16);
-}
-
-inline bool actor_handle_valid(actor_handle handle)
-{
-    return handle.value != 0;
-}
-
 // actor game systems interface implementation
 void actor_system_init(game_settings* settings)
 {
@@ -271,11 +297,11 @@ void actor_system_init(game_settings* settings)
     };
 
     arrsetlen(actors, 64);
-    arrsetlen(handles, 64);
+    arrsetlen(actor_handles, 64);
     arrsetcap(free_stack, 64);
 
     memset(actors, 0, sizeof(actor) * arrlen(actors));
-    memset(handles, 0, sizeof(actor_handle) * arrlen(handles));
+    memset(actor_handles, 0, sizeof(actor_handle) * arrlen(actor_handles));
 
     for (int i = 63; i >= 0; --i) {
         arrput(free_stack, i);
@@ -285,7 +311,7 @@ void actor_system_init(game_settings* settings)
 void actor_system_shutdown(void)
 {
     arrfree(actors);
-    arrfree(handles);
+    arrfree(actor_handles);
     arrfree(free_stack);
 }
 
@@ -300,24 +326,49 @@ void actor_system_unload_level(void)
 void actor_system_update(float dt)
 {
     for (int i = 0; i < arrlen(actors); ++i) {
-        if (!VALID_HANDLE(handles[i])) {
+        if (!VALID_HANDLE(actor_handles[i])) {
             continue;
         }
 
         actor* actor = &actors[i];
 
+        // begin new movement
         actor->last_pos = actor->pos;
 
-        // update timers
-        if (actor->platform_timer > 0.0f) actor->platform_timer -= dt;
-
+        // apply inputs
         const vec2 input_move = actor->input.move;
 
         if (input_move.x > 0) {
             actor->flags &= ~ActorFlags_FacingLeft;
         } else if (input_move.x < 0) {
             actor->flags |= ActorFlags_FacingLeft;
+        }
+
+        if (input_move.y > 0.0f) {
+            actor->platform_timer = config.platform_drop_time;
         } else {
+            if (actor->platform_timer > 0.0f) actor->platform_timer -= dt;
+        }
+
+        if (actor->jump_forgive_timer > 0.0f) {
+            actor->jump_forgive_timer -= dt;
+            if (actor->input.jump) {
+                actor->vel.y = -18.0f;
+                if (i == 0) start_jump_report();
+            }
+        }
+
+        bool apply_friction = false;
+        if (!near_zero(input_move.x)) {
+            actor->vel.x += 30.0f * dt * input_move.x;
+        } else {
+            apply_friction = true;
+        }
+
+        // apply physics
+        actor->vel.x = clampf(actor->vel.x, -8.0f, 8.0f);
+
+        if (apply_friction) {
             if (actor->vel.x < 0) {
                 actor->vel.x = min(actor->vel.x + 10.0f * dt, 0);
             } else if (actor->vel.x > 0) {
@@ -325,34 +376,20 @@ void actor_system_update(float dt)
             }
         }
 
-        if (input_move.y > 0.0f) {
-            actor->platform_timer = config.platform_drop_time;
-        }
-
-        actor->vel.x += 30.0f * dt * input_move.x;
-        actor->vel.x = clampf(actor->vel.x, -8.0f, 8.0f);
-
         if ((actor->flags & ActorFlags_OnGround) != 0 && actor->vel.y > 0.0f) {
             actor->vel.y = 8.0f;
-            end_jump_report();
+            if (i == 0) end_jump_report();
         } else {
             actor->vel.y += phys_get_gravity() * dt;
         }
 
-        if (actor->jump_forgive_timer > 0.0f) {
-            actor->jump_forgive_timer -= dt;
-            if (actor->input.jump) {
-                actor->vel.y = -18.0f;
-                start_jump_report();
-            }
-        }
+        if (i == 0) jump_record_frame(actor->pos.y, actor->vel.y, phys_get_gravity(), dt);
 
-        jump_record_frame(actor->pos.y, actor->vel.y, phys_get_gravity(), dt);
-
+        // move the actor with physics
         struct actor_move_result move_result = actor_calc_move(actor, dt);
 
-        actor->flags &= ~0xE;
-        actor->flags |= ((move_result.flags & 0x7) << 1);
+        actor->flags &= ~0x1FF;
+        actor->flags |= move_result.flags;
 
         if ((actor->flags & ActorFlags_OnGround) != 0) {
             actor->jump_forgive_timer = config.jump_ungrounded_time;
@@ -364,25 +401,6 @@ void actor_system_update(float dt)
 
         actor->pos = move_result.new_pos;
         actor->vel = move_result.new_vel;
-
-        if (actor->track_jump.enable) {
-            if (actor->pos.y < actor->track_jump.min_y) {
-                actor->track_jump.min_y = actor->pos.y;
-            }
-            if ((move_result.flags & ActorMoveResultFlags_HitGround) != 0) {
-                actor->track_jump.enable = false;
-
-                float jump_height = actor->pos.y - actor->track_jump.min_y;
-                uint64_t jump_time =
-                    (get_ticks() - actor->track_jump.start_time) * 1000 / get_frequency();
-
-                printf(
-                    "Jump\n\tStart Y:\t%0.3f\n\tHeight:\t\t%0.3f\n\tTime:\t\t%llums\n\n",
-                    actor->track_jump.start_y,
-                    jump_height,
-                    jump_time);
-            }
-        }
     }
 }
 
@@ -487,47 +505,45 @@ void actor_system_debug_ui(void)
     // igEnd();
 }
 
-actor_handle actor_create(actor_desc* desc)
+// public system implementation
+
+actor_handle actor_create(const actor_desc* const desc)
 {
     if (desc) {
         uint32_t index;
         if (pop_free_index(&index)) {
-            handles[index] = actor_make_handle(index, actors_gen);
+            actor_handles[index] = actor_handle_make(index, actors_gen);
             actors[index] = (actor){
                 .pos = desc->pos,
                 .hsize = desc->hsize,
                 .sprite_id = desc->sprite_id,
             };
-            return handles[index];
+            return actor_handles[index];
         }
     }
     return INVALID_HANDLE(actor);
 }
 
-void actor_destroy(actor_handle handle)
+bool actor_destroy(actor_handle handle)
 {
     actor* actor = actor_get(handle);
     if (actor) {
         ptrdiff_t index = actor - actors;
-        uint16_t gen = actor_handle_gen(handles[index]);
-        handles[index] = INVALID_HANDLE(actor);
+        uint16_t gen = actor_handle_get_gen(actor_handles[index]);
+        actor_handles[index] = INVALID_HANDLE(actor);
         push_free_index((uint32_t)index);
         if (gen >= actors_gen) {
             ++actors_gen;
         }
+        return true;
     }
+    return false;
 }
 
 actor* actor_get(actor_handle handle)
 {
     if (actor_handle_valid(handle)) {
-        uint32_t index = actor_handle_index(handle);
-
-        if (index < arrlen(actors)) {
-            if (actor_handle_gen(handle) == actor_handle_gen(handles[index])) {
-                return &actors[index];
-            }
-        }
+        return &actors[actor_handle_get_index(handle)];
     }
     return NULL;
 }

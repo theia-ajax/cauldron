@@ -8,8 +8,8 @@ typedef struct sprite_handle {
     uint32_t value;
 } sprite_handle;
 
-void spr_init();
-void spr_shutdown();
+void spr_init(void);
+void spr_shutdown(void);
 void spr_render(int width, int height);
 
 typedef enum sprite_flip {

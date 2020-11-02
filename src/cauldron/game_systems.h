@@ -1,6 +1,8 @@
 #pragma once
 
 #include "game_systems_forward.h"
+#include "handle.h"
+#include "hash.h"
 #include "tx_types.h"
 
 typedef void (*game_system_init)(game_settings*);

@@ -570,8 +570,8 @@
 				"tileRenderMode": "Stretch",
 				"maxPerLevel": 0,
 				"limitBehavior": "DiscardOldOnes",
-				"pivotX": 0,
-				"pivotY": 0,
+				"pivotX": 0.5,
+				"pivotY": 1,
 				"fieldDefs": []
 			}
 		],
@@ -612,16 +612,64 @@
 					"autoTiles": [],
 					"seed": 808594,
 					"gridTiles": [],
-					"entityInstances": [ { "__identifier": "PlayerSpawn", "__cx": 16, "__cy": 4, "defUid": 6, "x": 132, "y": 40, "fieldInstances": [ {
-						"__identifier": "Facing",
-						"__value": "Right",
-						"__type": "LocalEnum.Facing",
-						"defUid": 12,
-						"realEditorValues": [ {
-							"id": "V_String",
-							"params": [ "Right" ]
-						} ]
-					} ] } ]
+					"entityInstances": [
+						{ "__identifier": "PlayerSpawn", "__cx": 15, "__cy": 5, "defUid": 6, "x": 124, "y": 48, "fieldInstances": [ {
+							"__identifier": "Facing",
+							"__value": "Right",
+							"__type": "LocalEnum.Facing",
+							"defUid": 12,
+							"realEditorValues": [ {
+								"id": "V_String",
+								"params": [ "Right" ]
+							} ]
+						} ] },
+						{ "__identifier": "EnemySpawn01", "__cx": 11, "__cy": 5, "defUid": 82, "x": 92, "y": 48, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 25, "__cy": 6, "defUid": 82, "x": 204, "y": 56, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 23, "__cy": 11, "defUid": 82, "x": 188, "y": 96, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 4, "__cy": 11, "defUid": 82, "x": 36, "y": 96, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 4, "__cy": 16, "defUid": 82, "x": 36, "y": 136, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 10, "__cy": 14, "defUid": 82, "x": 84, "y": 120, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 4, "__cy": 6, "defUid": 82, "x": 36, "y": 56, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 11, "__cy": 7, "defUid": 82, "x": 92, "y": 64, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 16, "__cy": 10, "defUid": 82, "x": 132, "y": 88, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 19, "__cy": 9, "defUid": 82, "x": 156, "y": 80, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 20, "__cy": 5, "defUid": 82, "x": 164, "y": 48, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 9, "__cy": 4, "defUid": 82, "x": 76, "y": 40, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 5, "__cy": 14, "defUid": 82, "x": 44, "y": 120, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 6, "__cy": 16, "defUid": 82, "x": 52, "y": 136, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 12, "__cy": 13, "defUid": 82, "x": 100, "y": 112, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 20, "__cy": 16, "defUid": 82, "x": 164, "y": 136, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 8, "__cy": 16, "defUid": 82, "x": 68, "y": 136, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 29, "__cy": 16, "defUid": 82, "x": 236, "y": 136, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 26, "__cy": 13, "defUid": 82, "x": 212, "y": 112, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 19, "__cy": 13, "defUid": 82, "x": 156, "y": 112, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 17, "__cy": 7, "defUid": 82, "x": 140, "y": 64, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 11, "__cy": 11, "defUid": 82, "x": 92, "y": 96, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 18, "__cy": 4, "defUid": 82, "x": 148, "y": 40, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 28, "__cy": 6, "defUid": 82, "x": 228, "y": 56, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 2, "__cy": 6, "defUid": 82, "x": 20, "y": 56, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 6, "__cy": 6, "defUid": 82, "x": 52, "y": 56, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 4, "__cy": 3, "defUid": 82, "x": 36, "y": 32, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 7, "__cy": 2, "defUid": 82, "x": 60, "y": 24, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 6, "__cy": 4, "defUid": 82, "x": 52, "y": 40, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 9, "__cy": 6, "defUid": 82, "x": 76, "y": 56, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 6, "__cy": 8, "defUid": 82, "x": 52, "y": 72, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 5, "__cy": 9, "defUid": 82, "x": 44, "y": 80, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 6, "__cy": 11, "defUid": 82, "x": 52, "y": 96, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 14, "__cy": 9, "defUid": 82, "x": 116, "y": 80, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 13, "__cy": 4, "defUid": 82, "x": 108, "y": 40, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 16, "__cy": 3, "defUid": 82, "x": 132, "y": 32, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 21, "__cy": 3, "defUid": 82, "x": 172, "y": 32, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 25, "__cy": 3, "defUid": 82, "x": 204, "y": 32, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 27, "__cy": 4, "defUid": 82, "x": 220, "y": 40, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 30, "__cy": 5, "defUid": 82, "x": 244, "y": 48, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 13, "__cy": 11, "defUid": 82, "x": 108, "y": 96, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 12, "__cy": 9, "defUid": 82, "x": 100, "y": 80, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 14, "__cy": 7, "defUid": 82, "x": 116, "y": 64, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 20, "__cy": 11, "defUid": 82, "x": 164, "y": 96, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 18, "__cy": 11, "defUid": 82, "x": 148, "y": 96, "fieldInstances": [] },
+						{ "__identifier": "EnemySpawn01", "__cx": 17, "__cy": 13, "defUid": 82, "x": 140, "y": 112, "fieldInstances": [] }
+					]
 				},
 				{
 					"__identifier": "CollisionEnvironment",
