@@ -1,8 +1,10 @@
 {
     "options": {
         "video": {
-            "display_width": 2240,
-            "display_height": 1260,
+            "_display_width": 2240,
+            "_display_height": 1260,
+            "display_width": 1920,
+            "display_height": 1080,
             "enable_vsync": true,
             "frame_limit": 0
         }

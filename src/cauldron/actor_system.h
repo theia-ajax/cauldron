@@ -17,7 +17,18 @@ enum actor_flags {
     ActorFlags_LeftGround = 1 << 6,
     ActorFlags_LeftWall = 1 << 7,
     ActorFlags_LeftCeiling = 1 << 8,
+
     ActorFlags_FacingLeft = 1 << 9,
+
+    ActorFlags_AllMoveResultOnFlags =
+        ActorFlags_OnGround | ActorFlags_OnWall | ActorFlags_OnCeiling,
+    ActorFlags_AllMoveResultHitFlags =
+        ActorFlags_HitGround | ActorFlags_HitWall | ActorFlags_HitCeiling,
+    ActorFlags_AllMoveResultLeftFlags =
+        ActorFlags_LeftGround | ActorFlags_LeftWall | ActorFlags_LeftCeiling,
+    ActorFlags_AllMoveResultFlags = ActorFlags_AllMoveResultOnFlags
+                                    | ActorFlags_AllMoveResultHitFlags
+                                    | ActorFlags_AllMoveResultLeftFlags,
 };
 
 typedef struct actor {

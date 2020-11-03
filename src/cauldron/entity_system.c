@@ -50,7 +50,7 @@ void entity_system_load_level(game_level* level)
                         .actor_desc =
                             &(actor_desc){
                                 .pos = {.x = ent_def->world_x, .y = ent_def->world_y},
-                                .hsize = {.x = 0.45f, .y = 0.495f},
+                                .hsize = {.x = 0.45f, .y = 0.375f},
                                 .sprite_id = 2,
                             },
                         .bot_desc =
@@ -66,6 +66,11 @@ void entity_system_load_level(game_level* level)
 
 void entity_system_unload_level(void)
 {
+    for (int i = 0; i < MAX_ENTITIES; ++i) {
+        entity_destroy(ent_map.ents[i]);
+        actor_destroy(ent_map.actors[i]);
+        bot_destroy(ent_map.bots[i]);
+    }
 }
 
 void entity_system_update(float dt)

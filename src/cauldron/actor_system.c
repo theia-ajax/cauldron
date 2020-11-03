@@ -388,7 +388,7 @@ void actor_system_update(float dt)
         // move the actor with physics
         struct actor_move_result move_result = actor_calc_move(actor, dt);
 
-        actor->flags &= ~0x1FF;
+        actor->flags &= ~ActorFlags_AllMoveResultFlags;
         actor->flags |= move_result.flags;
 
         if ((actor->flags & ActorFlags_OnGround) != 0) {

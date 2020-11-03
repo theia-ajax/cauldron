@@ -1,4 +1,5 @@
 
+#include "event_system.h"
 #include "game_level.h"
 #include "game_settings.h"
 #include "game_systems.h"
@@ -64,6 +65,7 @@ struct config_ui configui = {
 
 int main(int argc, char* argv[])
 {
+    event_system_init();
     load_game_settings(NULL);
 
     game_settings* const settings = get_game_settings();
@@ -163,6 +165,11 @@ int main(int argc, char* argv[])
             dbgui.show = !dbgui.show;
         }
 
+        if (txinp_get_key_down(TXINP_KEY_F5)) {
+            game_systems_unload_level();
+            game_systems_load_level(&proj.levels[0]);
+        }
+
         int update_count = 0;
         uint64_t frequency = get_frequency();
         uint64_t ticks = get_ticks();
@@ -201,6 +208,7 @@ int main(int argc, char* argv[])
             const float ms_per_update = 1.0f / dbgui.update_frequency;
 
             while (lag >= ms_per_update && update_count < dbgui.maximum_updates) {
+                event_system_process_queue();
                 game_systems_update(ms_per_update);
                 ++update_count;
                 lag -= ms_per_update;
@@ -212,6 +220,7 @@ int main(int argc, char* argv[])
             game_systems_render(rt);
         } else if (dbgui.update_mode == UpdateMode_VariableFrameRate) {
             update_count = 1;
+            event_system_process_queue();
             game_systems_update(dt);
             txinp_update();
             game_systems_render(0.0f);
@@ -321,6 +330,8 @@ int main(int argc, char* argv[])
     sg_shutdown();
     SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(window);
+
+    event_system_shutdown();
 
     return 0;
 }
