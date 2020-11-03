@@ -45,7 +45,7 @@ param (
     [string] $configuration = "Debug"
 )
 
-$dependencies = "sdl2", "stb", "imgui[sdl2-binding,opengl3-gl3w-binding]", "sokol", "gl3w", "cgltf", "jsmn"
+$dependencies = "sdl2", "stb", "sokol", "gl3w", "jsmn", "xxhash"
 
 $toolset_version_from_product_line = @{
     "2019" = "16"
