@@ -56,7 +56,7 @@ typedef struct actor_desc {
 
 // public system interface
 
-HANDLE(actor) * actor_system_get_handles();
+actor_handle* actor_system_get_handles();
 size_t actor_system_get_handles_len();
 actor_handle actor_create(const actor_desc* const desc);
 bool actor_destroy(actor_handle handle);

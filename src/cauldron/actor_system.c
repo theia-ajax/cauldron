@@ -68,7 +68,7 @@ actor_system_conf config;
 actor_jump_report current_jump_report;
 actor_jump_report* saved_jump_reports = NULL;
 
-HANDLE(actor) * actor_system_get_handles()
+actor_handle* actor_system_get_handles()
 {
     return actor_handles;
 }
