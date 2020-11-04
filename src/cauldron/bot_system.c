@@ -1,6 +1,8 @@
 #include "bot_system.h"
 
 #include "entity_system.h"
+#include "event_messages.h"
+#include "event_system.h"
 #include "stb_ds.h"
 
 bot* bots = NULL;
@@ -9,13 +11,14 @@ bot_handle* bot_handles = NULL;
 uint16_t bot_gen = 1;
 int bot_free = 0;
 
-static void on_entity_created(entity ent)
+static void on_entity_spawned(event_message* message)
 {
-    bot_handle* bot_h = entity_get_bot(ent);
-    actor_handle* actor_h = entity_get_actor(ent);
-    if (bot_h && actor_h && bot_handle_valid(*bot_h)) {
-        bot* bot = bot_get(*bot_h);
-        bot->actor = *actor_h;
+    on_entity_spawned_event* on_entity_spawned = (on_entity_spawned_event*)message;
+
+    bot* bot = bot_get(on_entity_spawned->h_bot);
+    actor* actor = actor_get(on_entity_spawned->h_actor);
+    if (bot && actor) {
+        bot->actor = on_entity_spawned->h_actor;
     }
 }
 
@@ -27,7 +30,7 @@ void bot_system_init(game_settings* settings)
     memset(bots, 0, sizeof(bot) * 64);
     memset(bot_handles, 0, sizeof(bot_handle) * 64);
 
-    entity_system_subscribe_entity_created(on_entity_created);
+    event_system_subscribe(EventMessage_OnEntitySpawned, on_entity_spawned);
 }
 
 void bot_system_shutdown(void)

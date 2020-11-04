@@ -23,7 +23,7 @@ typedef uint8_t opqaue_message_storage[MAX_EVENT_MESSAGE_SIZE_IN_BYTES];
 // update with new message types as new types are added
 message_type_meta message_meta_data[EventMessage_Count] = {
     {.message_type = EventMessage_None, .message_size = 0},
-    {.message_type = EventMessage_SpawnEntity, .message_size = sizeof(spawn_entity_event)},
+    {.message_type = EventMessage_OnEntitySpawned, .message_size = sizeof(on_entity_spawned_event)},
 };
 
 // system state
@@ -46,6 +46,7 @@ void event_system_init(void)
         subscriptions[i] = (event_subscription){
             .msg_type = (event_message_type)i,
         };
+        arrsetcap(subscriptions[i].subscribers, 32);
     }
 }
 
@@ -67,6 +68,7 @@ void event_system_process_queue(void)
         for (int i = 0; i < arrlen(receivers); ++i) {
             receivers[i](event);
         }
+        ++head;
     }
     queue_tail = 0;
 }

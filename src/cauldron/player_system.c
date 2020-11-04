@@ -2,6 +2,7 @@
 
 #include "actor_system.h"
 #include "entity_system.h"
+#include "event_system.h"
 #include "game_level.h"
 #include "hash.h"
 #include "sprite_draw.h"
@@ -19,18 +20,18 @@ enum {
 
 struct player players[ACTOR_COUNT_MAX];
 
-static void on_entity_created(entity ent)
+static void on_entity_spawned(event_message* event)
 {
-    bot_handle* bot_h = entity_get_bot(ent);
-    actor_handle* actor_h = entity_get_actor(ent);
-    if (!bot_h && actor_h && actor_handle_valid(*actor_h)) {
-        players[0].actor = *actor_h;
+    on_entity_spawned_event* on_entity_spawned = (on_entity_spawned_event*)event;
+
+    if (!VALID_HANDLE(on_entity_spawned->h_bot)) {
+        players[0].actor = on_entity_spawned->h_actor;
     }
 }
 
 void player_system_init(game_settings* settings)
 {
-    entity_system_subscribe_entity_created(on_entity_created);
+    event_system_subscribe(EventMessage_OnEntitySpawned, on_entity_spawned);
 }
 
 void player_system_shutdown(void)

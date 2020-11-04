@@ -1,5 +1,7 @@
 #pragma once
 
+#include "event_messages.h"
+
 typedef enum event_message_type event_message_type;
 typedef struct event_message event_message;
 typedef void (*event_receiver_proc)(event_message*);

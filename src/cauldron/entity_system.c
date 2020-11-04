@@ -2,28 +2,78 @@
 
 #include "actor_system.h"
 #include "bot_system.h"
+#include "event_messages.h"
+#include "event_system.h"
 #include "game_level.h"
 #include "hash.h"
+#include <stb_ds.h>
 
-enum { MAX_ENTITIES = 128 };
+typedef void (*spawn_entity_proc)(entity_desc*);
 
-struct {
-    entity_handle ents[MAX_ENTITIES];
-    actor_handle actors[MAX_ENTITIES];
-    bot_handle bots[MAX_ENTITIES];
-} ent_map;
+typedef struct entity_spawn_data {
+    uint32_t key;
+    spawn_entity_proc spawn_proc;
+} entity_spawn_data;
 
-uint16_t ent_gen = 1;
+entity_spawn_data* ent_spawn_data = NULL;
 
-entity_created_cb* entity_created_subscribers = NULL;
+void spawn_entity_player_spawn(entity_desc* desc)
+{
+    game_ent_def_inst* ent_def = desc->ent_def;
+    desc->actor_desc = &(actor_desc){
+        .pos = {.x = ent_def->world_x, .y = ent_def->world_y},
+        .hsize = {.x = 0.45f, .y = 0.495f},
+        .sprite_id = 1,
+    };
+
+    entity_create(desc);
+}
+
+void spawn_entity_enemy_01_spawn(entity_desc* desc)
+{
+    game_ent_def_inst* ent_def = desc->ent_def;
+    desc->actor_desc = &(actor_desc){
+        .pos = {.x = ent_def->world_x, .y = ent_def->world_y},
+        .hsize = {.x = 0.45f, .y = 0.375f},
+        .sprite_id = 2,
+    };
+    desc->bot_desc = &(bot_desc){
+        .type = BotType_Default,
+    };
+
+    entity_create(desc);
+}
+
+void register_entity(char* name, spawn_entity_proc spawn_proc)
+{
+    uint32_t key = hash_string(name);
+    stbds_hmputs(
+        ent_spawn_data,
+        ((entity_spawn_data){
+            .key = hash_string(name),
+            .spawn_proc = spawn_proc,
+        }));
+}
+
+void spawn_entity(entity_desc* desc)
+{
+    if (desc && desc->ent_def) {
+        entity_spawn_data spawn_data = hmgets(ent_spawn_data, desc->ent_def->id);
+        if (spawn_data.spawn_proc) {
+            spawn_data.spawn_proc(desc);
+        }
+    }
+}
 
 void entity_system_init(game_settings* settings)
 {
-    memset(&ent_map, 0, sizeof(ent_map));
+    register_entity("PlayerSpawn", spawn_entity_player_spawn);
+    register_entity("EnemySpawn01", spawn_entity_enemy_01_spawn);
 }
 
 void entity_system_shutdown(void)
 {
+    hmfree(ent_spawn_data);
 }
 
 void entity_system_load_level(game_level* level)
@@ -36,29 +86,7 @@ void entity_system_load_level(game_level* level)
         if (layer->type == GAME_LAYER_TYPE_ENTITIES) {
             for (int j = 0; j < arrlen(layer->ents); ++j) {
                 game_ent_def_inst* ent_def = &layer->ents[j];
-                if (ent_def->id == ent_player_spawn) {
-                    entity_create(&(entity_desc){
-                        .actor_desc =
-                            &(actor_desc){
-                                .pos = {.x = ent_def->world_x, .y = ent_def->world_y},
-                                .hsize = {.x = 0.45f, .y = 0.495f},
-                                .sprite_id = 1,
-                            },
-                    });
-                } else if (ent_def->id == ent_en01_spawn) {
-                    entity_create(&(entity_desc){
-                        .actor_desc =
-                            &(actor_desc){
-                                .pos = {.x = ent_def->world_x, .y = ent_def->world_y},
-                                .hsize = {.x = 0.45f, .y = 0.375f},
-                                .sprite_id = 2,
-                            },
-                        .bot_desc =
-                            &(bot_desc){
-                                .type = BotType_Default,
-                            },
-                    });
-                }
+                spawn_entity(&(entity_desc){.ent_def = ent_def});
             }
         }
     }
@@ -66,11 +94,6 @@ void entity_system_load_level(game_level* level)
 
 void entity_system_unload_level(void)
 {
-    for (int i = 0; i < MAX_ENTITIES; ++i) {
-        entity_destroy(ent_map.ents[i]);
-        actor_destroy(ent_map.actors[i]);
-        bot_destroy(ent_map.bots[i]);
-    }
 }
 
 void entity_system_update(float dt)
@@ -81,81 +104,16 @@ void entity_system_render(float rt)
 {
 }
 
-entity* entity_system_get_handles(void)
-{
-    return ent_map.ents;
-}
-
-size_t entity_system_get_handles_len(void)
-{
-    return MAX_ENTITIES;
-}
-
-entity entity_create(const entity_desc* const desc)
+void entity_create(const entity_desc* const desc)
 {
     if (desc) {
-        int found = -1;
-        for (int i = 0; i < MAX_ENTITIES; ++i) {
-            if (!entity_handle_valid(ent_map.ents[i])) {
-                found = i;
-                break;
-            }
-        }
+        on_entity_spawned_event event = (on_entity_spawned_event){
+            .event.msg_type = EventMessage_OnEntitySpawned,
+        };
 
-        if (found < 0) {
-            return INVALID_HANDLE(entity);
-        }
+        event.h_actor = actor_create(desc->actor_desc);
+        event.h_bot = bot_create(desc->bot_desc);
 
-        entity ent = entity_handle_make((uint32_t)found, ent_gen);
-        ent_map.ents[found] = ent;
-
-        if (desc->actor_desc) {
-            ent_map.actors[found] = actor_create(desc->actor_desc);
-        }
-
-        if (desc->bot_desc) {
-            ent_map.bots[found] = bot_create(desc->bot_desc);
-        }
-
-        for (int i = 0; i < arrlen(entity_created_subscribers); ++i) {
-            entity_created_subscribers[i](ent);
-        }
+        event_send((event_message*)&event);
     }
-    return INVALID_HANDLE(entity);
-}
-
-bool entity_destroy(entity ent)
-{
-    if (entity_handle_valid(ent)) {
-        uint32_t index = entity_handle_get_index(ent);
-
-        actor_destroy(ent_map.actors[index]);
-        bot_destroy(ent_map.bots[index]);
-
-        return true;
-    }
-
-    return false;
-}
-
-void entity_system_subscribe_entity_created(entity_created_cb callback)
-{
-    arrput(entity_created_subscribers, callback);
-}
-
-actor_handle* entity_get_actor(entity ent)
-{
-    if (entity_handle_valid(ent)
-        && actor_handle_valid(ent_map.actors[entity_handle_get_index(ent)])) {
-        return &ent_map.actors[entity_handle_get_index(ent)];
-    }
-    return NULL;
-}
-
-bot_handle* entity_get_bot(entity ent)
-{
-    if (entity_handle_valid(ent) && bot_handle_valid(ent_map.bots[entity_handle_get_index(ent)])) {
-        return &ent_map.bots[entity_handle_get_index(ent)];
-    }
-    return NULL;
 }

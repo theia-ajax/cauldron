@@ -8,7 +8,8 @@
         "system_error": "cpp",
         "vector": "cpp",
         "xstring": "cpp",
-        "compare": "c"
+        "compare": "c",
+        "xtr1common": "cpp"
     },
     "cmake.configureOnOpen": true
 }
