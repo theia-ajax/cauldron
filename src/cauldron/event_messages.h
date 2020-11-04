@@ -25,4 +25,5 @@ typedef struct on_entity_spawned_event {
     uint32_t ent_id;
     actor_handle h_actor;
     bot_handle h_bot;
+    uint32_t player_id;
 } on_entity_spawned_event;

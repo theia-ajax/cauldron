@@ -11,6 +11,9 @@ typedef struct game_settings {
             int frame_limit;
         } video;
     } options;
+    struct {
+        uint32_t level_id;
+    } startup;
 } game_settings;
 
 game_settings* const get_game_settings();

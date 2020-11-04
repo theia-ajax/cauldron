@@ -25,6 +25,7 @@ void spawn_entity_player_spawn(entity_desc* desc)
         .hsize = {.x = 0.45f, .y = 0.495f},
         .sprite_id = 1,
     };
+    desc->player_id = 1;
 
     entity_create(desc);
 }
@@ -109,10 +110,11 @@ void entity_create(const entity_desc* const desc)
     if (desc) {
         on_entity_spawned_event event = (on_entity_spawned_event){
             .event.msg_type = EventMessage_OnEntitySpawned,
+            .ent_id = desc->ent_def->id,
+            .h_actor = actor_create(desc->actor_desc),
+            .h_bot = bot_create(desc->bot_desc),
+            .player_id = desc->player_id,
         };
-
-        event.h_actor = actor_create(desc->actor_desc);
-        event.h_bot = bot_create(desc->bot_desc);
 
         event_send((event_message*)&event);
     }

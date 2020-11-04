@@ -15,17 +15,21 @@ struct player {
 };
 
 enum {
-    ACTOR_COUNT_MAX = 4,
+    MAX_PLAYERS = 4,
 };
 
-struct player players[ACTOR_COUNT_MAX];
+struct player players[MAX_PLAYERS];
 
 static void on_entity_spawned(event_message* event)
 {
     on_entity_spawned_event* on_entity_spawned = (on_entity_spawned_event*)event;
 
-    if (!VALID_HANDLE(on_entity_spawned->h_bot)) {
-        players[0].actor = on_entity_spawned->h_actor;
+    uint32_t pid = on_entity_spawned->player_id;
+    if (pid > 0) {
+        int player_idx = (int)(pid - 1);
+        if (VALID_INDEX(player_idx, MAX_PLAYERS)) {
+            players[player_idx].actor = on_entity_spawned->h_actor;
+        }
     }
 }
 

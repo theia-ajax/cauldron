@@ -65,7 +65,6 @@ struct config_ui configui = {
 
 int main(int argc, char* argv[])
 {
-    event_system_init();
     load_game_settings(NULL);
 
     game_settings* const settings = get_game_settings();
@@ -107,7 +106,17 @@ int main(int argc, char* argv[])
     dbgui.load_proj_ms = (float)(load_ticks * 1000) / SDL_GetPerformanceFrequency();
 
     game_systems_init(&(game_settings){0});
-    game_systems_load_level(&proj.levels[0]);
+
+    int index = -1;
+    for (int i = 0; i < arrlen(proj.levels); ++i) {
+        if (proj.levels[i].name_id == settings->startup.level_id) {
+            index = i;
+            break;
+        }
+    }
+    if (index >= 0) {
+        game_systems_load_level(&proj.levels[index]);
+    }
 
     igCreateContext(NULL);
     ImGuiIO* io = igGetIO();
@@ -208,7 +217,6 @@ int main(int argc, char* argv[])
             const float ms_per_update = 1.0f / dbgui.update_frequency;
 
             while (lag >= ms_per_update && update_count < dbgui.maximum_updates) {
-                event_system_process_queue();
                 game_systems_update(ms_per_update);
                 ++update_count;
                 lag -= ms_per_update;
@@ -220,40 +228,12 @@ int main(int argc, char* argv[])
             game_systems_render(rt);
         } else if (dbgui.update_mode == UpdateMode_VariableFrameRate) {
             update_count = 1;
-            event_system_process_queue();
             game_systems_update(dt);
             txinp_update();
             game_systems_render(0.0f);
         }
 
-        for (int lid = 0; lid < arrlen(proj.levels[0].layer_insts); ++lid) {
-            game_layer_inst layer = proj.levels[0].layer_insts[lid];
-            for (uint32_t x = 0; x < layer.cell_w; x++) {
-                for (uint32_t y = 0; y < layer.cell_h; y++) {
-                    if (layer.type != GAME_LAYER_TYPE_TILES) {
-                        continue;
-                    }
-                    game_tile tile = layer.tiles[x + y * layer.cell_w];
-                    int id = tile.value;
-                    sprite_flip flip = SPRITE_FLIP_NONE;
-                    if ((tile.flags & GAME_TILE_FLAGS_FLIP_X) != 0) {
-                        flip |= SPRITE_FLIP_X;
-                    }
-                    if ((tile.flags & GAME_TILE_FLAGS_FILP_Y) != 0) {
-                        flip |= SPRITE_FLIP_Y;
-                    }
-
-                    if (id > 0) {
-                        spr_draw(&(sprite_draw_desc){
-                            .sprite_id = id,
-                            .pos = (vec2){.x = (float)x, .y = (float)y},
-                            .flip = flip,
-                        });
-                    }
-                }
-            }
-        }
-
+    
         // render
         int cur_width, cur_height;
         SDL_GetWindowSize(window, &cur_width, &cur_height);
@@ -330,8 +310,6 @@ int main(int argc, char* argv[])
     sg_shutdown();
     SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(window);
-
-    event_system_shutdown();
 
     return 0;
 }

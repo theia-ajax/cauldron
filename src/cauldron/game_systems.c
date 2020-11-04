@@ -5,6 +5,8 @@
 #include "actor_system.h"
 #include "bot_system.h"
 #include "entity_system.h"
+#include "event_system.h"
+#include "level_system.h"
 #include "phys_system.h"
 #include "player_system.h"
 
@@ -40,11 +42,34 @@ game_system* g_game_systems;
 
 void game_systems_init(game_settings* settings)
 {
-    arrput(g_game_systems, GAME_SYSTEM(entity));
+    stbds_arrput(
+        g_game_systems,
+        ((game_system){
+            .name = "event_system",
+            .init = event_system_init,
+            .shutdown = event_system_shutdown,
+            .update = event_system_process_queue,
+        }));
+    arrput(
+        g_game_systems,
+        ((game_system){
+            .name = "entity_system",
+            .init = entity_system_init,
+            .shutdown = entity_system_shutdown,
+            .load_level = entity_system_load_level,
+        }));
     arrput(g_game_systems, GAME_SYSTEM(player));
     arrput(g_game_systems, GAME_SYSTEM(bot));
     arrput(g_game_systems, GAME_SYSTEM_DEBUG(actor));
     arrput(g_game_systems, GAME_SYSTEM(phys));
+    arrput(
+        g_game_systems,
+        ((game_system){
+            .name = "level_system",
+            .load_level = level_system_load_level,
+            .unload_level = level_system_unload_level,
+            .render = level_system_render,
+        }));
 
     for (int i = 0; i < arrlen(g_game_systems); ++i) {
         if (g_game_systems[i].init) {
