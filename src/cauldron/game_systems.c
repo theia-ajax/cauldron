@@ -42,13 +42,39 @@ game_system* g_game_systems;
 
 void game_systems_init(game_settings* settings)
 {
+    /*
+    Descriptions of current game systems
+
+    event_system: Handles an event queue for passing messages between systems. Should be run
+    before other systems for consistency of message delivery.
+
+    entity_system: Shortcuts for spawning entities which may have handles to data in multiple
+    systems.
+
+    player_system: Directs player input from input sources into game actions.
+
+    bot_system: NPC controllers that produce game actions.
+
+    actor_system: Handles characters that can walk and jump.
+
+    phys_system: Stores physical representation of the world and responds to physics queries.
+
+    level_system: Right now just renders the currently loaded level.
+
+    */
+
     stbds_arrput(
         g_game_systems,
         ((game_system){
             .name = "event_system",
             .init = event_system_init,
             .shutdown = event_system_shutdown,
+            .load_level = NULL,
+            .unload_level = NULL,
             .update = event_system_process_queue,
+            .render = NULL,
+            .config_ui = NULL,
+            .debug_ui = NULL,
         }));
     arrput(
         g_game_systems,

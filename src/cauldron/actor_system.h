@@ -1,7 +1,6 @@
 #pragma once
 
 #include "game_systems_forward.h"
-#include "handle.h"
 #include "tx_math.h"
 #include "tx_types.h"
 
@@ -31,6 +30,9 @@ enum actor_flags {
                                     | ActorFlags_AllMoveResultLeftFlags,
 };
 
+typedef struct actor_def actor_def;
+DEFINE_HANDLE(actor_def);
+
 typedef struct actor {
     vec2 pos;
     vec2 last_pos;
@@ -48,6 +50,9 @@ typedef struct actor {
 
 DEFINE_HANDLE(actor);
 
+DECLARE_POOL(actor);
+DECLARE_POOL(actor_def);
+
 typedef struct actor_desc {
     vec2 pos;
     vec2 hsize;
@@ -56,11 +61,13 @@ typedef struct actor_desc {
 
 // public system interface
 
-actor_handle* actor_system_get_handles();
-size_t actor_system_get_handles_len();
 actor_handle actor_create(const actor_desc* const desc);
 bool actor_destroy(actor_handle handle);
-actor* actor_get(actor_handle handle);
+
+actor_def_handle actor_def_create(actor_def def);
+bool actor_def_destroy(actor_def_handle handle);
+actor_def* actor_def_get_name(char* name);
+actor_def* actor_def_get_id(uint32_t name_id);
 
 // game systems interface
 

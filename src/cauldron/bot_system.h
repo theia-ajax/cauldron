@@ -34,8 +34,8 @@ typedef struct bot_desc {
     bot_type type;
 } bot_desc;
 
-HANDLE(bot) * bot_system_get_handles();
-size_t bot_system_get_handles_len();
+HANDLE(bot) * get_bot_handles();
+size_t get_bot_handles_len();
 bot_handle bot_create(const bot_desc* const desc);
 bool bot_destroy(bot_handle handle);
 bot* bot_get(bot_handle handle);

@@ -44,6 +44,8 @@ inline bool raw_handle_is_valid(raw_handle handle, raw_handle* handles, size_t l
 #define VALID_HANDLE(handle) (handle.value != INVALID_RAW_HANDLE)
 
 #define HANDLE_FUNC(type, func) type##_handle_##func
+#define GET_HANDLES_FUNC(type) get_##type##_handles
+#define GET_HANDLES_LEN_FUNC(type) get_##type##_handles_len
 
 #define DEFINE_HANDLE_MAKE_FUNC(type)                                                              \
     inline HANDLE(type) HANDLE_FUNC(type, make)(uint32_t index, uint32_t gen)                      \
@@ -74,17 +76,15 @@ inline bool raw_handle_is_valid(raw_handle handle, raw_handle* handles, size_t l
     inline bool HANDLE_FUNC(type, valid)(HANDLE(type) handle)                                      \
     {                                                                                              \
         return raw_handle_is_valid(                                                                \
-            handle.value,                                                                          \
-            (raw_handle*)type##_system_get_handles(),                                              \
-            type##_system_get_handles_len());                                                      \
+            handle.value, (raw_handle*)GET_HANDLES_FUNC(type)(), GET_HANDLES_LEN_FUNC(type)());    \
     }
 
 #define DEFINE_HANDLE(type)                                                                        \
     typedef struct HANDLE(type) {                                                                  \
         raw_handle value;                                                                          \
     } HANDLE(type);                                                                                \
-    HANDLE(type) * type##_system_get_handles(void);                                                \
-    size_t type##_system_get_handles_len(void);                                                    \
+    HANDLE(type) * GET_HANDLES_FUNC(type)(void);                                                   \
+    size_t GET_HANDLES_LEN_FUNC(type)(void);                                                       \
     DEFINE_HANDLE_MAKE_FUNC(type)                                                                  \
     DEFINE_HANDLE_GET_INDEX_FUNC(type)                                                             \
     DEFINE_HANDLE_GET_GEN_FUNC(type)                                                               \

@@ -77,12 +77,12 @@ void bot_system_render(float rt)
 {
 }
 
-HANDLE(bot) * bot_system_get_handles()
+HANDLE(bot) * get_bot_handles()
 {
     return bot_handles;
 }
 
-size_t bot_system_get_handles_len()
+size_t get_bot_handles_len()
 {
     return arrlen(bot_handles);
 }

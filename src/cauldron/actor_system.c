@@ -4,6 +4,7 @@
 #include "profile.h"
 #include "sprite_draw.h"
 #include "stb_ds.h"
+#include "system_pool.h"
 #include "tx_math.h"
 #include <stdio.h>
 
@@ -58,84 +59,136 @@ typedef struct actor_jump_report {
     actor_jump_frame_report* jump_frames; // stbds_arr
 } actor_jump_report;
 
+typedef struct actor_def {
+    uint32_t name_id;
+    vec2 hsize;
+    uint32_t sprite_id;
+    float jump_force;
+} actor_def;
+
 // private system state
-actor* actors = NULL;
-actor_handle* actor_handles = NULL;
-uint32_t* free_stack = NULL;
-uint16_t actors_gen = 1;
+
+DEFINE_POOL(actor)
+DEFINE_POOL(actor_def)
+
 actor_system_conf config;
 
 actor_jump_report current_jump_report;
 actor_jump_report* saved_jump_reports = NULL;
-
-actor_handle* actor_system_get_handles()
-{
-    return actor_handles;
-}
-
-size_t actor_system_get_handles_len()
-{
-    return arrlen(actor_handles);
-}
 
 // private system interface
 
 void start_jump_report(void);
 void jump_record_frame(float pos_y, float vel_y, float acl_y, float dt);
 void end_jump_report(void);
+void save_last_jump_report(void);
 
-void start_jump_report(void)
+struct actor_move_result actor_calc_move(const actor* actor, float dt);
+
+// actor game systems interface implementation
+void actor_system_init(game_settings* settings)
 {
-    if (!current_jump_report.track_enabled) {
-        end_jump_report();
-    }
+    config = (actor_system_conf){
+        .platform_drop_time = 0.1f,
+        .jump_ungrounded_time = 0.05f,
+    };
 
-    current_jump_report.track_enabled = true;
-    current_jump_report.current_frame = 0;
-
-    if (current_jump_report.jump_frames) {
-        arrfree(current_jump_report.jump_frames);
-        current_jump_report.jump_frames = NULL;
-    }
+    actor_pool_set_capacity(64);
+    actor_def_pool_set_capacity(16);
 }
 
-void jump_record_frame(float pos_y, float vel_y, float acl_y, float dt)
+void actor_system_shutdown(void)
 {
-    if (!current_jump_report.track_enabled) {
-        return;
-    }
-
-    arrput(
-        current_jump_report.jump_frames,
-        ((actor_jump_frame_report){
-            .frame = current_jump_report.current_frame,
-            .ticks = get_ticks(),
-            .pos_y = pos_y,
-            .vel_y = vel_y,
-            .acl_y = acl_y,
-            .dt = dt,
-        }));
-
-    current_jump_report.current_frame++;
+    actor_pool_free();
+    actor_def_pool_free();
 }
 
-void end_jump_report(void)
+void actor_system_load_level(game_level* level)
 {
-    current_jump_report.track_enabled = false;
 }
 
-void save_last_jump_report(void)
+void actor_system_unload_level(void)
 {
-    if (!current_jump_report.track_enabled) {
-        actor_jump_frame_report* copy = NULL;
-        size_t len = arrlen(current_jump_report.jump_frames);
-        arrsetlen(copy, len);
-        for (int i = 0; i < len; ++i) {
-            copy[i] = current_jump_report.jump_frames[i];
+}
+
+void actor_system_update(float dt)
+{
+    for (int i = 0; i < arrlen(actor_pool.data); ++i) {
+        if (!VALID_HANDLE(actor_pool.handles[i])) {
+            continue;
         }
-        actor_jump_report jr = current_jump_report;
-        jr.jump_frames = copy;
-        arrput(saved_jump_reports, jr);
+
+        actor* actor = &actor_pool.data[i];
+
+        // begin new movement
+        actor->last_pos = actor->pos;
+
+        // apply inputs
+        const vec2 input_move = actor->input.move;
+
+        if (input_move.x > 0) {
+            actor->flags &= ~ActorFlags_FacingLeft;
+        } else if (input_move.x < 0) {
+            actor->flags |= ActorFlags_FacingLeft;
+        }
+
+        if (input_move.y > 0.0f) {
+            actor->platform_timer = config.platform_drop_time;
+        } else {
+            if (actor->platform_timer > 0.0f) actor->platform_timer -= dt;
+        }
+
+        if (actor->jump_forgive_timer > 0.0f) {
+            actor->jump_forgive_timer -= dt;
+            if (actor->input.jump) {
+                actor->vel.y = -18.0f;
+                if (i == 0) start_jump_report();
+            }
+        }
+
+        bool apply_friction = false;
+        if (!near_zero(input_move.x)) {
+            actor->vel.x += 30.0f * dt * input_move.x;
+        } else {
+            apply_friction = true;
+        }
+
+        // apply physics
+        actor->vel.x = clampf(actor->vel.x, -8.0f, 8.0f);
+
+        if (apply_friction) {
+            if (actor->vel.x < 0) {
+                actor->vel.x = min(actor->vel.x + 10.0f * dt, 0);
+            } else if (actor->vel.x > 0) {
+                actor->vel.x = max(actor->vel.x - 10.0f * dt, 0);
+            }
+        }
+
+        if ((actor->flags & ActorFlags_OnGround) != 0 && actor->vel.y > 0.0f) {
+            actor->vel.y = 8.0f;
+            if (i == 0) end_jump_report();
+        } else {
+            actor->vel.y += phys_get_gravity() * dt;
+        }
+
+        if (i == 0) jump_record_frame(actor->pos.y, actor->vel.y, phys_get_gravity(), dt);
+
+        // move the actor with physics
+        struct actor_move_result move_result = actor_calc_move(actor, dt);
+
+        actor->flags &= ~ActorFlags_AllMoveResultFlags;
+        actor->flags |= move_result.flags;
+
+        if ((actor->flags & ActorFlags_OnGround) != 0) {
+            actor->jump_forgive_timer = config.jump_ungrounded_time;
+        }
+
+        // if ((move_result.flags & ActorMoveResultFlags_HitWall) != 0) printf("wall\n");
+        // if ((move_result.flags & ActorMoveResultFlags_HitGround) != 0) printf("floor\n");
+        // if ((move_result.flags & ActorMoveResultFlags_HitCeiling) != 0) printf("ceiling\n");
+
+        actor->pos = move_result.new_pos;
+        actor->vel = move_result.new_vel;
     }
 }
 
@@ -270,144 +323,65 @@ struct actor_move_result actor_calc_move(const actor* actor, float dt)
     };
 }
 
-bool pop_free_index(uint32_t* out)
+void start_jump_report(void)
 {
-    size_t len = arrlen(free_stack);
-    if (len > 0) {
-        if (out) {
-            *out = free_stack[len - 1];
-        }
-        arrdel(free_stack, len - 1);
-        return true;
+    if (!current_jump_report.track_enabled) {
+        end_jump_report();
     }
-    return false;
-}
 
-void push_free_index(uint32_t index)
-{
-    arrput(free_stack, index);
-}
+    current_jump_report.track_enabled = true;
+    current_jump_report.current_frame = 0;
 
-// actor game systems interface implementation
-void actor_system_init(game_settings* settings)
-{
-    config = (actor_system_conf){
-        .platform_drop_time = 0.1f,
-        .jump_ungrounded_time = 0.05f,
-    };
-
-    arrsetlen(actors, 64);
-    arrsetlen(actor_handles, 64);
-    arrsetcap(free_stack, 64);
-
-    memset(actors, 0, sizeof(actor) * arrlen(actors));
-    memset(actor_handles, 0, sizeof(actor_handle) * arrlen(actor_handles));
-
-    for (int i = 63; i >= 0; --i) {
-        arrput(free_stack, i);
+    if (current_jump_report.jump_frames) {
+        arrfree(current_jump_report.jump_frames);
+        current_jump_report.jump_frames = NULL;
     }
 }
 
-void actor_system_shutdown(void)
+void jump_record_frame(float pos_y, float vel_y, float acl_y, float dt)
 {
-    arrfree(actors);
-    arrfree(actor_handles);
-    arrfree(free_stack);
+    if (!current_jump_report.track_enabled) {
+        return;
+    }
+
+    arrput(
+        current_jump_report.jump_frames,
+        ((actor_jump_frame_report){
+            .frame = current_jump_report.current_frame,
+            .ticks = get_ticks(),
+            .pos_y = pos_y,
+            .vel_y = vel_y,
+            .acl_y = acl_y,
+            .dt = dt,
+        }));
+
+    current_jump_report.current_frame++;
 }
 
-void actor_system_load_level(game_level* level)
+void end_jump_report(void)
 {
+    current_jump_report.track_enabled = false;
 }
 
-void actor_system_unload_level(void)
+void save_last_jump_report(void)
 {
-}
-
-void actor_system_update(float dt)
-{
-    for (int i = 0; i < arrlen(actors); ++i) {
-        if (!VALID_HANDLE(actor_handles[i])) {
-            continue;
+    if (!current_jump_report.track_enabled) {
+        actor_jump_frame_report* copy = NULL;
+        size_t len = arrlen(current_jump_report.jump_frames);
+        arrsetlen(copy, len);
+        for (int i = 0; i < len; ++i) {
+            copy[i] = current_jump_report.jump_frames[i];
         }
-
-        actor* actor = &actors[i];
-
-        // begin new movement
-        actor->last_pos = actor->pos;
-
-        // apply inputs
-        const vec2 input_move = actor->input.move;
-
-        if (input_move.x > 0) {
-            actor->flags &= ~ActorFlags_FacingLeft;
-        } else if (input_move.x < 0) {
-            actor->flags |= ActorFlags_FacingLeft;
-        }
-
-        if (input_move.y > 0.0f) {
-            actor->platform_timer = config.platform_drop_time;
-        } else {
-            if (actor->platform_timer > 0.0f) actor->platform_timer -= dt;
-        }
-
-        if (actor->jump_forgive_timer > 0.0f) {
-            actor->jump_forgive_timer -= dt;
-            if (actor->input.jump) {
-                actor->vel.y = -18.0f;
-                if (i == 0) start_jump_report();
-            }
-        }
-
-        bool apply_friction = false;
-        if (!near_zero(input_move.x)) {
-            actor->vel.x += 30.0f * dt * input_move.x;
-        } else {
-            apply_friction = true;
-        }
-
-        // apply physics
-        actor->vel.x = clampf(actor->vel.x, -8.0f, 8.0f);
-
-        if (apply_friction) {
-            if (actor->vel.x < 0) {
-                actor->vel.x = min(actor->vel.x + 10.0f * dt, 0);
-            } else if (actor->vel.x > 0) {
-                actor->vel.x = max(actor->vel.x - 10.0f * dt, 0);
-            }
-        }
-
-        if ((actor->flags & ActorFlags_OnGround) != 0 && actor->vel.y > 0.0f) {
-            actor->vel.y = 8.0f;
-            if (i == 0) end_jump_report();
-        } else {
-            actor->vel.y += phys_get_gravity() * dt;
-        }
-
-        if (i == 0) jump_record_frame(actor->pos.y, actor->vel.y, phys_get_gravity(), dt);
-
-        // move the actor with physics
-        struct actor_move_result move_result = actor_calc_move(actor, dt);
-
-        actor->flags &= ~ActorFlags_AllMoveResultFlags;
-        actor->flags |= move_result.flags;
-
-        if ((actor->flags & ActorFlags_OnGround) != 0) {
-            actor->jump_forgive_timer = config.jump_ungrounded_time;
-        }
-
-        // if ((move_result.flags & ActorMoveResultFlags_HitWall) != 0) printf("wall\n");
-        // if ((move_result.flags & ActorMoveResultFlags_HitGround) != 0) printf("floor\n");
-        // if ((move_result.flags & ActorMoveResultFlags_HitCeiling) != 0) printf("ceiling\n");
-
-        actor->pos = move_result.new_pos;
-        actor->vel = move_result.new_vel;
+        actor_jump_report jr = current_jump_report;
+        jr.jump_frames = copy;
+        arrput(saved_jump_reports, jr);
     }
 }
 
 void actor_system_render(float rt)
 {
-    for (int i = 0; i < arrlen(actors); ++i) {
-        actor* actor = &actors[i];
+    for (int i = 0; i < arrlen(actor_pool.data); ++i) {
+        actor* actor = &actor_pool.data[i];
 
         sprite_flip flip =
             ((actor->flags & ActorFlags_FacingLeft) != 0) ? SPRITE_FLIP_X : SPRITE_FLIP_NONE;
@@ -469,56 +443,62 @@ void jump_report_ui(actor_jump_report* report)
     igSeparator();
 }
 
+void jump_report_window(void)
+{
+    igBegin("Jumps", NULL, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+
+    igBeginChildStr(
+        "Current Report",
+        (ImVec2){igGetWindowContentRegionWidth() * 0.25f, 0},
+        true,
+        ImGuiWindowFlags_None);
+    {
+        if (igButton("Save Last", (ImVec2){0})) {
+            save_last_jump_report();
+        }
+
+        jump_report_ui(&current_jump_report);
+    }
+    igEndChild();
+
+    igSameLine(0.0f, -1.0f);
+
+    igBeginChildStr("Saved Reports", (ImVec2){0}, true, ImGuiWindowFlags_None);
+    {
+        size_t len = arrlen(saved_jump_reports);
+        static int cur_idx = 0;
+
+        if (len > 0) {
+            igInputInt("Saved Id", &cur_idx, 1, 10, ImGuiInputTextFlags_None);
+            cur_idx = mod(cur_idx, (int)len);
+            jump_report_ui(&saved_jump_reports[cur_idx]);
+        }
+    }
+    igEndChild();
+
+    igEnd();
+}
+
 void actor_system_debug_ui(void)
 {
-    // igBegin("Jumps", NULL, ImGuiWindowFlags_AlwaysVerticalScrollbar);
-
-    // igBeginChildStr(
-    //     "Current Report",
-    //     (ImVec2){igGetWindowContentRegionWidth() * 0.25f, 0},
-    //     true,
-    //     ImGuiWindowFlags_None);
-    // {
-    //     if (igButton("Save Last", (ImVec2){0})) {
-    //         save_last_jump_report();
-    //     }
-
-    //     jump_report_ui(&current_jump_report);
-    // }
-    // igEndChild();
-
-    // igSameLine(0.0f, -1.0f);
-
-    // igBeginChildStr("Saved Reports", (ImVec2){0}, true, ImGuiWindowFlags_None);
-    // {
-    //     size_t len = arrlen(saved_jump_reports);
-    //     static int cur_idx = 0;
-
-    //     if (len > 0) {
-    //         igInputInt("Saved Id", &cur_idx, 1, 10, ImGuiInputTextFlags_None);
-    //         cur_idx = mod(cur_idx, (int)len);
-    //         jump_report_ui(&saved_jump_reports[cur_idx]);
-    //     }
-    // }
-    // igEndChild();
-
-    // igEnd();
+    // jump_report_window();
 }
 
 // public system implementation
 
+// actor implementation
 actor_handle actor_create(const actor_desc* const desc)
 {
     if (desc) {
-        uint32_t index;
-        if (pop_free_index(&index)) {
-            actor_handles[index] = actor_handle_make(index, actors_gen);
-            actors[index] = (actor){
+        actor_handle handle = actor_acquire();
+        if (VALID_HANDLE(handle)) {
+            uint32_t index = actor_handle_get_index(handle);
+            actor_pool.data[index] = (actor){
                 .pos = desc->pos,
                 .hsize = desc->hsize,
                 .sprite_id = desc->sprite_id,
             };
-            return actor_handles[index];
+            return handle;
         }
     }
     return INVALID_HANDLE(actor);
@@ -526,24 +506,56 @@ actor_handle actor_create(const actor_desc* const desc)
 
 bool actor_destroy(actor_handle handle)
 {
-    actor* actor = actor_get(handle);
-    if (actor) {
-        ptrdiff_t index = actor - actors;
-        uint16_t gen = actor_handle_get_gen(actor_handles[index]);
-        actor_handles[index] = INVALID_HANDLE(actor);
-        push_free_index((uint32_t)index);
-        if (gen >= actors_gen) {
-            ++actors_gen;
-        }
+    if (actor_handle_valid(handle)) {
+        actor_release(handle);
         return true;
     }
     return false;
 }
 
-actor* actor_get(actor_handle handle)
+// actor_def implementation
+actor_def_handle actor_def_create(actor_def def)
 {
-    if (actor_handle_valid(handle)) {
-        return &actors[actor_handle_get_index(handle)];
+
+    actor_def_handle handle = actor_def_acquire();
+    if (VALID_HANDLE(handle)) {
+        uint32_t index = actor_def_handle_get_index(handle);
+        actor_def_pool.data[index] = def;
+        return handle;
+    }
+    return INVALID_HANDLE(actor_def);
+}
+
+bool actor_def_destroy(actor_def_handle handle)
+{
+    if (actor_def_handle_valid(handle)) {
+        actor_def_release(handle);
+        return true;
+    }
+    return false;
+}
+
+actor_def* actor_def_get_name(char* name)
+{
+    if (name) {
+        return actor_def_get_id(hash_string(name));
+    } else {
+        return NULL;
+    }
+}
+
+actor_def* actor_def_get_id(uint32_t name_id)
+{
+    for (int i = 0; i < arrlen(actor_def_pool.handles); ++i) {
+        actor_def_handle handle = actor_def_pool.handles[i];
+        if (!VALID_HANDLE(handle)) {
+            continue;
+        }
+
+        actor_def* current = actor_def_get(handle);
+        if (current->name_id == name_id) {
+            return current;
+        }
     }
     return NULL;
 }
