@@ -10,34 +10,6 @@
 #include "phys_system.h"
 #include "player_system.h"
 
-#define GAME_SYS_FUNC(sys, func) sys##_system_##func
-
-#define GAME_SYSTEM(sys)                                                                           \
-    ((game_system){                                                                                \
-        .name = #sys "_system",                                                                    \
-        .init = GAME_SYS_FUNC(sys, init),                                                          \
-        .shutdown = GAME_SYS_FUNC(sys, shutdown),                                                  \
-        .load_level = GAME_SYS_FUNC(sys, load_level),                                              \
-        .unload_level = GAME_SYS_FUNC(sys, unload_level),                                          \
-        .update = GAME_SYS_FUNC(sys, update),                                                      \
-        .render = GAME_SYS_FUNC(sys, render),                                                      \
-        .config_ui = NULL,                                                                         \
-        .debug_ui = NULL,                                                                          \
-    })
-
-#define GAME_SYSTEM_DEBUG(sys)                                                                     \
-    ((game_system){                                                                                \
-        .name = #sys "_system",                                                                    \
-        .init = GAME_SYS_FUNC(sys, init),                                                          \
-        .shutdown = GAME_SYS_FUNC(sys, shutdown),                                                  \
-        .load_level = GAME_SYS_FUNC(sys, load_level),                                              \
-        .unload_level = GAME_SYS_FUNC(sys, unload_level),                                          \
-        .update = GAME_SYS_FUNC(sys, update),                                                      \
-        .render = GAME_SYS_FUNC(sys, render),                                                      \
-        .config_ui = GAME_SYS_FUNC(sys, config_ui),                                                \
-        .debug_ui = GAME_SYS_FUNC(sys, debug_ui),                                                  \
-    })
-
 game_system* g_game_systems;
 
 void game_systems_init(game_settings* settings)
@@ -84,10 +56,48 @@ void game_systems_init(game_settings* settings)
             .shutdown = entity_system_shutdown,
             .load_level = entity_system_load_level,
         }));
-    arrput(g_game_systems, GAME_SYSTEM(player));
-    arrput(g_game_systems, GAME_SYSTEM(bot));
-    arrput(g_game_systems, GAME_SYSTEM_DEBUG(actor));
-    arrput(g_game_systems, GAME_SYSTEM(phys));
+    arrput(
+        g_game_systems,
+        ((game_system){
+            .name = "player_system",
+            .init = player_system_init,
+            .shutdown = player_system_shutdown,
+            .update = player_system_update,
+        }));
+    arrput(
+        g_game_systems,
+        ((game_system){
+            .name = "bot_system",
+            .init = bot_system_init,
+            .shutdown = bot_system_shutdown,
+            .update = bot_system_update,
+        }));
+    arrput(
+        g_game_systems,
+        ((game_system){
+            .name = "actor_system",
+            .init = actor_system_init,
+            .shutdown = actor_system_shutdown,
+            .load_level = NULL,
+            .unload_level = NULL,
+            .update = actor_system_update,
+            .render = actor_system_render,
+            .config_ui = actor_system_config_ui,
+            .debug_ui = actor_system_debug_ui,
+        }));
+    arrput(
+        g_game_systems,
+        ((game_system){
+            .name = "phys_system",
+            .init = phys_system_init,
+            .shutdown = phys_system_shutdown,
+            .load_level = phys_system_load_level,
+            .unload_level = phys_system_unload_level,
+            .update = phys_system_update,
+            .render = NULL,
+            .config_ui = NULL,
+            .debug_ui = NULL,
+        }));
     arrput(
         g_game_systems,
         ((game_system){

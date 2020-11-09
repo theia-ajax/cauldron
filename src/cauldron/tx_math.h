@@ -165,7 +165,7 @@ quat quat_from_mat4x4(const mat4 m);
 // Implementation
 #ifdef TX_MATH_IMPLEMENTATION
 
-#pragma region Basic Math Implementation
+    #pragma region Basic Math Implementation
 
 // math utilities
 float clampf(const float v, const float min, const float max)
@@ -188,9 +188,9 @@ float signf(const float v)
     return (v == 0.0f) ? 0.0f : (v < 0) ? -1.0f : 1.0f;
 }
 
-#pragma endregion
+    #pragma endregion
 
-#pragma region Vec2 Implementation
+    #pragma region Vec2 Implementation
 vec2 vec2_add(const vec2 a, const vec2 b)
 {
     return (vec2){
@@ -293,9 +293,9 @@ vec2 vec2_abs(const vec2 v)
         .y = fabsf(v.y),
     };
 }
-#pragma endregion
+    #pragma endregion
 
-#pragma region Vec3 Implementation
+    #pragma region Vec3 Implementation
 vec3 vec3_add(const vec3 a, const vec3 b)
 {
     return (vec3){
@@ -416,9 +416,9 @@ vec3 vec3_abs(const vec3 v)
         .z = fabsf(v.z),
     };
 }
-#pragma endregion
+    #pragma endregion
 
-#pragma region Vec4 Implementation
+    #pragma region Vec4 Implementation
 vec4 vec4_add(const vec4 a, const vec4 b)
 {
     return (vec4){
@@ -541,9 +541,9 @@ vec4 vec4_abs(const vec4 v)
     };
 }
 
-#pragma endregion
+    #pragma endregion
 
-#pragma region Mat4 Implementation
+    #pragma region Mat4 Implementation
 mat4 mat4_identity()
 {
     return (mat4){
@@ -709,7 +709,7 @@ mat4 mat4_rotate(const mat4 m, float x, float y, float z, float radians)
     }
 }
 
-mat4 mat4_rotate_x(const mat4 m, const float radians)
+mat4 mat4_rotate_x(const mat4 m, float radians)
 {
     float s = sinf(radians);
     float c = cosf(radians);
@@ -943,9 +943,9 @@ mat4 mat4_arcball(const mat4 m, const vec2 a, const vec2 b, float s)
     const float radians = acosf(vec3_dot(a3, b3)) * s;
     return mat4_rotate(m, c.x, c.y, c.z, radians);
 }
-#pragma endregion
+    #pragma endregion
 
-#pragma region Quat Implementation
+    #pragma region Quat Implementation
 quat quat_identity()
 {
     // 0, 0, 0, 1
@@ -1070,6 +1070,6 @@ quat quat_from_mat4(const mat4 m)
         .w = m.m[i2][i1] - m.m[i1][i2] / (2.0f * r),
     };
 }
-#pragma endregion
+    #pragma endregion
 
 #endif // TX_MATH_IMPL

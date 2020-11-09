@@ -60,16 +60,39 @@ typedef struct actor_jump_report {
 } actor_jump_report;
 
 typedef struct actor_def {
-    uint32_t name_id;
     vec2 hsize;
     uint32_t sprite_id;
     float jump_force;
+    float max_speed;
+    float move_accel;
+    float grav_scale;
+    float step_height;
 } actor_def;
+
+actor_def default_actor_def()
+{
+    return (actor_def){
+        .hsize = {0.5f, 0.5f},
+        .jump_force = 15.f,
+        .max_speed = 10.0f,
+        .move_accel = 5.0f,
+        .grav_scale = 1.0f,
+        .step_height = 0.125f,
+    };
+}
+
+actor_def_handle h_default_actor_def;
 
 // private system state
 
 DEFINE_POOL(actor)
 DEFINE_POOL(actor_def)
+
+struct actor_def_entry {
+    uint32_t key;
+    actor_def_handle handle;
+};
+struct actor_def_entry* actor_defs_by_id = NULL;
 
 actor_system_conf config;
 
@@ -83,7 +106,7 @@ void jump_record_frame(float pos_y, float vel_y, float acl_y, float dt);
 void end_jump_report(void);
 void save_last_jump_report(void);
 
-struct actor_move_result actor_calc_move(const actor* actor, float dt);
+struct actor_move_result actor_calc_move(const actor* actor, const actor_def* actdef, float dt);
 
 // actor game systems interface implementation
 void actor_system_init(game_settings* settings)
@@ -95,20 +118,34 @@ void actor_system_init(game_settings* settings)
 
     actor_pool_set_capacity(64);
     actor_def_pool_set_capacity(16);
+
+    actor_def defaults = default_actor_def();
+    h_default_actor_def = actor_def_create("default", &defaults);
+
+    actor_def_create(
+        "PlayerSpawn",
+        &(actor_def){
+            .hsize = {.x = 0.45f, .y = 0.495f},
+            .sprite_id = 1,
+            .jump_force = 18.0f,
+            .max_speed = 8.0f,
+            .move_accel = 30.0f,
+            .grav_scale = 1.0f,
+            .step_height = 0.125f,
+        });
+
+    actor_def e01_spawn = default_actor_def();
+    e01_spawn.hsize = (vec2){.x = 0.45f, .y = 0.375f};
+    e01_spawn.sprite_id = 2;
+    actor_def_create("EnemySpawn01", &e01_spawn);
 }
 
 void actor_system_shutdown(void)
 {
+    hmfree(actor_defs_by_id);
+
     actor_pool_free();
     actor_def_pool_free();
-}
-
-void actor_system_load_level(game_level* level)
-{
-}
-
-void actor_system_unload_level(void)
-{
 }
 
 void actor_system_update(float dt)
@@ -119,6 +156,7 @@ void actor_system_update(float dt)
         }
 
         actor* actor = &actor_pool.data[i];
+        actor_def* actdef = actor_def_ptr(actor->h_actor_def);
 
         // begin new movement
         actor->last_pos = actor->pos;
@@ -141,20 +179,22 @@ void actor_system_update(float dt)
         if (actor->jump_forgive_timer > 0.0f) {
             actor->jump_forgive_timer -= dt;
             if (actor->input.jump) {
-                actor->vel.y = -18.0f;
+
+                actor->vel.y = -actdef->jump_force;
+
                 if (i == 0) start_jump_report();
             }
         }
 
         bool apply_friction = false;
         if (!near_zero(input_move.x)) {
-            actor->vel.x += 30.0f * dt * input_move.x;
+            actor->vel.x += actdef->move_accel * dt * input_move.x;
         } else {
             apply_friction = true;
         }
 
         // apply physics
-        actor->vel.x = clampf(actor->vel.x, -8.0f, 8.0f);
+        actor->vel.x = clampf(actor->vel.x, -actdef->max_speed, actdef->max_speed);
 
         if (apply_friction) {
             if (actor->vel.x < 0) {
@@ -168,13 +208,13 @@ void actor_system_update(float dt)
             actor->vel.y = 8.0f;
             if (i == 0) end_jump_report();
         } else {
-            actor->vel.y += phys_get_gravity() * dt;
+            actor->vel.y += phys_get_gravity() * dt * actdef->grav_scale;
         }
 
         if (i == 0) jump_record_frame(actor->pos.y, actor->vel.y, phys_get_gravity(), dt);
 
         // move the actor with physics
-        struct actor_move_result move_result = actor_calc_move(actor, dt);
+        struct actor_move_result move_result = actor_calc_move(actor, actdef, dt);
 
         actor->flags &= ~ActorFlags_AllMoveResultFlags;
         actor->flags |= move_result.flags;
@@ -192,7 +232,7 @@ void actor_system_update(float dt)
     }
 }
 
-struct actor_move_result actor_calc_move(const actor* actor, float dt)
+struct actor_move_result actor_calc_move(const actor* actor, const actor_def* actdef, float dt)
 {
     const bool was_contact_ground = (actor->flags & ActorFlags_OnGround) != 0;
     const bool was_contact_wall = (actor->flags & ActorFlags_OnWall) != 0;
@@ -217,15 +257,15 @@ struct actor_move_result actor_calc_move(const actor* actor, float dt)
 
         // horizontal movement
         {
-            float check_x = new_pos.x + delta.x + signf(delta.x) * actor->hsize.x;
+            float check_x = new_pos.x + delta.x + signf(delta.x) * actdef->hsize.x;
             float bottom = new_pos.y - 0.25f;
-            float top = new_pos.y - actor->hsize.y * 1.75f;
-            float center = new_pos.y - actor->hsize.y;
+            float top = new_pos.y - actdef->hsize.y * 1.75f;
+            float center = new_pos.y - actdef->hsize.y;
             if (!phys_solid(check_x, center, 1) /* && !phys_solid(check_x, top, 1)*/) {
                 new_pos.x += delta.x;
                 remaining_delta.x -= fabsf(delta.x);
             } else {
-                while (!phys_solid(new_pos.x + signf(delta.x) * actor->hsize.x, center, 1)
+                while (!phys_solid(new_pos.x + signf(delta.x) * actdef->hsize.x, center, 1)
                        /* && !phys_solid(new_pos.x + signf(delta.x) * actor->hsize.x, top, 1) */) {
                     new_pos.x += signf(delta.x) * solid_scan_dist;
                 }
@@ -240,15 +280,15 @@ struct actor_move_result actor_calc_move(const actor* actor, float dt)
 
         // vertical movement
         {
-            float left = new_pos.x - actor->hsize.x * 0.95f;
-            float right = new_pos.x + actor->hsize.x * 0.95f;
+            float left = new_pos.x - actdef->hsize.x * 0.95f;
+            float right = new_pos.x + actdef->hsize.x * 0.95f;
 
             if (delta.y >= 0.0f) {
                 // going down
                 uint16_t ground_mask =
                     (actor->vel.y < 0.0f || actor->platform_timer > 0.0f) ? 1 : 3;
                 float bottom = new_pos.y;
-                float top = new_pos.y - actor->hsize.y * 2.0f;
+                float top = new_pos.y - actdef->hsize.y * 2.0f;
 
                 if (phys_solid(left, bottom + delta.y, ground_mask)
                     || phys_solid(right, bottom + delta.y, ground_mask)) {
@@ -279,12 +319,12 @@ struct actor_move_result actor_calc_move(const actor* actor, float dt)
                 }
             } else {
                 // going up
-                if (phys_solid(left, new_pos.y - delta.y - actor->hsize.y * 2.0f, 1)
-                    || phys_solid(right, new_pos.y - delta.y - actor->hsize.y * 2.0f, 1)) {
+                if (phys_solid(left, new_pos.y - delta.y - actdef->hsize.y * 2.0f, 1)
+                    || phys_solid(right, new_pos.y - delta.y - actdef->hsize.y * 2.0f, 1)) {
 
                     // find contact point
-                    while (!phys_solid(left, new_pos.y - actor->hsize.y * 2.0f, 1)
-                           && !phys_solid(right, new_pos.y - actor->hsize.y * 2.0f, 1)) {
+                    while (!phys_solid(left, new_pos.y - actdef->hsize.y * 2.0f, 1)
+                           && !phys_solid(right, new_pos.y - actdef->hsize.y * 2.0f, 1)) {
                         new_pos.y -= solid_scan_dist;
                     }
 
@@ -381,6 +421,10 @@ void save_last_jump_report(void)
 void actor_system_render(float rt)
 {
     for (int i = 0; i < arrlen(actor_pool.data); ++i) {
+        if (!VALID_HANDLE(actor_pool.handles[i])) {
+            continue;
+        }
+
         actor* actor = &actor_pool.data[i];
 
         sprite_flip flip =
@@ -388,8 +432,10 @@ void actor_system_render(float rt)
 
         vec2 delta = vec2_sub(actor->pos, actor->last_pos);
 
+        actor_def* actdef = actor_def_ptr(actor->h_actor_def);
+
         spr_draw(&(sprite_draw_desc){
-            .sprite_id = actor->sprite_id,
+            .sprite_id = actdef->sprite_id,
             .pos = vec2_add(actor->pos, vec2_scale(delta, rt)),
             .origin = {.x = 0.5f, .y = 1.0f},
             .layer = -5.0f,
@@ -493,10 +539,11 @@ actor_handle actor_create(const actor_desc* const desc)
         actor_handle handle = actor_acquire();
         if (VALID_HANDLE(handle)) {
             uint32_t index = actor_handle_get_index(handle);
+            actor_def_handle h_actor_def =
+                (VALID_HANDLE(desc->h_actor_def)) ? desc->h_actor_def : h_default_actor_def;
             actor_pool.data[index] = (actor){
                 .pos = desc->pos,
-                .hsize = desc->hsize,
-                .sprite_id = desc->sprite_id,
+                .h_actor_def = h_actor_def,
             };
             return handle;
         }
@@ -514,14 +561,21 @@ bool actor_destroy(actor_handle handle)
 }
 
 // actor_def implementation
-actor_def_handle actor_def_create(actor_def def)
+actor_def_handle actor_def_create(char* name, actor_def* def)
 {
-
-    actor_def_handle handle = actor_def_acquire();
-    if (VALID_HANDLE(handle)) {
-        uint32_t index = actor_def_handle_get_index(handle);
-        actor_def_pool.data[index] = def;
-        return handle;
+    if (def) {
+        actor_def_handle handle = actor_def_acquire();
+        if (VALID_HANDLE(handle)) {
+            uint32_t index = actor_def_handle_get_index(handle);
+            hmputs(
+                actor_defs_by_id,
+                ((struct actor_def_entry){
+                    .key = hash_string(name),
+                    .handle = handle,
+                }));
+            actor_def_pool.data[index] = *def;
+            return handle;
+        }
     }
     return INVALID_HANDLE(actor_def);
 }
@@ -535,27 +589,16 @@ bool actor_def_destroy(actor_def_handle handle)
     return false;
 }
 
-actor_def* actor_def_get_name(char* name)
+actor_def_handle actor_def_get_name(char* name)
 {
     if (name) {
         return actor_def_get_id(hash_string(name));
     } else {
-        return NULL;
+        return INVALID_HANDLE(actor_def);
     }
 }
 
-actor_def* actor_def_get_id(uint32_t name_id)
+actor_def_handle actor_def_get_id(uint32_t name_id)
 {
-    for (int i = 0; i < arrlen(actor_def_pool.handles); ++i) {
-        actor_def_handle handle = actor_def_pool.handles[i];
-        if (!VALID_HANDLE(handle)) {
-            continue;
-        }
-
-        actor_def* current = actor_def_get(handle);
-        if (current->name_id == name_id) {
-            return current;
-        }
-    }
-    return NULL;
+    return hmgets(actor_defs_by_id, name_id).handle;
 }

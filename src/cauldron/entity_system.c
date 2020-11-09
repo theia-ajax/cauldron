@@ -21,9 +21,8 @@ void spawn_entity_player_spawn(entity_desc* desc)
 {
     game_ent_def_inst* ent_def = desc->ent_def;
     desc->actor_desc = &(actor_desc){
+        .h_actor_def = actor_def_get_id(ent_def->id),
         .pos = {.x = ent_def->world_x, .y = ent_def->world_y},
-        .hsize = {.x = 0.45f, .y = 0.495f},
-        .sprite_id = 1,
     };
     desc->player_id = 1;
 
@@ -34,9 +33,8 @@ void spawn_entity_enemy_01_spawn(entity_desc* desc)
 {
     game_ent_def_inst* ent_def = desc->ent_def;
     desc->actor_desc = &(actor_desc){
+        .h_actor_def = actor_def_get_id(ent_def->id),
         .pos = {.x = ent_def->world_x, .y = ent_def->world_y},
-        .hsize = {.x = 0.45f, .y = 0.375f},
-        .sprite_id = 2,
     };
     desc->bot_desc = &(bot_desc){
         .type = BotType_Default,

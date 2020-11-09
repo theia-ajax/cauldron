@@ -10,10 +10,7 @@
 
 void bot_system_init(game_settings* settings);
 void bot_system_shutdown(void);
-void bot_system_load_level(game_level* level);
-void bot_system_unload_level(void);
 void bot_system_update(float dt);
-void bot_system_render(float rt);
 
 // public system structures
 typedef enum bot_type {

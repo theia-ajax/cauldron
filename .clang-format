@@ -24,6 +24,7 @@ PointerAlignment: Left
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Custom
 PenaltyReturnTypeOnItsOwnLine: 100000
+IndentPPDirectives: BeforeHash
 BraceWrapping:
   AfterClass:      false
   AfterControlStatement: false

@@ -227,7 +227,7 @@ if ($steps.do_build) {
 
 if ($steps.do_clean) {
     # If we're cleaning manually call the asset_pipeline clean
-    .\asset_pipeline.ps1 -target $target -platform $platform -configuration $configuration -clean
+    #.\asset_pipeline.ps1 -target $target -platform $platform -configuration $configuration -clean
 }
 
 if ($steps.do_run) {

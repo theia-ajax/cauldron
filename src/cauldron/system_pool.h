@@ -8,7 +8,7 @@
 #define POOL_FREE_PROTO(type) void type##_pool_free()
 #define POOL_GET_HANDLES_PROTO(type) HANDLE(type) * get_##type##_handles()
 #define POOL_GET_HANDLES_LEN_PROTO(type) size_t get_##type##_handles_len()
-#define POOL_GET_ELEMENT_PTR_PROTO(type) type* type##_get(HANDLE(type) handle)
+#define POOL_GET_ELEMENT_PTR_PROTO(type) type* type##_ptr(HANDLE(type) handle)
 
 #define POOL_SET_CAPACITY(type)                                                                    \
     POOL_SET_CAPACITY_PROTO(type)                                                                  \

@@ -233,7 +233,6 @@ int main(int argc, char* argv[])
             game_systems_render(0.0f);
         }
 
-    
         // render
         int cur_width, cur_height;
         SDL_GetWindowSize(window, &cur_width, &cur_height);
@@ -271,7 +270,7 @@ int main(int argc, char* argv[])
             }
 
             actor_handle hactor = get_player_actor(0);
-            actor* actor = actor_get(hactor);
+            actor* actor = actor_ptr(hactor);
             if (actor) {
                 igText("Pos: %0.2f, %0.2f", actor->pos.x, actor->pos.y);
                 igText("Vel: %0.2f, %0.2f", actor->vel.x, actor->vel.y);
@@ -289,7 +288,23 @@ int main(int argc, char* argv[])
             igEnd();
         }
 
-        game_systems_debug_ui();
+        {
+            static bool show_debug_ui = true;
+            static bool menu_bar_editors_enabled = false;
+            static bool show_editor_actors = false;
+
+            igBegin("aaa", &show_debug_ui, ImGuiWindowFlags_MenuBar);
+            if (igBeginMenuBar()) {
+                if (igBeginMenu("Editors", &menu_bar_editors_enabled)) {
+                    igMenuItemBoolPtr("Actors", "ctrl+shift+a", &show_editor_actors, true);
+                    igEndMenu();
+                }
+                igEndMenuBar();
+            }
+            igEnd();
+
+            game_systems_debug_ui();
+        }
 
         igRender();
         ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());

@@ -37,9 +37,8 @@ typedef struct actor {
     vec2 pos;
     vec2 last_pos;
     vec2 vel;
-    vec2 hsize;
+    actor_def_handle h_actor_def;
     uint32_t flags;
-    uint32_t sprite_id;
     float platform_timer;
     float jump_forgive_timer;
     struct {
@@ -54,9 +53,8 @@ DECLARE_POOL(actor);
 DECLARE_POOL(actor_def);
 
 typedef struct actor_desc {
+    actor_def_handle h_actor_def;
     vec2 pos;
-    vec2 hsize;
-    uint32_t sprite_id;
 } actor_desc;
 
 // public system interface
@@ -64,17 +62,15 @@ typedef struct actor_desc {
 actor_handle actor_create(const actor_desc* const desc);
 bool actor_destroy(actor_handle handle);
 
-actor_def_handle actor_def_create(actor_def def);
+actor_def_handle actor_def_create(char* name, actor_def* def);
 bool actor_def_destroy(actor_def_handle handle);
-actor_def* actor_def_get_name(char* name);
-actor_def* actor_def_get_id(uint32_t name_id);
+actor_def_handle actor_def_get_name(char* name);
+actor_def_handle actor_def_get_id(uint32_t name_id);
 
 // game systems interface
 
 void actor_system_init(game_settings* settings);
 void actor_system_shutdown(void);
-void actor_system_load_level(game_level* level);
-void actor_system_unload_level(void);
 void actor_system_update(float dt);
 void actor_system_render(float rt);
 void actor_system_config_ui(void);

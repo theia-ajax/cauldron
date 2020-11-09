@@ -15,10 +15,11 @@ static void on_entity_spawned(event_message* message)
 {
     on_entity_spawned_event* on_entity_spawned = (on_entity_spawned_event*)message;
 
-    bot* bot = bot_get(on_entity_spawned->h_bot);
-    actor* actor = actor_get(on_entity_spawned->h_actor);
-    if (bot && actor) {
-        bot->actor = on_entity_spawned->h_actor;
+    actor_handle h_actor = on_entity_spawned->h_actor;
+    bot_handle h_bot = on_entity_spawned->h_bot;
+
+    if (bot_handle_valid(h_bot) && actor_handle_valid(h_actor)) {
+        bot_get(h_bot)->actor = h_actor;
     }
 }
 
@@ -38,15 +39,6 @@ void bot_system_shutdown(void)
     arrfree(bots);
     arrfree(bot_handles);
 }
-
-void bot_system_load_level(game_level* level)
-{
-}
-
-void bot_system_unload_level(void)
-{
-}
-
 void bot_system_update(float dt)
 {
     for (int i = 0; i < arrlen(bot_handles); ++i) {
@@ -56,7 +48,7 @@ void bot_system_update(float dt)
 
         bot* bot = bot_get(bot_handles[i]);
 
-        actor* actor = actor_get(bot->actor);
+        actor* actor = actor_ptr(bot->actor);
         if (actor) {
             if ((actor->flags & ActorFlags_HitWall) != 0) {
                 bot->dir *= -1.0f;
@@ -71,10 +63,6 @@ void bot_system_update(float dt)
             }
         }
     }
-}
-
-void bot_system_render(float rt)
-{
 }
 
 HANDLE(bot) * get_bot_handles()
