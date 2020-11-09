@@ -10,6 +10,6 @@
         }
     },
     "startup": {
-        "level": "Level"
+        "level": "Test_big_box"
     }
 }

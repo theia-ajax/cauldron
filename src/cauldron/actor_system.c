@@ -602,3 +602,20 @@ actor_def_handle actor_def_get_id(uint32_t name_id)
 {
     return hmgets(actor_defs_by_id, name_id).handle;
 }
+
+void actor_def_config_ui(actor_def_handle sel_handle)
+{
+    actor_def* actdef = actor_def_ptr(sel_handle);
+    // float jump_force;
+    //     float max_speed;
+    //     float move_accel;
+    //     float grav_scale;
+    //     float step_height;
+    igInputFloat2("half size", &actdef->hsize.x, "%0.3f", ImGuiInputTextFlags_CharsDecimal);
+    igInputFloat(
+        "gravity scale", &actdef->grav_scale, 0.1f, 0.5f, "%0.2f", ImGuiInputTextFlags_None);
+    igInputFloat("jump force", &actdef->jump_force, 0.1f, 0.5f, "%0.2f", ImGuiInputTextFlags_None);
+    igInputFloat("max speed", &actdef->max_speed, 0.1f, 0.5f, "%0.2f", ImGuiInputTextFlags_None);
+    igInputFloat(
+        "acceleration", &actdef->move_accel, 0.1f, 0.5f, "%0.2f", ImGuiInputTextFlags_None);
+}

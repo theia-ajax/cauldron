@@ -289,20 +289,67 @@ int main(int argc, char* argv[])
         }
 
         {
-            static bool show_debug_ui = true;
-            static bool menu_bar_editors_enabled = false;
+            static bool show_main_menu_bar = false;
+            static bool sel_menu_bar_editors_actors = false;
             static bool show_editor_actors = false;
+            static bool show_demo_window = false;
 
-            igBegin("aaa", &show_debug_ui, ImGuiWindowFlags_MenuBar);
-            if (igBeginMenuBar()) {
-                if (igBeginMenu("Editors", &menu_bar_editors_enabled)) {
-                    igMenuItemBoolPtr("Actors", "ctrl+shift+a", &show_editor_actors, true);
-                    igEndMenu();
-                }
-                igEndMenuBar();
+            if (igIsKeyPressed(TXINP_KEY_LALT, false)) {
+                show_main_menu_bar = !show_main_menu_bar;
             }
-            igEnd();
 
+            if (show_main_menu_bar) {
+                if (igBeginMainMenuBar()) {
+                    if (igBeginMenu("Editors", true)) {
+                        if (igMenuItemBoolPtr("Actors", NULL, &show_editor_actors, true)) {
+                        }
+                        igEndMenu();
+                    }
+                    if (igBeginMenu("Misc", true)) {
+                        if (igMenuItemBool("Demo Window", NULL, false, true)) {
+                            show_demo_window = !show_demo_window;
+                        }
+                        igEndMenu();
+                    }
+                    igEndMainMenuBar();
+                }
+            }
+
+            if (show_editor_actors) {
+                if (igBegin("Actor Definitions", &show_editor_actors, ImGuiWindowFlags_None)) {
+                    static actor_def_handle sel_handle = {INVALID_RAW_HANDLE};
+                    if (igBeginTabBar("def bar", ImGuiTabBarFlags_None)) {
+                        actor_def_handle* handles = get_actor_def_handles();
+                        size_t len = get_actor_def_handles_len();
+
+                        for (size_t i = 0; i < len; ++i) {
+                            actor_def_handle handle = handles[i];
+                            if (actor_def_handle_valid(handle)) {
+                                actor_def* actdef = actor_def_ptr(handle);
+                                char buffer[4] = {0};
+                                snprintf(buffer, 4, "%llu", i);
+                                ImGuiTabItemFlags tab_flags = ImGuiTabItemFlags_Button;
+                                if (handle.value == sel_handle.value) {
+                                    tab_flags |= ImGuiTabItemFlags_SetSelected;
+                                }
+                                if (igTabItemButton(buffer, tab_flags)) {
+                                    sel_handle = handle;
+                                }
+                            }
+                        }
+
+                        igEndTabBar();
+                    }
+                    if (VALID_HANDLE(sel_handle)) {
+                        actor_def_config_ui(sel_handle);
+                    }
+                    igEnd();
+                }
+            }
+
+            if (show_demo_window) {
+                igShowDemoWindow(&show_demo_window);
+            }
             game_systems_debug_ui();
         }
 

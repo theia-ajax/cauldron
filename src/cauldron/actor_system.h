@@ -66,6 +66,7 @@ actor_def_handle actor_def_create(char* name, actor_def* def);
 bool actor_def_destroy(actor_def_handle handle);
 actor_def_handle actor_def_get_name(char* name);
 actor_def_handle actor_def_get_id(uint32_t name_id);
+void actor_def_config_ui(actor_def_handle sel_handle);
 
 // game systems interface
 
