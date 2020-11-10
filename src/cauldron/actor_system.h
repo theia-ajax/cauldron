@@ -1,6 +1,7 @@
 #pragma once
 
 #include "game_systems_forward.h"
+#include "strhash.h"
 #include "tx_math.h"
 #include "tx_types.h"
 
@@ -49,8 +50,8 @@ typedef struct actor {
 
 DEFINE_HANDLE(actor);
 
-DECLARE_POOL(actor);
-DECLARE_POOL(actor_def);
+POOL_FORWARD(actor);
+POOL_FORWARD(actor_def);
 
 typedef struct actor_desc {
     actor_def_handle h_actor_def;
@@ -65,12 +66,13 @@ bool actor_destroy(actor_handle handle);
 actor_def_handle actor_def_create(char* name, actor_def* def);
 bool actor_def_destroy(actor_def_handle handle);
 actor_def_handle actor_def_get_name(char* name);
-actor_def_handle actor_def_get_id(uint32_t name_id);
-void actor_def_editor_window(bool* show_editor);
+actor_def_handle actor_def_get_id(strhash name_id);
+void actor_def_editor_window(bool* show);
 
 // game systems interface
 
 tx_result actor_system_init(game_settings* settings);
 void actor_system_term(void);
+void actor_system_unload_level(void);
 void actor_system_update(float dt);
 void actor_system_render(float rt);

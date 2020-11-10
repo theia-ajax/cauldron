@@ -83,6 +83,7 @@ tx_result game_systems_init(game_settings* settings)
             .name = "bot_system",
             .init = bot_system_init,
             .term = bot_system_term,
+            .unload_level = bot_system_unload_level,
             .update = bot_system_update,
         }));
     arrput(
@@ -92,7 +93,7 @@ tx_result game_systems_init(game_settings* settings)
             .init = actor_system_init,
             .term = actor_system_term,
             .load_level = NULL,
-            .unload_level = NULL,
+            .unload_level = actor_system_unload_level,
             .update = actor_system_update,
             .render = actor_system_render,
         }));
@@ -111,6 +112,8 @@ tx_result game_systems_init(game_settings* settings)
         g_game_systems,
         ((game_system){
             .name = "level_system",
+            .init = level_system_init,
+            .term = level_system_term,
             .load_level = level_system_load_level,
             .unload_level = level_system_unload_level,
             .render = level_system_render,

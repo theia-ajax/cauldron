@@ -45,7 +45,7 @@ void player_system_term(void)
 
 void player_system_update(float dt)
 {
-    if (VALID_HANDLE(players[0].actor)) {
+    if (actor_handle_valid(players[0].actor)) {
         vec2 input = {0};
         if (txinp_get_key(TXINP_KEY_LEFT)) input.x -= 1;
         if (txinp_get_key(TXINP_KEY_RIGHT)) input.x += 1;

@@ -10,6 +10,7 @@
 
 tx_result bot_system_init(game_settings* settings);
 void bot_system_term(void);
+void bot_system_unload_level(void);
 void bot_system_update(float dt);
 
 // public system structures
@@ -26,13 +27,11 @@ typedef struct bot {
 } bot;
 
 DEFINE_HANDLE(bot);
+POOL_FORWARD(bot);
 
 typedef struct bot_desc {
     bot_type type;
 } bot_desc;
 
-HANDLE(bot) * get_bot_handles();
-size_t get_bot_handles_len();
 bot_handle bot_create(const bot_desc* const desc);
 bool bot_destroy(bot_handle handle);
-bot* bot_get(bot_handle handle);

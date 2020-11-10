@@ -60,6 +60,7 @@ typedef struct actor_jump_report {
 } actor_jump_report;
 
 typedef struct actor_def {
+    strhash name_id;
     vec2 hsize;
     uint32_t sprite_id;
     float jump_force;
@@ -85,8 +86,8 @@ actor_def_handle h_default_actor_def;
 
 // private system state
 
-DEFINE_POOL(actor)
-DEFINE_POOL(actor_def)
+POOL_IMPL(actor)
+POOL_IMPL(actor_def)
 
 struct actor_def_entry {
     uint32_t key;
@@ -148,6 +149,11 @@ void actor_system_term(void)
 
     actor_pool_free();
     actor_def_pool_free();
+}
+
+void actor_system_unload_level(void)
+{
+    actor_pool_release_all();
 }
 
 void actor_system_update(float dt)
@@ -460,6 +466,7 @@ actor_handle actor_create(const actor_desc* const desc)
             actor_pool.data[index] = (actor){
                 .pos = desc->pos,
                 .h_actor_def = h_actor_def,
+                .input = {0},
             };
             return handle;
         }
@@ -482,11 +489,12 @@ actor_def_handle actor_def_create(char* name, actor_def* def)
     if (def) {
         actor_def_handle handle = actor_def_acquire();
         if (VALID_HANDLE(handle)) {
+            def->name_id = strhash_get(name);
             uint32_t index = actor_def_handle_get_index(handle);
             hmputs(
                 actor_defs_by_id,
                 ((struct actor_def_entry){
-                    .key = hash_string(name),
+                    .key = def->name_id.value,
                     .handle = handle,
                 }));
             actor_def_pool.data[index] = *def;
@@ -508,15 +516,15 @@ bool actor_def_destroy(actor_def_handle handle)
 actor_def_handle actor_def_get_name(char* name)
 {
     if (name) {
-        return actor_def_get_id(hash_string(name));
+        return actor_def_get_id(strhash_get(name));
     } else {
         return INVALID_HANDLE(actor_def);
     }
 }
 
-actor_def_handle actor_def_get_id(uint32_t name_id)
+actor_def_handle actor_def_get_id(strhash name_id)
 {
-    return hmgets(actor_defs_by_id, name_id).handle;
+    return hmgets(actor_defs_by_id, name_id.value).handle;
 }
 
 // imgui editors
@@ -600,9 +608,9 @@ void actor_def_config_ui(actor_def_handle sel_handle)
         "acceleration", &actdef->move_accel, 0.1f, 0.5f, "%0.2f", ImGuiInputTextFlags_None);
 }
 
-void actor_def_editor_window(bool* show_editor)
+void actor_def_editor_window(bool* show)
 {
-    if (igBegin("Actor Definitions", show_editor, ImGuiWindowFlags_None)) {
+    if (igBegin("Actor Definitions", show, ImGuiWindowFlags_None)) {
         static actor_def_handle sel_handle = {INVALID_RAW_HANDLE};
         if (igBeginTabBar("def bar", ImGuiTabBarFlags_None)) {
             actor_def_handle* handles = get_actor_def_handles();
@@ -612,13 +620,11 @@ void actor_def_editor_window(bool* show_editor)
                 actor_def_handle handle = handles[i];
                 if (actor_def_handle_valid(handle)) {
                     actor_def* actdef = actor_def_ptr(handle);
-                    char buffer[4] = {0};
-                    snprintf(buffer, 4, "%llu", i);
                     ImGuiTabItemFlags tab_flags = ImGuiTabItemFlags_Button;
                     if (handle.value == sel_handle.value) {
                         tab_flags |= ImGuiTabItemFlags_SetSelected;
                     }
-                    if (igTabItemButton(buffer, tab_flags)) {
+                    if (igTabItemButton(strhash_cstr(actdef->name_id), tab_flags)) {
                         sel_handle = handle;
                     }
                 }

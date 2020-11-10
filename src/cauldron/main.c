@@ -1,14 +1,13 @@
-
 #include "event_system.h"
 #include "game_level.h"
 #include "game_settings.h"
 #include "game_systems.h"
-#include "hash.h"
-#include "hash_string.h"
+#include "level_system.h"
 #include "player_system.h"
 #include "profile.h"
 #include "sprite_draw.h"
 #include "stb_ds.h"
+#include "system_pool.h"
 #include "tx_input.h"
 #include "tx_math.h"
 #include "tx_rand.h"
@@ -49,40 +48,19 @@ struct game_time_desc {
 
 int main(int argc, char* argv[])
 {
+    txrng_seed((uint32_t)time(NULL));
+    strhash_init();
     load_game_settings(NULL);
 
     game_settings* const settings = get_game_settings();
 
     game_time.frame_limit = settings->options.video.frame_limit;
 
-    strhash_init();
     txinp_init();
-    txrng_seed((uint32_t)time(NULL));
-
-    game_level_proj proj = {0};
-    if (load_game_level_project("assets/test_level.json", &proj) != TX_SUCCESS) {
-        return 1;
-    }
-
-    uint64_t load_ticks = profile_get_last_ticks("load_game_level_project");
-
     game_systems_init(settings);
     spr_init();
 
-    int index = -1;
-    for (int i = 0; i < arrlen(proj.levels); ++i) {
-        if (proj.levels[i].name_id == settings->startup.level_id) {
-            index = i;
-            break;
-        }
-    }
-    if (index >= 0) {
-        game_systems_load_level(&proj.levels[index]);
-    }
-
-    // unsigned char* text_pixels = NULL;
-    // int text_w, text_h;
-    // ImFontAtlas_GetTexDataAsRGBA32(io->Fonts, &text_pixels, &text_w, &text_h, NULL);
+    level_load_id(settings->startup.level_id);
 
     uint64_t last_ticks = SDL_GetPerformanceCounter();
     float time = 0.0f;
@@ -118,11 +96,6 @@ int main(int argc, char* argv[])
                 });
                 break;
             }
-        }
-
-        if (txinp_get_key_down(TXINP_KEY_F5)) {
-            game_systems_unload_level();
-            game_systems_load_level(&proj.levels[0]);
         }
 
         int update_count = 0;
@@ -189,6 +162,8 @@ int main(int argc, char* argv[])
             static bool show_editor_game_time = false;
             static bool show_editor_actors = false;
             static bool show_demo_window = false;
+            static bool show_editor_levels = false;
+            static bool show_pool_window = false;
 
             if (igIsKeyPressed(TXINP_KEY_LALT, false)) {
                 show_main_menu_bar = !show_main_menu_bar;
@@ -203,6 +178,11 @@ int main(int argc, char* argv[])
                     if (igBeginMenu("Editors", true)) {
                         igMenuItemBoolPtr("Actors", "ctrl+a", &show_editor_actors, true);
                         igMenuItemBoolPtr("Game Time", NULL, &show_editor_game_time, true);
+                        igMenuItemBoolPtr("Levels", NULL, &show_editor_levels, true);
+                        igEndMenu();
+                    }
+                    if (igBeginMenu("Debug", true)) {
+                        igMenuItemBoolPtr("System Pools", NULL, &show_pool_window, true);
                         igEndMenu();
                     }
                     if (igBeginMenu("Misc", true)) {
@@ -213,9 +193,9 @@ int main(int argc, char* argv[])
                 }
             }
 
-            if (show_editor_actors) {
-                actor_def_editor_window(&show_editor_actors);
-            }
+            if (show_editor_actors) actor_def_editor_window(&show_editor_actors);
+            if (show_editor_levels) level_select_window(&show_editor_levels);
+            if (show_pool_window) system_pool_editor_window(&show_pool_window);
 
             if (show_editor_game_time) {
                 igBegin("Game Time", &show_editor_game_time, ImGuiWindowFlags_NoNavInputs);
@@ -259,8 +239,6 @@ int main(int argc, char* argv[])
 
     spr_term();
     game_systems_term();
-
-    free_game_level_project(&proj);
 
     strhash_term();
 

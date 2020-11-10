@@ -1,5 +1,6 @@
 #pragma once
 
+#include "strhash.h"
 #include "tx_types.h"
 
 typedef struct game_settings {
@@ -12,7 +13,7 @@ typedef struct game_settings {
         } video;
     } options;
     struct {
-        uint32_t level_id;
+        strhash level_id;
     } startup;
 } game_settings;
 

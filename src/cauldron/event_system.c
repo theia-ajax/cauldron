@@ -23,6 +23,7 @@ typedef uint8_t opqaue_message_storage[MAX_EVENT_MESSAGE_SIZE_IN_BYTES];
 // update with new message types as new types are added
 message_type_meta message_meta_data[EventMessage_Count] = {
     {.message_type = EventMessage_None, .message_size = 0},
+    {.message_type = EventMessage_ChangeLevel, .message_size = sizeof(change_level_event)},
     {.message_type = EventMessage_OnEntitySpawned, .message_size = sizeof(on_entity_spawned_event)},
 };
 

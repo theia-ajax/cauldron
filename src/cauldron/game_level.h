@@ -1,9 +1,10 @@
 #pragma once
 
+#include "strhash.h"
 #include "tx_types.h"
 
 typedef struct game_ent_def_inst {
-    uint32_t id;
+    strhash id;
     float world_x;
     float world_y;
 } game_ent_def_inst;
@@ -47,7 +48,7 @@ typedef struct game_layer_inst {
 
 typedef struct game_level {
     game_layer_inst* layer_insts;
-    uint32_t name_id;
+    strhash name_id;
 } game_level;
 
 typedef struct game_level_proj {

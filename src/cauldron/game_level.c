@@ -130,7 +130,7 @@ tx_result parse_level(const char* js, jsmntok_t* tokens, int tok_id, game_level*
     memset(out, 0, sizeof(game_level));
 
     jsmntok_t name_tok = jsget(js, tokens, tok_id, "identifier");
-    out->name_id = hash_data(js + name_tok.start, name_tok.end - name_tok.start);
+    out->name_id = strhash_get_len(js + name_tok.start, name_tok.end - name_tok.start);
 
     int layer_inst_id = jsget_id(js, tokens, tok_id, "layerInstances");
 
@@ -324,9 +324,9 @@ tx_result parse_entity_layer(const char* js, jsmntok_t* tokens, int tok_id, game
 
         jsmntok_t id_tok = jsget(js, tokens, i, "__identifier");
         if (id_tok.type == JSMN_STRING) {
-            out->ents[index].id = hash_data(js + id_tok.start, id_tok.end - id_tok.start);
+            out->ents[index].id = strhash_get_len(js + id_tok.start, id_tok.end - id_tok.start);
         } else {
-            out->ents[index].id = 0;
+            out->ents[index].id = (strhash){0};
         }
 
         float world_x_px, world_y_px;
@@ -337,8 +337,8 @@ tx_result parse_entity_layer(const char* js, jsmntok_t* tokens, int tok_id, game
         out->ents[index].world_y = world_y_px / 8.0f;
 
         printf(
-            "Entity = { id = %lu, x = %0.0f, y = %0.0f }\n",
-            out->ents[index].id,
+            "Entity = { id = %s, x = %0.0f, y = %0.0f }\n",
+            strhash_cstr(out->ents[index].id),
             out->ents[index].world_x,
             out->ents[index].world_y);
 

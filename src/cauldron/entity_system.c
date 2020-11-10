@@ -11,7 +11,7 @@
 typedef void (*spawn_entity_proc)(entity_desc*);
 
 typedef struct entity_spawn_data {
-    uint32_t key;
+    strhash key;
     spawn_entity_proc spawn_proc;
 } entity_spawn_data;
 
@@ -45,11 +45,10 @@ void spawn_entity_enemy_01_spawn(entity_desc* desc)
 
 void register_entity(char* name, spawn_entity_proc spawn_proc)
 {
-    uint32_t key = hash_string(name);
     stbds_hmputs(
         ent_spawn_data,
         ((entity_spawn_data){
-            .key = hash_string(name),
+            .key = strhash_get(name),
             .spawn_proc = spawn_proc,
         }));
 }

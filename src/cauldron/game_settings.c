@@ -1,7 +1,6 @@
 #include "game_settings.h"
 
 #include "futils.h"
-#include "hash.h"
 #include "jsonutil.h"
 #include "stb_ds.h"
 
@@ -62,7 +61,7 @@ bool load_game_settings(const char* file_override)
         jsmntok_t level_tok = jsget(js, tokens, startup_id, "level");
         int len = level_tok.end - level_tok.start;
         if (len > 0) {
-            settings.startup.level_id = hash_data(js + level_tok.start, len);
+            settings.startup.level_id = strhash_get_len(js + level_tok.start, len);
         }
     }
 

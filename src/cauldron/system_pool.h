@@ -1,19 +1,28 @@
 #pragma once
 
+#include <stdbool.h>
+
+void system_pool_register(char* name, void*);
+void system_pool_editor_window(bool* show);
+
 #define POOL(type) type##_pool
 
 #define POOL_SET_CAPACITY_PROTO(type) void type##_pool_set_capacity(uint32_t capacity)
-#define POOL_ACQUIRE_PROTO(type) HANDLE(type) type##_acquire()
+#define POOL_ACQUIRE_PROTO(type) HANDLE(type) type##_acquire(void)
 #define POOL_RELEASE_PROTO(type) void type##_release(HANDLE(type) handle)
-#define POOL_FREE_PROTO(type) void type##_pool_free()
-#define POOL_GET_HANDLES_PROTO(type) HANDLE(type) * get_##type##_handles()
-#define POOL_GET_HANDLES_LEN_PROTO(type) size_t get_##type##_handles_len()
+#define POOL_RELEASE_ALL_PROTO(type) void type##_pool_release_all(void)
+#define POOL_FREE_PROTO(type) void type##_pool_free(void)
+#define POOL_GET_HANDLES_PROTO(type) HANDLE(type) * get_##type##_handles(void)
+#define POOL_GET_HANDLES_LEN_PROTO(type) size_t get_##type##_handles_len(void)
 #define POOL_GET_ELEMENT_PTR_PROTO(type) type* type##_ptr(HANDLE(type) handle)
 
 #define POOL_SET_CAPACITY(type)                                                                    \
     POOL_SET_CAPACITY_PROTO(type)                                                                  \
     {                                                                                              \
         uint32_t prev_cap = (uint32_t)arrcap(POOL(type).data);                                     \
+        if (prev_cap == 0) {                                                                       \
+            system_pool_register(POOL(type).name, &POOL(type));                                    \
+        }                                                                                          \
         if (capacity <= prev_cap) {                                                                \
             return;                                                                                \
         }                                                                                          \
@@ -52,6 +61,18 @@
         POOL(type).handles[index] = INVALID_HANDLE(type);                                          \
     }
 
+#define POOL_RELEASE_ALL(type)                                                                     \
+    POOL_RELEASE_ALL_PROTO(type)                                                                   \
+    {                                                                                              \
+        POOL(type).gen = 1;                                                                        \
+        memset(POOL(type).data, 0, sizeof(type) * arrlen(POOL(type).data));                        \
+        memset(POOL(type).handles, 0, sizeof(HANDLE(type)) * arrlen(POOL(type).handles));          \
+        arrdeln(POOL(type).free_queue, 0, arrlen(POOL(type).free_queue));                          \
+        for (uint32_t i = (uint32_t)arrcap(POOL(type).data); i > 0; --i) {                         \
+            arrput(POOL(type).free_queue, i - 1);                                                  \
+        }                                                                                          \
+    }
+
 #define POOL_FREE(type)                                                                            \
     POOL_FREE_PROTO(type)                                                                          \
     {                                                                                              \
@@ -81,22 +102,29 @@
         return NULL;                                                                               \
     }
 
-#define DECLARE_POOL(type)                                                                         \
+#define POOL_FORWARD(type)                                                                         \
     typedef struct type type;                                                                      \
     POOL_GET_HANDLES_PROTO(type);                                                                  \
     POOL_GET_HANDLES_LEN_PROTO(type);                                                              \
     POOL_GET_ELEMENT_PTR_PROTO(type);
 
-#define DEFINE_POOL(type)                                                                          \
+#define POOL_IMPL(type)                                                                            \
     struct POOL(type) {                                                                            \
+        char* name;                                                                                \
+        size_t elem_size;                                                                          \
         type* data;                                                                                \
         HANDLE(type) * handles;                                                                    \
         uint32_t* free_queue;                                                                      \
         uint16_t gen;                                                                              \
-    } POOL(type) = {.gen = 1};                                                                     \
+    } POOL(type) = {                                                                               \
+        .name = #type,                                                                             \
+        .elem_size = sizeof(type),                                                                 \
+        .gen = 1,                                                                                  \
+    };                                                                                             \
     POOL_SET_CAPACITY(type)                                                                        \
     POOL_ACQUIRE(type)                                                                             \
     POOL_RELEASE(type)                                                                             \
+    POOL_RELEASE_ALL(type)                                                                         \
     POOL_FREE(type)                                                                                \
     POOL_GET_HANDLES(type)                                                                         \
     POOL_GET_HANDLES_LEN(type)                                                                     \
