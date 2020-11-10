@@ -17,9 +17,9 @@
 // clang-format on
 
 #if _DEBUG
-#define TX_ASSERT(expression) TX_ASSERT_ALWAYS(expression)
+    #define TX_ASSERT(expression) TX_ASSERT_ALWAYS(expression)
 #else
-#define TX_ASSERT(expresion, ...)
+    #define TX_ASSERT(expresion, ...)
 #endif
 
 #define VALID_INDEX(index, count) ((size_t)(index) < (size_t)(count))
@@ -27,6 +27,7 @@
 typedef enum tx_result {
     TX_INVALID = -1,
     TX_SUCCESS = 0,
+    TX_FAILURE,
     TX_FILE_ERROR,
     TX_ALLOCATION_ERROR,
     TX_PARSE_ERROR,

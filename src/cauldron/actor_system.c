@@ -109,7 +109,7 @@ void save_last_jump_report(void);
 struct actor_move_result actor_calc_move(const actor* actor, const actor_def* actdef, float dt);
 
 // actor game systems interface implementation
-void actor_system_init(game_settings* settings)
+tx_result actor_system_init(game_settings* settings)
 {
     config = (actor_system_conf){
         .platform_drop_time = 0.1f,
@@ -138,9 +138,11 @@ void actor_system_init(game_settings* settings)
     e01_spawn.hsize = (vec2){.x = 0.45f, .y = 0.375f};
     e01_spawn.sprite_id = 2;
     actor_def_create("EnemySpawn01", &e01_spawn);
+
+    return TX_SUCCESS;
 }
 
-void actor_system_shutdown(void)
+void actor_system_term(void)
 {
     hmfree(actor_defs_by_id);
 
@@ -444,92 +446,6 @@ void actor_system_render(float rt)
     }
 }
 
-#define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
-#include <cimgui.h>
-
-void actor_system_config_ui(void)
-{
-    igInputFloat(
-        "Platform Drop Time",
-        &config.platform_drop_time,
-        0.01f,
-        0.1f,
-        "%0.2f seconds",
-        ImGuiInputTextFlags_None);
-
-    igInputFloat(
-        "Jump Ungrounded Time",
-        &config.jump_ungrounded_time,
-        0.01f,
-        0.1f,
-        "%0.2f seconds",
-        ImGuiInputTextFlags_None);
-}
-
-void jump_report_ui(actor_jump_report* report)
-{
-    for (int i = 0; i < arrlen(report->jump_frames); ++i) {
-        actor_jump_frame_report frame = report->jump_frames[i];
-        float pd = 0.0f;
-        if (i > 0) {
-            pd = frame.pos_y - report->jump_frames[i - 1].pos_y;
-        }
-        igText("p:%0.5f v:%0.5f pd:%0.5f m:%f", frame.pos_y, frame.vel_y, pd, pd / frame.dt);
-
-        // igText(
-        //     "%d : time:%llu p:%0.2f v:%0.2f a:%0.2f dt:%f",
-        //     frame.frame,
-        //     frame.ticks,
-        //     frame.pos_y,
-        //     frame.vel_y,
-        //     frame.acl_y,
-        //     frame.dt);
-    }
-
-    igSeparator();
-}
-
-void jump_report_window(void)
-{
-    igBegin("Jumps", NULL, ImGuiWindowFlags_AlwaysVerticalScrollbar);
-
-    igBeginChildStr(
-        "Current Report",
-        (ImVec2){igGetWindowContentRegionWidth() * 0.25f, 0},
-        true,
-        ImGuiWindowFlags_None);
-    {
-        if (igButton("Save Last", (ImVec2){0})) {
-            save_last_jump_report();
-        }
-
-        jump_report_ui(&current_jump_report);
-    }
-    igEndChild();
-
-    igSameLine(0.0f, -1.0f);
-
-    igBeginChildStr("Saved Reports", (ImVec2){0}, true, ImGuiWindowFlags_None);
-    {
-        size_t len = arrlen(saved_jump_reports);
-        static int cur_idx = 0;
-
-        if (len > 0) {
-            igInputInt("Saved Id", &cur_idx, 1, 10, ImGuiInputTextFlags_None);
-            cur_idx = mod(cur_idx, (int)len);
-            jump_report_ui(&saved_jump_reports[cur_idx]);
-        }
-    }
-    igEndChild();
-
-    igEnd();
-}
-
-void actor_system_debug_ui(void)
-{
-    // jump_report_window();
-}
-
 // public system implementation
 
 // actor implementation
@@ -603,6 +519,70 @@ actor_def_handle actor_def_get_id(uint32_t name_id)
     return hmgets(actor_defs_by_id, name_id).handle;
 }
 
+// imgui editors
+
+#define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
+#include <cimgui.h>
+
+void jump_report_ui(actor_jump_report* report)
+{
+    for (int i = 0; i < arrlen(report->jump_frames); ++i) {
+        actor_jump_frame_report frame = report->jump_frames[i];
+        float pd = 0.0f;
+        if (i > 0) {
+            pd = frame.pos_y - report->jump_frames[i - 1].pos_y;
+        }
+        igText("p:%0.5f v:%0.5f pd:%0.5f m:%f", frame.pos_y, frame.vel_y, pd, pd / frame.dt);
+
+        // igText(
+        //     "%d : time:%llu p:%0.2f v:%0.2f a:%0.2f dt:%f",
+        //     frame.frame,
+        //     frame.ticks,
+        //     frame.pos_y,
+        //     frame.vel_y,
+        //     frame.acl_y,
+        //     frame.dt);
+    }
+
+    igSeparator();
+}
+
+void jump_report_window(void)
+{
+    igBegin("Jumps", NULL, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+
+    igBeginChildStr(
+        "Current Report",
+        (ImVec2){igGetWindowContentRegionWidth() * 0.25f, 0},
+        true,
+        ImGuiWindowFlags_None);
+    {
+        if (igButton("Save Last", (ImVec2){0})) {
+            save_last_jump_report();
+        }
+
+        jump_report_ui(&current_jump_report);
+    }
+    igEndChild();
+
+    igSameLine(0.0f, -1.0f);
+
+    igBeginChildStr("Saved Reports", (ImVec2){0}, true, ImGuiWindowFlags_None);
+    {
+        size_t len = arrlen(saved_jump_reports);
+        static int cur_idx = 0;
+
+        if (len > 0) {
+            igInputInt("Saved Id", &cur_idx, 1, 10, ImGuiInputTextFlags_None);
+            cur_idx = mod(cur_idx, (int)len);
+            jump_report_ui(&saved_jump_reports[cur_idx]);
+        }
+    }
+    igEndChild();
+
+    igEnd();
+}
+
 void actor_def_config_ui(actor_def_handle sel_handle)
 {
     actor_def* actdef = actor_def_ptr(sel_handle);
@@ -618,4 +598,37 @@ void actor_def_config_ui(actor_def_handle sel_handle)
     igInputFloat("max speed", &actdef->max_speed, 0.1f, 0.5f, "%0.2f", ImGuiInputTextFlags_None);
     igInputFloat(
         "acceleration", &actdef->move_accel, 0.1f, 0.5f, "%0.2f", ImGuiInputTextFlags_None);
+}
+
+void actor_def_editor_window(bool* show_editor)
+{
+    if (igBegin("Actor Definitions", show_editor, ImGuiWindowFlags_None)) {
+        static actor_def_handle sel_handle = {INVALID_RAW_HANDLE};
+        if (igBeginTabBar("def bar", ImGuiTabBarFlags_None)) {
+            actor_def_handle* handles = get_actor_def_handles();
+            size_t len = get_actor_def_handles_len();
+
+            for (size_t i = 0; i < len; ++i) {
+                actor_def_handle handle = handles[i];
+                if (actor_def_handle_valid(handle)) {
+                    actor_def* actdef = actor_def_ptr(handle);
+                    char buffer[4] = {0};
+                    snprintf(buffer, 4, "%llu", i);
+                    ImGuiTabItemFlags tab_flags = ImGuiTabItemFlags_Button;
+                    if (handle.value == sel_handle.value) {
+                        tab_flags |= ImGuiTabItemFlags_SetSelected;
+                    }
+                    if (igTabItemButton(buffer, tab_flags)) {
+                        sel_handle = handle;
+                    }
+                }
+            }
+
+            igEndTabBar();
+        }
+        if (VALID_HANDLE(sel_handle)) {
+            actor_def_config_ui(sel_handle);
+        }
+        igEnd();
+    }
 }

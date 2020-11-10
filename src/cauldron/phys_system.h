@@ -16,8 +16,8 @@ typedef struct phys_tile_shape {
     uint8_t flips;
 } phys_tile_shape;
 
-void phys_system_init(game_settings* settings);
-void phys_system_shutdown(void);
+tx_result phys_system_init(game_settings* settings);
+void phys_system_term(void);
 void phys_system_load_level(game_level* level);
 void phys_system_unload_level(void);
 void phys_system_update(float dt);

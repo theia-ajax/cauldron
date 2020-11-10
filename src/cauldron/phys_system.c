@@ -26,7 +26,7 @@ tile_phys_ref* tile_phys_map = NULL;
 uint32_t tiles_w = 0, tiles_h = 0;
 float gravity = 50.0f;
 
-void phys_system_init(game_settings* settings)
+tx_result phys_system_init(game_settings* settings)
 {
     for (int flip = 0; flip < 4; ++flip) {
         hmputs(
@@ -47,9 +47,11 @@ void phys_system_init(game_settings* settings)
             .key = tile_flip_key(60, 0),
             .shape = PHYS_TILE_SHAPE_PLATFORM,
         }));
+
+    return TX_SUCCESS;
 }
 
-void phys_system_shutdown(void)
+void phys_system_term(void)
 {
     hmfree(tile_phys_map);
 }

@@ -33,12 +33,13 @@ static void on_entity_spawned(event_message* event)
     }
 }
 
-void player_system_init(game_settings* settings)
+tx_result player_system_init(game_settings* settings)
 {
     event_system_subscribe(EventMessage_OnEntitySpawned, on_entity_spawned);
+    return TX_SUCCESS;
 }
 
-void player_system_shutdown(void)
+void player_system_term(void)
 {
 }
 

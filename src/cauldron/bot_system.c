@@ -23,7 +23,7 @@ static void on_entity_spawned(event_message* message)
     }
 }
 
-void bot_system_init(game_settings* settings)
+tx_result bot_system_init(game_settings* settings)
 {
     arrsetlen(bots, 64);
     arrsetlen(bot_handles, 64);
@@ -32,9 +32,11 @@ void bot_system_init(game_settings* settings)
     memset(bot_handles, 0, sizeof(bot_handle) * 64);
 
     event_system_subscribe(EventMessage_OnEntitySpawned, on_entity_spawned);
+
+    return TX_SUCCESS;
 }
 
-void bot_system_shutdown(void)
+void bot_system_term(void)
 {
     arrfree(bots);
     arrfree(bot_handles);

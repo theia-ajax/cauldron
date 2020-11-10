@@ -5,8 +5,8 @@
 #include "handle.h"
 #include "tx_types.h"
 
-void entity_system_init(game_settings* settings);
-void entity_system_shutdown(void);
+tx_result entity_system_init(game_settings* settings);
+void entity_system_term(void);
 void entity_system_load_level(game_level* level);
 void entity_system_unload_level(void);
 void entity_system_update(float dt);

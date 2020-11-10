@@ -64,13 +64,15 @@ void spawn_entity(entity_desc* desc)
     }
 }
 
-void entity_system_init(game_settings* settings)
+tx_result entity_system_init(game_settings* settings)
 {
     register_entity("PlayerSpawn", spawn_entity_player_spawn);
     register_entity("EnemySpawn01", spawn_entity_enemy_01_spawn);
+
+    return TX_SUCCESS;
 }
 
-void entity_system_shutdown(void)
+void entity_system_term(void)
 {
     hmfree(ent_spawn_data);
 }

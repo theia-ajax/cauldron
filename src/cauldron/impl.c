@@ -16,9 +16,6 @@
 #define TX_RAND_IMPLEMENTATION
 #include "tx_rand.h"
 
-#define TINYOBJ_LOADER_C_IMPLEMENTATION
-#include "tinyobj_loader_c.h"
-
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
 

@@ -8,8 +8,8 @@
 
 // game systems interface
 
-void bot_system_init(game_settings* settings);
-void bot_system_shutdown(void);
+tx_result bot_system_init(game_settings* settings);
+void bot_system_term(void);
 void bot_system_update(float dt);
 
 // public system structures

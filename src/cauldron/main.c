@@ -4,16 +4,16 @@
 #include "game_settings.h"
 #include "game_systems.h"
 #include "hash.h"
+#include "hash_string.h"
 #include "player_system.h"
 #include "profile.h"
-#include "sokol_gfx.h"
 #include "sprite_draw.h"
 #include "stb_ds.h"
-#include "tinyobj_loader_c.h"
 #include "tx_input.h"
 #include "tx_math.h"
 #include "tx_rand.h"
 #include "tx_types.h"
+#include "window_system.h"
 #include <GL/gl3w.h>
 #include <SDL2/SDL.h>
 
@@ -33,34 +33,18 @@ typedef enum update_mode {
 
 char* update_mode_names[UpdateMode_Count] = {"Variable", "Fixed"};
 
-struct debug_ui {
-    bool show;
-    bool open;
+struct game_time_desc {
     bool enable_render_interp;
-    int fps;
     int frame_limit;
     int update_frequency;
     update_mode update_mode;
     int maximum_updates;
-    float load_proj_ms;
-};
-
-struct debug_ui dbgui = {
-    .show = true,
-    .open = true,
+    int curr_fps;
+} game_time = {
+    .enable_render_interp = true,
     .update_mode = UpdateMode_FixedFrameRate,
     .maximum_updates = 30,
     .update_frequency = 240,
-};
-
-struct config_ui {
-    bool show;
-    bool open;
-};
-
-struct config_ui configui = {
-    .show = false,
-    .open = true,
 };
 
 int main(int argc, char* argv[])
@@ -69,31 +53,9 @@ int main(int argc, char* argv[])
 
     game_settings* const settings = get_game_settings();
 
-    dbgui.frame_limit = settings->options.video.frame_limit;
+    game_time.frame_limit = settings->options.video.frame_limit;
 
-    SDL_Window* window = SDL_CreateWindow(
-        "cauldron",
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        settings->options.video.display_width,
-        settings->options.video.display_height,
-        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-    SDL_GLContext gl_context = SDL_GL_CreateContext(window);
-
-    SDL_GL_SetSwapInterval((settings->options.video.enable_vsync) ? 1 : 0);
-
-    if (gl3wInit() != GL3W_OK) {
-        return 1;
-    }
-
-    sg_setup(&(sg_desc){0});
-    spr_init();
+    strhash_init();
     txinp_init();
     txrng_seed((uint32_t)time(NULL));
 
@@ -103,9 +65,9 @@ int main(int argc, char* argv[])
     }
 
     uint64_t load_ticks = profile_get_last_ticks("load_game_level_project");
-    dbgui.load_proj_ms = (float)(load_ticks * 1000) / SDL_GetPerformanceFrequency();
 
-    game_systems_init(&(game_settings){0});
+    game_systems_init(settings);
+    spr_init();
 
     int index = -1;
     for (int i = 0; i < arrlen(proj.levels); ++i) {
@@ -118,17 +80,9 @@ int main(int argc, char* argv[])
         game_systems_load_level(&proj.levels[index]);
     }
 
-    igCreateContext(NULL);
-    ImGuiIO* io = igGetIO();
-    io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-
-    ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
-    ImGui_ImplOpenGL3_Init(NULL);
-    igStyleColorsDark(NULL);
-
-    unsigned char* text_pixels = NULL;
-    int text_w, text_h;
-    ImFontAtlas_GetTexDataAsRGBA32(io->Fonts, &text_pixels, &text_w, &text_h, NULL);
+    // unsigned char* text_pixels = NULL;
+    // int text_w, text_h;
+    // ImFontAtlas_GetTexDataAsRGBA32(io->Fonts, &text_pixels, &text_w, &text_h, NULL);
 
     uint64_t last_ticks = SDL_GetPerformanceCounter();
     float time = 0.0f;
@@ -166,14 +120,6 @@ int main(int argc, char* argv[])
             }
         }
 
-        if (txinp_get_key_down(TXINP_KEY_F11) && txinp_get_key(TXINP_KEY_LSHIFT)) {
-            configui.show = !configui.show;
-        }
-
-        if (txinp_get_key_down(TXINP_KEY_F12) && txinp_get_key(TXINP_KEY_LSHIFT)) {
-            dbgui.show = !dbgui.show;
-        }
-
         if (txinp_get_key_down(TXINP_KEY_F5)) {
             game_systems_unload_level();
             game_systems_load_level(&proj.levels[0]);
@@ -185,7 +131,7 @@ int main(int argc, char* argv[])
         uint64_t delta_ticks = ticks - last_ticks;
         last_ticks = ticks;
 
-        int frame_limit = dbgui.frame_limit;
+        int frame_limit = game_time.frame_limit;
         if (frame_limit > 0) {
             uint64_t min_frame_delta_ticks = frequency / frame_limit;
             uint64_t over_ticks = 0;
@@ -202,7 +148,7 @@ int main(int argc, char* argv[])
         ++frames_this_sec;
         if (time >= next_sec) {
             next_sec += 1.0f;
-            dbgui.fps = frames_this_sec;
+            game_time.curr_fps = frames_this_sec;
             frames_this_sec = 0;
         }
 
@@ -210,13 +156,13 @@ int main(int argc, char* argv[])
         time += dt;
 
         // time
-        if (dbgui.update_mode == UpdateMode_FixedFrameRate) {
+        if (game_time.update_mode == UpdateMode_FixedFrameRate) {
             lag += dt;
 
-            dbgui.update_frequency = min(max(dbgui.update_frequency, 1), 500);
-            const float ms_per_update = 1.0f / dbgui.update_frequency;
+            game_time.update_frequency = min(max(game_time.update_frequency, 1), 500);
+            const float ms_per_update = 1.0f / game_time.update_frequency;
 
-            while (lag >= ms_per_update && update_count < dbgui.maximum_updates) {
+            while (lag >= ms_per_update && update_count < game_time.maximum_updates) {
                 game_systems_update(ms_per_update);
                 ++update_count;
                 lag -= ms_per_update;
@@ -224,9 +170,9 @@ int main(int argc, char* argv[])
             }
 
             // float rt = lag / ms_per_update;
-            float rt = (dbgui.enable_render_interp) ? lag / ms_per_update : 0.0f;
+            float rt = (game_time.enable_render_interp) ? lag / ms_per_update : 0.0f;
             game_systems_render(rt);
-        } else if (dbgui.update_mode == UpdateMode_VariableFrameRate) {
+        } else if (game_time.update_mode == UpdateMode_VariableFrameRate) {
             update_count = 1;
             game_systems_update(dt);
             txinp_update();
@@ -234,63 +180,13 @@ int main(int argc, char* argv[])
         }
 
         // render
-        int cur_width, cur_height;
-        SDL_GetWindowSize(window, &cur_width, &cur_height);
-        spr_render(cur_width, cur_height);
-        sg_commit();
+        spr_render();
 
-        int win_w, win_h;
-        SDL_GetWindowSize(window, &win_w, &win_h);
-        io->DisplaySize = (ImVec2){.x = (float)win_w, .y = (float)win_h};
-        io->DeltaTime = dt;
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL2_NewFrame(window);
-        igNewFrame();
-
-        if (dbgui.show) {
-            igBegin("Debug", &dbgui.open, ImGuiWindowFlags_NoNavInputs);
-            igText("FPS: %d", dbgui.fps);
-            igCheckbox("Enable Render Interp", &dbgui.enable_render_interp);
-            igInputInt("Frame Limit", &dbgui.frame_limit, 1, 10, ImGuiInputTextFlags_None);
-            if (igButton(update_mode_names[(int)dbgui.update_mode], (ImVec2){0})) {
-                dbgui.update_mode =
-                    (update_mode)mod((int)dbgui.update_mode + 1, (int)UpdateMode_Count);
-            }
-
-            if (dbgui.update_mode == UpdateMode_FixedFrameRate) {
-                igInputInt(
-                    "Update Frequency (Hz)",
-                    &dbgui.update_frequency,
-                    1,
-                    10,
-                    ImGuiInputTextFlags_None);
-                igInputInt(
-                    "Maximum Updates", &dbgui.maximum_updates, 1, 5, ImGuiInputTextFlags_None);
-                igText("Update Count: %d", update_count);
-            }
-
-            actor_handle hactor = get_player_actor(0);
-            actor* actor = actor_ptr(hactor);
-            if (actor) {
-                igText("Pos: %0.2f, %0.2f", actor->pos.x, actor->pos.y);
-                igText("Vel: %0.2f, %0.2f", actor->vel.x, actor->vel.y);
-                igText("Jump Forgive: %0.2f", actor->jump_forgive_timer);
-            }
-
-            igEnd();
-        }
-
-        // config ui
-        if (configui.show) {
-            if (igBegin("config", &configui.show, ImGuiWindowFlags_None)) {
-                game_systems_config_ui();
-            }
-            igEnd();
-        }
-
+        imgui_begin(dt);
         {
             static bool show_main_menu_bar = false;
             static bool sel_menu_bar_editors_actors = false;
+            static bool show_editor_game_time = false;
             static bool show_editor_actors = false;
             static bool show_demo_window = false;
 
@@ -298,17 +194,19 @@ int main(int argc, char* argv[])
                 show_main_menu_bar = !show_main_menu_bar;
             }
 
+            if (igIsKeyDown(TXINP_KEY_LCTRL) && igIsKeyPressed(TXINP_KEY_A, false)) {
+                show_editor_actors = !show_editor_actors;
+            }
+
             if (show_main_menu_bar) {
                 if (igBeginMainMenuBar()) {
                     if (igBeginMenu("Editors", true)) {
-                        if (igMenuItemBoolPtr("Actors", NULL, &show_editor_actors, true)) {
-                        }
+                        igMenuItemBoolPtr("Actors", "ctrl+a", &show_editor_actors, true);
+                        igMenuItemBoolPtr("Game Time", NULL, &show_editor_game_time, true);
                         igEndMenu();
                     }
                     if (igBeginMenu("Misc", true)) {
-                        if (igMenuItemBool("Demo Window", NULL, false, true)) {
-                            show_demo_window = !show_demo_window;
-                        }
+                        igMenuItemBoolPtr("Demo Window", NULL, &show_demo_window, true);
                         igEndMenu();
                     }
                     igEndMainMenuBar();
@@ -316,62 +214,55 @@ int main(int argc, char* argv[])
             }
 
             if (show_editor_actors) {
-                if (igBegin("Actor Definitions", &show_editor_actors, ImGuiWindowFlags_None)) {
-                    static actor_def_handle sel_handle = {INVALID_RAW_HANDLE};
-                    if (igBeginTabBar("def bar", ImGuiTabBarFlags_None)) {
-                        actor_def_handle* handles = get_actor_def_handles();
-                        size_t len = get_actor_def_handles_len();
+                actor_def_editor_window(&show_editor_actors);
+            }
 
-                        for (size_t i = 0; i < len; ++i) {
-                            actor_def_handle handle = handles[i];
-                            if (actor_def_handle_valid(handle)) {
-                                actor_def* actdef = actor_def_ptr(handle);
-                                char buffer[4] = {0};
-                                snprintf(buffer, 4, "%llu", i);
-                                ImGuiTabItemFlags tab_flags = ImGuiTabItemFlags_Button;
-                                if (handle.value == sel_handle.value) {
-                                    tab_flags |= ImGuiTabItemFlags_SetSelected;
-                                }
-                                if (igTabItemButton(buffer, tab_flags)) {
-                                    sel_handle = handle;
-                                }
-                            }
-                        }
-
-                        igEndTabBar();
-                    }
-                    if (VALID_HANDLE(sel_handle)) {
-                        actor_def_config_ui(sel_handle);
-                    }
-                    igEnd();
+            if (show_editor_game_time) {
+                igBegin("Game Time", &show_editor_game_time, ImGuiWindowFlags_NoNavInputs);
+                // igText("FPS: %d", dbgui.fps);
+                igCheckbox("Enable Render Interp", &game_time.enable_render_interp);
+                igInputInt("Frame Limit", &game_time.frame_limit, 1, 10, ImGuiInputTextFlags_None);
+                if (igButton(update_mode_names[(int)game_time.update_mode], (ImVec2){0})) {
+                    game_time.update_mode =
+                        (update_mode)mod((int)game_time.update_mode + 1, (int)UpdateMode_Count);
                 }
+
+                if (game_time.update_mode == UpdateMode_FixedFrameRate) {
+                    igInputInt(
+                        "Update Frequency (Hz)",
+                        &game_time.update_frequency,
+                        1,
+                        10,
+                        ImGuiInputTextFlags_None);
+                    igInputInt(
+                        "Maximum Updates",
+                        &game_time.maximum_updates,
+                        1,
+                        5,
+                        ImGuiInputTextFlags_None);
+                    igText("Update Count: %d", update_count);
+                }
+
+                igEnd();
             }
 
             if (show_demo_window) {
                 igShowDemoWindow(&show_demo_window);
             }
-            game_systems_debug_ui();
         }
+        imgui_end();
 
-        igRender();
-        ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());
-
-        SDL_GL_SwapWindow(window);
+        window_swap();
     }
 
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
-    igDestroyContext(NULL);
-
     game_systems_unload_level();
-    game_systems_shutdown();
+
+    spr_term();
+    game_systems_term();
 
     free_game_level_project(&proj);
 
-    spr_shutdown();
-    sg_shutdown();
-    SDL_GL_DeleteContext(gl_context);
-    SDL_DestroyWindow(window);
+    strhash_term();
 
     return 0;
 }

@@ -3,6 +3,7 @@
 #include "futils.h"
 #include "stb_image.h"
 #include "string.h"
+#include "window_system.h"
 
 // private system structs
 struct vertex {
@@ -55,6 +56,8 @@ struct {
 
 void spr_init()
 {
+    sg_setup(&(sg_desc){0});
+
     // Configure render target render
     int iw, ih, ichan;
     stbi_uc* pixels = stbi_load("assets/atlas2.png", &iw, &ih, &ichan, 4);
@@ -278,12 +281,16 @@ void spr_init()
     };
 }
 
-void spr_shutdown()
+void spr_term()
 {
+    sg_shutdown();
 }
 
-void spr_render(int width, int height)
+void spr_render()
 {
+    int width, height;
+    window_get_size(&width, &height);
+
     sg_update_buffer(inst_vbuf, sprites, sizeof(struct sprite) * sprite_ct);
 
     {
@@ -317,6 +324,8 @@ void spr_render(int width, int height)
         sg_apply_bindings(&screen.bindings);
         sg_draw(0, 6, 1);
         sg_end_pass();
+
+        sg_commit();
     }
 
     sprite_ct = 0;

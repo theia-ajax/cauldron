@@ -9,10 +9,11 @@
 #include "level_system.h"
 #include "phys_system.h"
 #include "player_system.h"
+#include "window_system.h"
 
 game_system* g_game_systems;
 
-void game_systems_init(game_settings* settings)
+tx_result game_systems_init(game_settings* settings)
 {
     /*
     Descriptions of current game systems
@@ -40,20 +41,32 @@ void game_systems_init(game_settings* settings)
         ((game_system){
             .name = "event_system",
             .init = event_system_init,
-            .shutdown = event_system_shutdown,
+            .term = event_system_term,
             .load_level = NULL,
             .unload_level = NULL,
             .update = event_system_process_queue,
             .render = NULL,
-            .config_ui = NULL,
-            .debug_ui = NULL,
+        }));
+    arrput(
+        g_game_systems,
+        ((game_system){
+            .name = "window_system",
+            .init = window_system_init,
+            .term = window_system_term,
+        }));
+    arrput(
+        g_game_systems,
+        ((game_system){
+            .name = "imgui_system",
+            .init = imgui_system_init,
+            .term = imgui_system_term,
         }));
     arrput(
         g_game_systems,
         ((game_system){
             .name = "entity_system",
             .init = entity_system_init,
-            .shutdown = entity_system_shutdown,
+            .term = entity_system_term,
             .load_level = entity_system_load_level,
         }));
     arrput(
@@ -61,7 +74,7 @@ void game_systems_init(game_settings* settings)
         ((game_system){
             .name = "player_system",
             .init = player_system_init,
-            .shutdown = player_system_shutdown,
+            .term = player_system_term,
             .update = player_system_update,
         }));
     arrput(
@@ -69,7 +82,7 @@ void game_systems_init(game_settings* settings)
         ((game_system){
             .name = "bot_system",
             .init = bot_system_init,
-            .shutdown = bot_system_shutdown,
+            .term = bot_system_term,
             .update = bot_system_update,
         }));
     arrput(
@@ -77,26 +90,22 @@ void game_systems_init(game_settings* settings)
         ((game_system){
             .name = "actor_system",
             .init = actor_system_init,
-            .shutdown = actor_system_shutdown,
+            .term = actor_system_term,
             .load_level = NULL,
             .unload_level = NULL,
             .update = actor_system_update,
             .render = actor_system_render,
-            .config_ui = actor_system_config_ui,
-            .debug_ui = actor_system_debug_ui,
         }));
     arrput(
         g_game_systems,
         ((game_system){
             .name = "phys_system",
             .init = phys_system_init,
-            .shutdown = phys_system_shutdown,
+            .term = phys_system_term,
             .load_level = phys_system_load_level,
             .unload_level = phys_system_unload_level,
             .update = phys_system_update,
             .render = NULL,
-            .config_ui = NULL,
-            .debug_ui = NULL,
         }));
     arrput(
         g_game_systems,
@@ -109,16 +118,21 @@ void game_systems_init(game_settings* settings)
 
     for (int i = 0; i < arrlen(g_game_systems); ++i) {
         if (g_game_systems[i].init) {
-            g_game_systems[i].init(settings);
+            tx_result result = g_game_systems[i].init(settings);
+            if (result != TX_SUCCESS) {
+                return result;
+            }
         }
     }
+
+    return TX_SUCCESS;
 }
 
-void game_systems_shutdown(void)
+void game_systems_term(void)
 {
     for (int i = 0; i < arrlen(g_game_systems); ++i) {
-        if (g_game_systems[i].shutdown) {
-            g_game_systems[i].shutdown();
+        if (g_game_systems[i].term) {
+            g_game_systems[i].term();
         }
     }
 }
@@ -155,29 +169,6 @@ void game_systems_render(float rt)
     for (int i = 0; i < arrlen(g_game_systems); ++i) {
         if (g_game_systems[i].render) {
             g_game_systems[i].render(rt);
-        }
-    }
-}
-
-#define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
-#include <cimgui.h>
-
-void game_systems_config_ui(void)
-{
-    for (int i = 0; i < arrlen(g_game_systems); ++i) {
-        if (g_game_systems[i].config_ui) {
-            if (igCollapsingHeaderTreeNodeFlags(g_game_systems[i].name, ImGuiTreeNodeFlags_None)) {
-                g_game_systems[i].config_ui();
-            }
-        }
-    }
-}
-
-void game_systems_debug_ui(void)
-{
-    for (int i = 0; i < arrlen(g_game_systems); ++i) {
-        if (g_game_systems[i].debug_ui) {
-            g_game_systems[i].debug_ui();
         }
     }
 }

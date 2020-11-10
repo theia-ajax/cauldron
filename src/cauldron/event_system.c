@@ -31,7 +31,7 @@ event_subscription subscriptions[EventMessage_Count];
 opqaue_message_storage message_queue[MAX_EVENT_MESSAGES_IN_QUEUE];
 uint32_t queue_tail = 0;
 
-void event_system_init(game_settings* settings)
+tx_result event_system_init(game_settings* settings)
 {
     // get some type safety by ensuring that valid sizing data has been provided for all messages
     // skip the none message by starting at 1
@@ -49,9 +49,11 @@ void event_system_init(game_settings* settings)
         };
         arrsetcap(subscriptions[i].subscribers, 32);
     }
+
+    return TX_SUCCESS;
 }
 
-void event_system_shutdown(void)
+void event_system_term(void)
 {
     for (int i = 0; i < EventMessage_Count; ++i) {
         arrfree(subscriptions[i].subscribers);

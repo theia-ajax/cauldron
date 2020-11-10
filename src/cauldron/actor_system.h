@@ -66,13 +66,11 @@ actor_def_handle actor_def_create(char* name, actor_def* def);
 bool actor_def_destroy(actor_def_handle handle);
 actor_def_handle actor_def_get_name(char* name);
 actor_def_handle actor_def_get_id(uint32_t name_id);
-void actor_def_config_ui(actor_def_handle sel_handle);
+void actor_def_editor_window(bool* show_editor);
 
 // game systems interface
 
-void actor_system_init(game_settings* settings);
-void actor_system_shutdown(void);
+tx_result actor_system_init(game_settings* settings);
+void actor_system_term(void);
 void actor_system_update(float dt);
 void actor_system_render(float rt);
-void actor_system_config_ui(void);
-void actor_system_debug_ui(void);

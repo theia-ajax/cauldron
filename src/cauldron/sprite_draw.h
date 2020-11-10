@@ -9,8 +9,8 @@ typedef struct sprite_handle {
 } sprite_handle;
 
 void spr_init(void);
-void spr_shutdown(void);
-void spr_render(int width, int height);
+void spr_term(void);
+void spr_render();
 
 typedef enum sprite_flip {
     SPRITE_FLIP_NONE = 0,
