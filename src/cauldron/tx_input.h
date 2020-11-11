@@ -399,40 +399,43 @@ enum txinp_frame {
 
 struct {
     uint8_t keys[k_frame_count][TXINP_KEY_COUNT];
-} state;
+} txinp_state;
 
 void txinp_init(void)
 {
-    memset(state.keys, 0, sizeof(state.keys));
+    memset(txinp_state.keys, 0, sizeof(txinp_state.keys));
 }
 
 void txinp_update(void)
 {
-    memcpy(&state.keys[k_frame_prev], &state.keys[k_frame_curr], sizeof(state.keys[k_frame_prev]));
+    memcpy(
+        &txinp_state.keys[k_frame_prev],
+        &txinp_state.keys[k_frame_curr],
+        sizeof(txinp_state.keys[k_frame_prev]));
 }
 
 void txinp_on_key_event(txinp_event_key key_event)
 {
     TX_ASSERT(TXINP_VALID_KEY(key_event.key));
 
-    state.keys[k_frame_curr][key_event.key] = (key_event.is_down) ? 1 : 0;
+    txinp_state.keys[k_frame_curr][key_event.key] = (key_event.is_down) ? 1 : 0;
 }
 
 bool txinp_get_key(txinp_key key)
 {
     TX_ASSERT(TXINP_VALID_KEY(key));
-    return state.keys[k_frame_curr][key];
+    return txinp_state.keys[k_frame_curr][key];
 }
 
 bool txinp_get_key_down(txinp_key key)
 {
     TX_ASSERT(TXINP_VALID_KEY(key));
-    return state.keys[k_frame_curr][key] && !state.keys[k_frame_prev][key];
+    return txinp_state.keys[k_frame_curr][key] && !txinp_state.keys[k_frame_prev][key];
 }
 
 bool txinp_get_key_up(txinp_key key)
 {
     TX_ASSERT(TXINP_VALID_KEY(key));
-    return state.keys[k_frame_prev][key] && !state.keys[k_frame_curr][key];
+    return txinp_state.keys[k_frame_prev][key] && !txinp_state.keys[k_frame_curr][key];
 }
 #endif

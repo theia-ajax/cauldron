@@ -70,7 +70,8 @@
 			"xlocmon": "cpp",
 			"xlocnum": "cpp",
 			"xloctime": "cpp",
-			"numbers": "cpp"
+			"numbers": "cpp",
+			"*.rh": "cpp"
 		}
 	}
 }

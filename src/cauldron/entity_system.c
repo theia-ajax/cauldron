@@ -65,8 +65,8 @@ void spawn_entity(entity_desc* desc)
 
 tx_result entity_system_init(game_settings* settings)
 {
-    register_entity("PlayerSpawn", spawn_entity_player_spawn);
-    register_entity("EnemySpawn01", spawn_entity_enemy_01_spawn);
+    register_entity("player_01", spawn_entity_player_spawn);
+    register_entity("enemy_01", spawn_entity_enemy_01_spawn);
 
     return TX_SUCCESS;
 }
@@ -78,8 +78,8 @@ void entity_system_term(void)
 
 void entity_system_load_level(game_level* level)
 {
-    uint32_t ent_player_spawn = hash_string("PlayerSpawn");
-    uint32_t ent_en01_spawn = hash_string("EnemySpawn01");
+    uint32_t ent_player_spawn = hash_string("player_01");
+    uint32_t ent_en01_spawn = hash_string("enemy_01");
 
     for (int i = 0; i < arrlen(level->layer_insts); ++i) {
         game_layer_inst* layer = &level->layer_insts[i];

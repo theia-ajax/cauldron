@@ -258,7 +258,7 @@ tx_result parse_auto_layer(const char* js, jsmntok_t* tokens, int tok_id, game_l
     out->cell_w = jstoi_or(js, jsget(js, tokens, tok_id, "__cWid"), 0);
     out->cell_h = jstoi_or(js, jsget(js, tokens, tok_id, "__cHei"), 0);
     out->cell_size = jstoi_or(js, jsget(js, tokens, tok_id, "__gridSize"), 0);
-    int auto_layer_id = jsget_id(js, tokens, tok_id, "autoTiles");
+    int auto_layer_id = jsget_id(js, tokens, tok_id, "autoLayerTiles");
 
     if (out->cell_size == 0 || auto_layer_id < 0) {
         return TX_INVALID;
@@ -277,26 +277,20 @@ tx_result parse_auto_layer(const char* js, jsmntok_t* tokens, int tok_id, game_l
 
         next = jsnextsib(tokens, i);
 
-        int results_id = jsget_id(js, tokens, i, "results");
-        for (int j = results_id + 1; j < next; j = jsnextsib(tokens, j)) {
-            int coord_id = jstoi_or(js, jsget(js, tokens, j, "coordId"), -1);
-            int flips = jstoi_or(js, jsget(js, tokens, j, "flips"), 0);
+        int px_id = jsget_id(js, tokens, i, "px");
+        int src_id = jsget_id(js, tokens, i, "src");
+        int flips = jstoi_or(js, jsget(js, tokens, i, "f"), 0);
+        int data_id = jsget_id(js, tokens, i, "d");
+        int coord_id, tile_id;
+        jstoi(js, tokens[data_id + 2], &coord_id);
+        jstoi(js, tokens[data_id + 3], &tile_id);
 
-            int tiles_start = jsget_id(js, tokens, j, "tiles");
-            int tiles_end = jsnextsib(tokens, tiles_start);
-            int tile_id = 0;
-            for (int k = tiles_start + 1; k < tiles_end; k = jsnextsib(tokens, k)) {
-                tile_id = jstoi_or(js, jsget(js, tokens, k, "tileId"), 0);
-                break;
-            }
-
-            if (coord_id >= 0 && tile_id > 0 && out->tiles[coord_id].value == 0) {
-                // printf("auto_layer[%d]=%d\n", coord_id, tile_id);
-                out->tiles[coord_id] = (game_tile){
-                    .value = (uint16_t)tile_id,
-                    .flags = flips,
-                };
-            }
+        if (coord_id >= 0 && tile_id > 0 /* && out->tiles[coord_id].value == 0*/) {
+            // printf("auto_layer[%d]=%d\n", coord_id, tile_id);
+            out->tiles[coord_id] = (game_tile){
+                .value = (uint16_t)tile_id,
+                .flags = flips,
+            };
         }
     }
     return TX_SUCCESS;
@@ -330,8 +324,10 @@ tx_result parse_entity_layer(const char* js, jsmntok_t* tokens, int tok_id, game
         }
 
         float world_x_px, world_y_px;
-        jstof(js, jsget(js, tokens, i, "x"), &world_x_px);
-        jstof(js, jsget(js, tokens, i, "y"), &world_y_px);
+
+        int px_id = jsget_id(js, tokens, i, "px");
+        jstof(js, tokens[px_id + 1], &world_x_px);
+        jstof(js, tokens[px_id + 2], &world_y_px);
 
         out->ents[index].world_x = world_x_px / 8.0f;
         out->ents[index].world_y = world_y_px / 8.0f;

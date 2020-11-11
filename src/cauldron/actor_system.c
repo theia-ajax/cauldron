@@ -124,7 +124,7 @@ tx_result actor_system_init(game_settings* settings)
     h_default_actor_def = actor_def_create("default", &defaults);
 
     actor_def_create(
-        "PlayerSpawn",
+        "player_01",
         &(actor_def){
             .hsize = {.x = 0.45f, .y = 0.495f},
             .sprite_id = 1,
@@ -138,7 +138,7 @@ tx_result actor_system_init(game_settings* settings)
     actor_def e01_spawn = default_actor_def();
     e01_spawn.hsize = (vec2){.x = 0.45f, .y = 0.375f};
     e01_spawn.sprite_id = 2;
-    actor_def_create("EnemySpawn01", &e01_spawn);
+    actor_def_create("enemy_01", &e01_spawn);
 
     return TX_SUCCESS;
 }
