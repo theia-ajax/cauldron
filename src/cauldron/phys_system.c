@@ -26,27 +26,26 @@ tile_phys_ref* tile_phys_map = NULL;
 uint32_t tiles_w = 0, tiles_h = 0;
 float gravity = 50.0f;
 
-tx_result phys_system_init(game_settings* settings)
+void set_tile_shape(uint32_t tile_id, phys_tile_shape_type shape_type)
 {
     for (int flip = 0; flip < 4; ++flip) {
         hmputs(
             tile_phys_map,
             ((tile_phys_ref){
-                .key = tile_flip_key(61, flip),
+                .key = tile_flip_key(tile_id, flip),
                 .shape =
                     (phys_tile_shape){
-                        .type = PHYS_TILE_SHAPE_SLOPE,
+                        .type = shape_type,
                         .flips = flip,
                     },
             }));
     }
+}
 
-    hmputs(
-        tile_phys_map,
-        ((tile_phys_ref){
-            .key = tile_flip_key(60, 0),
-            .shape = PHYS_TILE_SHAPE_PLATFORM,
-        }));
+tx_result phys_system_init(game_settings* settings)
+{
+    set_tile_shape(61, PHYS_TILE_SHAPE_SLOPE);
+    set_tile_shape(60, PHYS_TILE_SHAPE_PLATFORM);
 
     return TX_SUCCESS;
 }

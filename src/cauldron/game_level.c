@@ -47,18 +47,14 @@ tx_result free_game_level_project(game_level_proj* proj)
             if (level->layer_insts) {
                 for (int j = 0; j < arrlen(level->layer_insts); ++j) {
                     game_layer_inst* layer = &level->layer_insts[j];
-                    if (layer->tiles) {
-                        arrfree(layer->tiles);
-                        memset(layer, 0, sizeof(game_layer_inst));
-                    }
+                    arrfree(layer->tiles);
+                    arrfree(layer->ents);
                 }
-                arrfree(level->layer_insts);
-                memset(level, 0, sizeof(game_level));
             }
+            arrfree(level->layer_insts);
         }
     }
     arrfree(proj->levels);
-    memset(proj, 0, sizeof(game_level_proj));
     return TX_SUCCESS;
 }
 

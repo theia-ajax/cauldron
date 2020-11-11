@@ -12,6 +12,7 @@ typedef enum event_message_type {
     EventMessage_None,
 
     EventMessage_ChangeLevel,
+    EventMessage_ReloadLevelProject,
     EventMessage_OnEntitySpawned,
 
     EventMessage_Count,
@@ -26,6 +27,10 @@ typedef struct change_level_event {
     event_message event;
     strhash level_id;
 } change_level_event;
+
+typedef struct reload_level_proj_event {
+    event_message event;
+} reload_level_proj_event;
 
 typedef struct on_entity_spawned_event {
     event_message event;

@@ -127,7 +127,7 @@ tx_result actor_system_init(game_settings* settings)
         "player_01",
         &(actor_def){
             .hsize = {.x = 0.45f, .y = 0.495f},
-            .sprite_id = 1,
+            .sprite_id = 96,
             .jump_force = 18.0f,
             .max_speed = 8.0f,
             .move_accel = 30.0f,

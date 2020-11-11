@@ -12,20 +12,26 @@ void on_change_level(event_message* message)
 {
     change_level_event* change_level = (change_level_event*)message;
 
-    game_level* next_level = NULL;
-    for (int i = 0; i < arrlen(proj.levels); ++i) {
-        if (proj.levels[i].name_id.value == change_level->level_id.value) {
-            next_level = &proj.levels[i];
-        }
+    if (active) {
+        game_systems_unload_level();
     }
-
-    if (next_level != active) {
-        if (active) {
-            game_systems_unload_level();
-        }
-        active = next_level;
+    active = level_find_id(change_level->level_id);
+    if (active) {
         game_systems_load_level(active);
     }
+}
+
+void on_reload_level_proj(event_message* message)
+{
+    strhash level_id = (strhash){0};
+    if (active) {
+        level_id = active->name_id;
+        game_systems_unload_level();
+        active = NULL;
+    }
+    free_game_level_project(&proj);
+    load_game_level_project("assets/test_level.json", &proj);
+    level_load_id(level_id);
 }
 
 tx_result level_system_init(game_settings* settings)
@@ -37,6 +43,7 @@ tx_result level_system_init(game_settings* settings)
     }
 
     event_system_subscribe(EventMessage_ChangeLevel, on_change_level);
+    event_system_subscribe(EventMessage_ReloadLevelProject, on_reload_level_proj);
 
     return TX_SUCCESS;
 }
@@ -89,6 +96,13 @@ void level_system_render(float ft)
     }
 }
 
+void level_reload(void)
+{
+    if (active) {
+        level_load_id(active->name_id);
+    }
+}
+
 void level_load_id(strhash id)
 {
     event_send((event_message*)&(change_level_event){
@@ -102,18 +116,41 @@ void level_load_name(char* name)
     level_load_id(strhash_get(name));
 }
 
+void level_system_reload_project(void)
+{
+    event_send((event_message*)&(reload_level_proj_event){
+        .event.msg_type = EventMessage_ReloadLevelProject,
+    });
+}
+
+game_level* level_find_id(strhash id)
+{
+    for (int i = 0; i < arrlen(proj.levels); ++i) {
+        if (proj.levels[i].name_id.value == id.value) {
+            return &proj.levels[i];
+        }
+    }
+    return NULL;
+}
+
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #include <cimgui.h>
 void level_select_window(bool* show)
 {
     if (igBegin("Levels", show, ImGuiWindowFlags_None)) {
         game_level* next_level = NULL;
+        if (igButton("Reload Level Project", (ImVec2){0})) {
+            level_system_reload_project();
+        }
+        igSeparator();
+        igBeginGroupPanel("Level Select", (ImVec2){0});
         for (int i = 0; i < arrlen(proj.levels); ++i) {
             game_level* level = &proj.levels[i];
             if (igButton(strhash_cstr(level->name_id), (ImVec2){0})) {
                 next_level = level;
             }
         }
+        igEndGroupPanel();
 
         if (next_level) {
             level_load_id(next_level->name_id);

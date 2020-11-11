@@ -4,6 +4,13 @@
 #include "tx_math.h"
 #include "tx_types.h"
 
+enum {
+    PHYS_LAYER_NONE = 0,
+    PHYS_LAYER_COLLISION = 1,
+    PHYS_LAYER_PLATFORM = 2,
+    PHYS_LAYER_NARROW_WALL = 8,
+};
+
 typedef enum phys_tile_shape_type {
     PHYS_TILE_SHAPE_FULL_TILE = 0,
     PHYS_TILE_SHAPE_PLATFORM = 1,

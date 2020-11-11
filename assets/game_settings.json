@@ -10,6 +10,6 @@
         }
     },
     "startup": {
-        "level": "test_big_box"
+        "level": "test_movement"
     }
 }

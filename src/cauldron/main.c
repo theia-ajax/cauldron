@@ -43,7 +43,7 @@ struct game_time_desc {
     .enable_render_interp = true,
     .update_mode = UpdateMode_FixedFrameRate,
     .maximum_updates = 30,
-    .update_frequency = 240,
+    .update_frequency = 144,
 };
 
 int main(int argc, char* argv[])
@@ -171,6 +171,10 @@ int main(int argc, char* argv[])
 
             if (igIsKeyDown(TXINP_KEY_LCTRL) && igIsKeyPressed(TXINP_KEY_A, false)) {
                 show_editor_actors = !show_editor_actors;
+            }
+
+            if (igIsKeyDown(TXINP_KEY_LSHIFT) && igIsKeyPressed(TXINP_KEY_R, false)) {
+                level_system_reload_project();
             }
 
             if (show_main_menu_bar) {
