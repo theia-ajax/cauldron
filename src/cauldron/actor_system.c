@@ -127,7 +127,7 @@ tx_result actor_system_init(game_settings* settings)
         "player_01",
         &(actor_def){
             .hsize = {.x = 0.45f, .y = 0.495f},
-            .sprite_id = 96,
+            .sprite_id = 1,
             .jump_force = 18.0f,
             .max_speed = 8.0f,
             .move_accel = 30.0f,
@@ -524,6 +524,9 @@ actor_def_handle actor_def_get_name(char* name)
 
 actor_def_handle actor_def_get_id(strhash name_id)
 {
+    if (hmgeti(actor_defs_by_id, name_id.value) < 0) {
+        return h_default_actor_def;
+    }
     return hmgets(actor_defs_by_id, name_id.value).handle;
 }
 

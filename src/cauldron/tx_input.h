@@ -1,5 +1,7 @@
 #pragma once
 
+#include "stb_ds.h"
+#include "strhash.h"
 #include "tx_types.h"
 
 // just copied from SDL2 SDL_Scancode
@@ -372,6 +374,17 @@ typedef enum {
                                  for array bounds */
 } txinp_key;
 
+typedef enum txinp_mod {
+    TXINP_MOD_NONE = 0,
+    TXINP_MOD_CTRL = 0x1,
+    TXINP_MOD_SHIFT = 0x2,
+    TXINP_MOD_ALT = 0x4,
+    TXINP_MOD_SUPER = 0x8,
+} txinp_mod;
+
+const char* txinp_mod_names[];
+const int txinp_mod_lens[];
+
 typedef struct txinp_event_key {
     txinp_key key;
     bool is_down;
@@ -384,6 +397,11 @@ void txinp_on_key_event(txinp_event_key key_event);
 bool txinp_get_key(txinp_key key);
 bool txinp_get_key_down(txinp_key key);
 bool txinp_get_key_up(txinp_key key);
+txinp_mod txinp_mods_down(txinp_mod mod);
+
+// key_name is a char* for now because I don't feel like writing a converter yet
+// snprintf style s and n parameters and return value
+int32_t txinp_write_mod_strn(txinp_mod mod, const char* key_name, char* s, size_t n);
 
 #if defined(TX_INPUT_IMPLEMENTATION)
 
@@ -391,51 +409,129 @@ bool txinp_get_key_up(txinp_key key);
 
 #include <string.h>
 
-enum txinp_frame {
-    k_frame_curr,
-    k_frame_prev,
-    k_frame_count,
+enum txinp_state_frame {
+    TXINP_CURR,
+    TXINP_PREV,
+    TXINP_COUNT,
 };
 
-struct {
-    uint8_t keys[k_frame_count][TXINP_KEY_COUNT];
-} txinp_state;
+struct txinp_state {
+    uint8_t keys[TXINP_KEY_COUNT];
+    txinp_mod mod;
+} txinp_state[TXINP_COUNT];
 
 void txinp_init(void)
 {
-    memset(txinp_state.keys, 0, sizeof(txinp_state.keys));
+    memset(&txinp_state, 0, sizeof(txinp_state));
 }
 
 void txinp_update(void)
 {
-    memcpy(
-        &txinp_state.keys[k_frame_prev],
-        &txinp_state.keys[k_frame_curr],
-        sizeof(txinp_state.keys[k_frame_prev]));
+    memcpy(&txinp_state[TXINP_PREV], &txinp_state[TXINP_CURR], sizeof(txinp_state[0]));
 }
+
+txinp_mod mod_from_key(uint8_t key)
+{
+    if (((key ^ 0b11100000) & 0b11111000) != 0) {
+        return TXINP_MOD_NONE;
+    }
+
+    txinp_mod mods[] = {
+        TXINP_MOD_CTRL,
+        TXINP_MOD_SHIFT,
+        TXINP_MOD_ALT,
+        TXINP_MOD_SUPER,
+        TXINP_MOD_CTRL,
+        TXINP_MOD_SHIFT,
+        TXINP_MOD_ALT,
+        TXINP_MOD_SUPER,
+    };
+
+    return mods[key & 0x7];
+}
+
+const char* txinp_mod_names[] = {"", "ctrl+", "shift+", "alt+", "super+"};
+const int txinp_mod_lens[] = {0, 5, 6, 4, 6};
 
 void txinp_on_key_event(txinp_event_key key_event)
 {
-    TX_ASSERT(TXINP_VALID_KEY(key_event.key));
+    uint8_t key = key_event.key;
 
-    txinp_state.keys[k_frame_curr][key_event.key] = (key_event.is_down) ? 1 : 0;
+    TX_ASSERT(TXINP_VALID_KEY(key));
+
+    txinp_state[TXINP_CURR].keys[key] = (key_event.is_down) ? 1 : 0;
+
+    txinp_mod mod = mod_from_key(key);
+    if (mod != TXINP_MOD_NONE) {
+        if (key_event.is_down) {
+            txinp_state[TXINP_CURR].mod |= mod;
+        } else {
+            txinp_state[TXINP_CURR].mod &= ~mod;
+        }
+    }
 }
 
 bool txinp_get_key(txinp_key key)
 {
     TX_ASSERT(TXINP_VALID_KEY(key));
-    return txinp_state.keys[k_frame_curr][key];
+    return txinp_state[TXINP_CURR].keys[key];
 }
 
 bool txinp_get_key_down(txinp_key key)
 {
     TX_ASSERT(TXINP_VALID_KEY(key));
-    return txinp_state.keys[k_frame_curr][key] && !txinp_state.keys[k_frame_prev][key];
+    return txinp_state[TXINP_CURR].keys[key] && !txinp_state[TXINP_PREV].keys[key];
 }
 
 bool txinp_get_key_up(txinp_key key)
 {
     TX_ASSERT(TXINP_VALID_KEY(key));
-    return txinp_state.keys[k_frame_prev][key] && !txinp_state.keys[k_frame_curr][key];
+    return txinp_state[TXINP_PREV].keys[key] && !txinp_state[TXINP_CURR].keys[key];
 }
+
+int32_t txinp_write_mod_strn(txinp_mod mod, const char* key_name, char* s, size_t n)
+{
+    TX_ASSERT(key_name);
+    TX_ASSERT(s);
+
+    int32_t needed = 0;
+    for (int i = 0; i < 4; ++i) {
+        if ((mod & (1 << i)) != 0) {
+            needed += txinp_mod_lens[i + 1];
+        }
+    }
+    needed += (int32_t)strlen(key_name);
+
+    if (needed >= n) {
+        return needed;
+    }
+
+    char* cur = s;
+    for (int i = 0; i < 4; ++i) {
+        if ((mod & (1 << i)) != 0) {
+            cur = strcpy(cur, txinp_mod_names[i + 1]) + txinp_mod_lens[i + 1];
+        }
+    }
+    strcpy(cur, key_name);
+
+    return needed;
+}
+
+txinp_mod txinp_mods_down(txinp_mod mod)
+{
+    return (txinp_state[TXINP_CURR].mod & mod) == mod;
+}
+
+strhash txinp_shortcut_strhash(txinp_mod mod, const char* key)
+{
+    char* buf = NULL;
+    int32_t need = txinp_write_mod_strn(mod, key, buf, 0);
+    arrsetlen(buf, need + 1);
+    memset(buf, 0, (size_t)need);
+    txinp_write_mod_strn(mod, key, buf, need + 1);
+    strhash ret = strhash_get(buf);
+    arrfree(buf);
+    return ret;
+}
+
 #endif

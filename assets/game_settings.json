@@ -10,6 +10,6 @@
         }
     },
     "startup": {
-        "level": "test_movement"
+        "level": "level"
     }
 }

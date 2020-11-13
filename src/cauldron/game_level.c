@@ -319,11 +319,11 @@ tx_result parse_entity_layer(const char* js, jsmntok_t* tokens, int tok_id, game
             out->ents[index].id = (strhash){0};
         }
 
-        float world_x_px, world_y_px;
+        int world_x_px, world_y_px;
 
         int px_id = jsget_id(js, tokens, i, "px");
-        jstof(js, tokens[px_id + 1], &world_x_px);
-        jstof(js, tokens[px_id + 2], &world_y_px);
+        jstoi(js, tokens[px_id + 1], &world_x_px);
+        jstoi(js, tokens[px_id + 2], &world_y_px);
 
         out->ents[index].world_x = world_x_px / 8.0f;
         out->ents[index].world_y = world_y_px / 8.0f;

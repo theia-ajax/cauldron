@@ -1,3 +1,4 @@
+#include "editor_windows.h"
 #include "event_system.h"
 #include "game_level.h"
 #include "game_settings.h"
@@ -39,12 +40,14 @@ struct game_time_desc {
     update_mode update_mode;
     int maximum_updates;
     int curr_fps;
+    int update_count;
 } game_time = {
     .enable_render_interp = true,
     .update_mode = UpdateMode_FixedFrameRate,
     .maximum_updates = 30,
     .update_frequency = 144,
 };
+void game_time_editor_window(bool*);
 
 int main(int argc, char* argv[])
 {
@@ -59,6 +62,43 @@ int main(int argc, char* argv[])
     txinp_init();
     game_systems_init(settings);
     spr_init();
+
+    editor_windows_init(&(editor_windows_sys_desc){
+        .windows = {
+            [0] =
+                {
+                    .menu_path = "Game/Actor Defs",
+                    .window_proc = actor_def_editor_window,
+                    .shortcut.mod = TXINP_MOD_CTRL,
+                    .shortcut.key = TXINP_KEY_A,
+                },
+            [1] =
+                {
+                    .menu_path = "Game/Editors/Game Time",
+                    .window_proc = game_time_editor_window,
+                    .shortcut.mod = TXINP_MOD_CTRL,
+                    .shortcut.key = TXINP_KEY_T,
+                },
+            [2] =
+                {
+                    .menu_path = "Game/Levels",
+                    .window_proc = level_select_window,
+                    .shortcut.mod = TXINP_MOD_CTRL,
+                    .shortcut.key = TXINP_KEY_L,
+                },
+            [3] =
+                {
+                    .menu_path = "Debug/System Pools",
+                    .window_proc = system_pool_editor_window,
+                    .shortcut.mod = TXINP_MOD_CTRL,
+                    .shortcut.key = TXINP_KEY_P,
+                },
+            [4] =
+                {
+                    .menu_path = "Misc/Demo Window",
+                    .window_proc = igShowDemoWindow,
+                },
+        }});
 
     level_load_id(settings->startup.level_id);
 
@@ -98,7 +138,7 @@ int main(int argc, char* argv[])
             }
         }
 
-        int update_count = 0;
+        game_time.update_count = 0;
         uint64_t frequency = get_frequency();
         uint64_t ticks = get_ticks();
         uint64_t delta_ticks = ticks - last_ticks;
@@ -135,9 +175,9 @@ int main(int argc, char* argv[])
             game_time.update_frequency = min(max(game_time.update_frequency, 1), 500);
             const float ms_per_update = 1.0f / game_time.update_frequency;
 
-            while (lag >= ms_per_update && update_count < game_time.maximum_updates) {
+            while (lag >= ms_per_update && game_time.update_count < game_time.maximum_updates) {
                 game_systems_update(ms_per_update);
-                ++update_count;
+                ++game_time.update_count;
                 lag -= ms_per_update;
                 txinp_update();
             }
@@ -146,7 +186,7 @@ int main(int argc, char* argv[])
             float rt = (game_time.enable_render_interp) ? lag / ms_per_update : 0.0f;
             game_systems_render(rt);
         } else if (game_time.update_mode == UpdateMode_VariableFrameRate) {
-            update_count = 1;
+            game_time.update_count = 1;
             game_systems_update(dt);
             txinp_update();
             game_systems_render(0.0f);
@@ -157,82 +197,18 @@ int main(int argc, char* argv[])
 
         imgui_begin(dt);
         {
-            static bool show_main_menu_bar = false;
-            static bool sel_menu_bar_editors_actors = false;
-            static bool show_editor_game_time = false;
-            static bool show_editor_actors = false;
-            static bool show_demo_window = false;
-            static bool show_editor_levels = false;
-            static bool show_pool_window = false;
+            editor_windows_process_shortcuts();
 
-            if (igIsKeyPressed(TXINP_KEY_LALT, false)) {
+            static bool show_main_menu_bar = false;
+            if (igIsKeyPressed(TXINP_KEY_LALT, true)) {
                 show_main_menu_bar = !show_main_menu_bar;
             }
 
-            if (igIsKeyDown(TXINP_KEY_LCTRL) && igIsKeyPressed(TXINP_KEY_A, false)) {
-                show_editor_actors = !show_editor_actors;
-            }
-
-            if (igIsKeyDown(TXINP_KEY_LSHIFT) && igIsKeyPressed(TXINP_KEY_R, false)) {
-                level_system_reload_project();
-            }
-
             if (show_main_menu_bar) {
-                if (igBeginMainMenuBar()) {
-                    if (igBeginMenu("Editors", true)) {
-                        igMenuItemBoolPtr("Actors", "ctrl+a", &show_editor_actors, true);
-                        igMenuItemBoolPtr("Game Time", NULL, &show_editor_game_time, true);
-                        igMenuItemBoolPtr("Levels", NULL, &show_editor_levels, true);
-                        igEndMenu();
-                    }
-                    if (igBeginMenu("Debug", true)) {
-                        igMenuItemBoolPtr("System Pools", NULL, &show_pool_window, true);
-                        igEndMenu();
-                    }
-                    if (igBeginMenu("Misc", true)) {
-                        igMenuItemBoolPtr("Demo Window", NULL, &show_demo_window, true);
-                        igEndMenu();
-                    }
-                    igEndMainMenuBar();
-                }
+                editor_windows_draw_menu_bar();
             }
 
-            if (show_editor_actors) actor_def_editor_window(&show_editor_actors);
-            if (show_editor_levels) level_select_window(&show_editor_levels);
-            if (show_pool_window) system_pool_editor_window(&show_pool_window);
-
-            if (show_editor_game_time) {
-                igBegin("Game Time", &show_editor_game_time, ImGuiWindowFlags_NoNavInputs);
-                // igText("FPS: %d", dbgui.fps);
-                igCheckbox("Enable Render Interp", &game_time.enable_render_interp);
-                igInputInt("Frame Limit", &game_time.frame_limit, 1, 10, ImGuiInputTextFlags_None);
-                if (igButton(update_mode_names[(int)game_time.update_mode], (ImVec2){0})) {
-                    game_time.update_mode =
-                        (update_mode)mod((int)game_time.update_mode + 1, (int)UpdateMode_Count);
-                }
-
-                if (game_time.update_mode == UpdateMode_FixedFrameRate) {
-                    igInputInt(
-                        "Update Frequency (Hz)",
-                        &game_time.update_frequency,
-                        1,
-                        10,
-                        ImGuiInputTextFlags_None);
-                    igInputInt(
-                        "Maximum Updates",
-                        &game_time.maximum_updates,
-                        1,
-                        5,
-                        ImGuiInputTextFlags_None);
-                    igText("Update Count: %d", update_count);
-                }
-
-                igEnd();
-            }
-
-            if (show_demo_window) {
-                igShowDemoWindow(&show_demo_window);
-            }
+            editor_windows_draw_windows();
         }
         imgui_end();
 
@@ -241,10 +217,33 @@ int main(int argc, char* argv[])
 
     game_systems_unload_level();
 
+    editor_windows_term();
+
     spr_term();
     game_systems_term();
 
     strhash_term();
 
     return 0;
+}
+
+void game_time_editor_window(bool* open)
+{
+    igBegin("Game Time", open, ImGuiWindowFlags_NoNavInputs);
+    // igText("FPS: %d", dbgui.fps);
+    igCheckbox("Enable Render Interp", &game_time.enable_render_interp);
+    igInputInt("Frame Limit", &game_time.frame_limit, 1, 10, ImGuiInputTextFlags_None);
+    if (igButton(update_mode_names[(int)game_time.update_mode], (ImVec2){0})) {
+        game_time.update_mode =
+            (update_mode)mod((int)game_time.update_mode + 1, (int)UpdateMode_Count);
+    }
+
+    if (game_time.update_mode == UpdateMode_FixedFrameRate) {
+        igInputInt(
+            "Update Frequency (Hz)", &game_time.update_frequency, 1, 10, ImGuiInputTextFlags_None);
+        igInputInt("Maximum Updates", &game_time.maximum_updates, 1, 5, ImGuiInputTextFlags_None);
+        igText("Update Count: %d", game_time.update_count);
+    }
+
+    igEnd();
 }
