@@ -230,7 +230,7 @@ int main(int argc, char* argv[])
 void game_time_editor_window(bool* open)
 {
     igBegin("Game Time", open, ImGuiWindowFlags_NoNavInputs);
-    // igText("FPS: %d", dbgui.fps);
+    igText("FPS: %d", game_time.curr_fps);
     igCheckbox("Enable Render Interp", &game_time.enable_render_interp);
     igInputInt("Frame Limit", &game_time.frame_limit, 1, 10, ImGuiInputTextFlags_None);
     if (igButton(update_mode_names[(int)game_time.update_mode], (ImVec2){0})) {

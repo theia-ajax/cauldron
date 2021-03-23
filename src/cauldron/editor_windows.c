@@ -96,7 +96,8 @@ void editor_windows_draw_menu_bar(void)
         size_t sub_len = arrlen(ew_.sub_menu_ids[index]);
 
         if (sub_len == 0) {
-            continue;
+            // at first empty menu list stop since we can assume everything after is empty.
+            break;
         }
 
         int menu_ct = 0;
