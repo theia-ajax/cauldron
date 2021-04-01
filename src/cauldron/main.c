@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "flecs.h"
+
 typedef enum update_mode {
     UpdateMode_VariableFrameRate,
     UpdateMode_FixedFrameRate,
@@ -49,13 +51,115 @@ struct game_time_desc {
 };
 void game_time_editor_window(bool*);
 
+typedef vec2 Position;
+typedef vec2 Velocity;
+typedef struct {
+    uint32_t sprite_id;
+    float layer;
+    vec2 origin;
+    sprite_flip flip;
+} Sprite;
+typedef uint32_t PlayerControlId;
+typedef uint32_t Sdl2Input;
+
+void actor_move(ecs_iter_t* it)
+{
+    Position* p = ecs_column(it, Position, 1);
+    Velocity* v = ecs_column(it, Velocity, 2);
+
+    for (int i = 0; i < it->count; ++i) {
+        *p = vec2_add(*p, vec2_scale(*v, it->delta_time));
+    }
+}
+
+void actor_render(ecs_iter_t* it)
+{
+    Position* pos = ecs_column(it, Position, 1);
+    Sprite* spr = ecs_column(it, Sprite, 2);
+
+    for (int i = 0; i < it->count; ++i) {
+        spr_draw(&(sprite_draw_desc){
+            .sprite_id = spr->sprite_id,
+            .pos = *pos,
+            .origin = spr->origin,
+            .layer = spr->layer,
+            .flip = spr->flip,
+        });
+    }
+}
+
+void sdl2_process_input(ecs_iter_t* it)
+{
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        // ImGui_ImplSDL2_ProcessEvent(&event);
+        switch (event.type) {
+        case SDL_QUIT:
+            ecs_quit(it->world);
+            break;
+
+        case SDL_KEYDOWN:
+            if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+                ecs_quit(it->world);
+            }
+            txinp_on_key_event((txinp_event_key){
+                .is_down = true,
+                .key = event.key.keysym.scancode,
+            });
+            break;
+
+        case SDL_KEYUP:
+            txinp_on_key_event((txinp_event_key){
+                .is_down = false,
+                .key = event.key.keysym.scancode,
+            });
+            break;
+        }
+    }
+
+    txinp_update();
+}
+
 int main(int argc, char* argv[])
 {
-    txrng_seed((uint32_t)time(NULL));
     strhash_init();
     load_game_settings(NULL);
-
     game_settings* const settings = get_game_settings();
+
+    ecs_world_t* world = ecs_init_w_args(argc, argv);
+    ecs_set_target_fps(world, 240.0f);
+
+    ECS_COMPONENT(world, Sdl2Input);
+    ECS_COMPONENT(world, Position);
+    ECS_COMPONENT(world, Velocity);
+    ECS_COMPONENT(world, Sprite);
+    ECS_COMPONENT(world, PlayerControlId);
+
+    ECS_SYSTEM(world, sdl2_process_input, EcsPreFrame, Sdl2Input);
+    ECS_SYSTEM(world, actor_move, EcsPreUpdate, Position, Velocity);
+    ECS_SYSTEM(world, actor_render, EcsOnStore, Position, Sprite);
+
+    ECS_ENTITY(world, MyEnt, Position, Velocity, Sprite);
+    ecs_set(world, MyEnt, Position, {.x = 0, .y = 2});
+    ecs_set(world, MyEnt, Velocity, {.x = 1.0f});
+    ecs_set(
+        world, MyEnt, Sprite, {.sprite_id = 1, .origin = {0.5f, 0.5f}, .layer = -5.0f, .flip = 0});
+
+    window_system_init(settings);
+    spr_init();
+
+    while (ecs_progress(world, 0.0f)) {
+
+        spr_render();
+        window_swap();
+    }
+
+    spr_term();
+    window_system_term();
+
+    return ecs_fini(world);
+
+    txrng_seed((uint32_t)time(NULL));
 
     game_time.frame_limit = settings->options.video.frame_limit;
 
