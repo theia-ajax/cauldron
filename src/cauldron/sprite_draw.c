@@ -288,8 +288,10 @@ void spr_term()
 
 void spr_render()
 {
-    int width, height;
-    window_get_size(&width, &height);
+    // int width, height;
+    // window_get_size(&width, &height);
+    // TODO: for real
+    int width = 1280, height = 720;
 
     sg_update_buffer(inst_vbuf, sprites, sizeof(struct sprite) * sprite_ct);
 

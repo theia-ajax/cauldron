@@ -47,20 +47,20 @@ tx_result game_systems_init(game_settings* settings)
             .update = event_system_process_queue,
             .render = NULL,
         }));
-    arrput(
-        g_game_systems,
-        ((game_system){
-            .name = "window_system",
-            .init = window_system_init,
-            .term = window_system_term,
-        }));
-    arrput(
-        g_game_systems,
-        ((game_system){
-            .name = "imgui_system",
-            .init = imgui_system_init,
-            .term = imgui_system_term,
-        }));
+    // arrput(
+    //     g_game_systems,
+    //     ((game_system){
+    //         .name = "window_system",
+    //         .init = window_system_init,
+    //         .term = window_system_term,
+    //     }));
+    // arrput(
+    //     g_game_systems,
+    //     ((game_system){
+    //         .name = "imgui_system",
+    //         .init = imgui_system_init,
+    //         .term = imgui_system_term,
+    //     }));
     arrput(
         g_game_systems,
         ((game_system){

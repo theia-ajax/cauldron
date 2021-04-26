@@ -27,6 +27,9 @@
 
 #include "flecs.h"
 
+#include "system_sdl2.h"
+#include "system_window_sdl2.h"
+
 typedef enum update_mode {
     UpdateMode_VariableFrameRate,
     UpdateMode_FixedFrameRate,
@@ -127,15 +130,19 @@ int main(int argc, char* argv[])
     game_settings* const settings = get_game_settings();
 
     ecs_world_t* world = ecs_init_w_args(argc, argv);
-    ecs_set_target_fps(world, 240.0f);
+    ecs_set_target_fps(world, 144.0f);
 
-    ECS_COMPONENT(world, Sdl2Input);
+    ECS_IMPORT(world, SystemSdl2);
+    ECS_IMPORT(world, SystemSdl2Window);
+
+    ecs_entity_t window =
+        ecs_set(world, 0, WindowDesc, {.title = "cauldron", .width = 1280, .height = 720});
+
     ECS_COMPONENT(world, Position);
     ECS_COMPONENT(world, Velocity);
     ECS_COMPONENT(world, Sprite);
     ECS_COMPONENT(world, PlayerControlId);
 
-    ECS_SYSTEM(world, sdl2_process_input, EcsPreFrame, Sdl2Input);
     ECS_SYSTEM(world, actor_move, EcsPreUpdate, Position, Velocity);
     ECS_SYSTEM(world, actor_render, EcsOnStore, Position, Sprite);
 
@@ -145,17 +152,14 @@ int main(int argc, char* argv[])
     ecs_set(
         world, MyEnt, Sprite, {.sprite_id = 1, .origin = {0.5f, 0.5f}, .layer = -5.0f, .flip = 0});
 
-    window_system_init(settings);
     spr_init();
 
     while (ecs_progress(world, 0.0f)) {
 
         spr_render();
-        window_swap();
     }
 
     spr_term();
-    window_system_term();
 
     return ecs_fini(world);
 
@@ -299,24 +303,24 @@ int main(int argc, char* argv[])
         // render
         spr_render();
 
-        imgui_begin(dt);
-        {
-            editor_windows_process_shortcuts();
+        // imgui_begin(dt);
+        // {
+        //     editor_windows_process_shortcuts();
 
-            static bool show_main_menu_bar = false;
-            if (igIsKeyPressed(TXINP_KEY_LALT, true)) {
-                show_main_menu_bar = !show_main_menu_bar;
-            }
+        //     static bool show_main_menu_bar = false;
+        //     if (igIsKeyPressed(TXINP_KEY_LALT, true)) {
+        //         show_main_menu_bar = !show_main_menu_bar;
+        //     }
 
-            if (show_main_menu_bar) {
-                editor_windows_draw_menu_bar();
-            }
+        //     if (show_main_menu_bar) {
+        //         editor_windows_draw_menu_bar();
+        //     }
 
-            editor_windows_draw_windows();
-        }
-        imgui_end();
+        //     editor_windows_draw_windows();
+        // }
+        // imgui_end();
 
-        window_swap();
+        // window_swap();
     }
 
     game_systems_unload_level();

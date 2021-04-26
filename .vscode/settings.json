@@ -14,7 +14,8 @@
         "tuple": "c",
         "utility": "c",
         "xmemory": "c",
-        "xutility": "c"
+        "xutility": "c",
+        "window_system.h": "c"
     },
     "cmake.configureOnOpen": true
 }
