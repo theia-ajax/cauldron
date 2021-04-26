@@ -281,7 +281,7 @@ void spr_init()
     };
 }
 
-void spr_term()
+void spr_term(ecs_world_t* world, void* ctx)
 {
     sg_shutdown();
 }
@@ -365,7 +365,8 @@ void spr_draw(const sprite_draw_desc* desc)
 
 void RenderSpriteDrawCalls(ecs_iter_t* it)
 {
-    SpriteDraw* sprite = ecs_column(it, SpriteDraw, 1);
+    Position* position = ecs_column(it, Position, 1);
+    SpriteDraw* sprite = ecs_column(it, SpriteDraw, 2);
 
     for (int i = 0; i < it->count; ++i) {
         uint32_t row = sprite[i].sprite_id / 16;
@@ -383,8 +384,8 @@ void RenderSpriteDrawCalls(ecs_iter_t* it)
         sprites[sprite_ct] = (struct sprite){
             .pos =
                 (vec3){
-                    .x = sprite[i].pos.x,
-                    .y = sprite[i].pos.y,
+                    .x = position[i].x,
+                    .y = position[i].y,
                     .z = sprite[i].layer,
                 },
             .rect = {(col + fx) / 16.0f, (row + fy) / 16.0f, fw / 16, fh / 16},
@@ -392,17 +393,22 @@ void RenderSpriteDrawCalls(ecs_iter_t* it)
         };
         sprite_ct++;
     }
+
+    spr_render();
 }
 
-void SystemSpriteRendererDrawImport(ecs_world_t* world)
+void SystemSpriteRendererImport(ecs_world_t* world)
 {
     ECS_MODULE(world, SystemSpriteRenderer);
 
-    ecs_atfini(world, sg_shutdown, NULL);
+    ECS_IMPORT(world, CommonGameComponents);
+
+    ecs_atfini(world, spr_term, NULL);
 
     ECS_COMPONENT(world, SpriteDraw);
 
-    ECS_SYSTEM(world, RenderSpriteDrawCalls, EcsOnStore, SpriteDraw);
+    ECS_SYSTEM(
+        world, RenderSpriteDrawCalls, EcsOnStore, common.game.components.Position, SpriteDraw);
 
     ECS_EXPORT_COMPONENT(SpriteDraw);
 
