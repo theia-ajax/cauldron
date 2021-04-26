@@ -362,3 +362,49 @@ void spr_draw(const sprite_draw_desc* desc)
     };
     sprite_ct++;
 }
+
+void RenderSpriteDrawCalls(ecs_iter_t* it)
+{
+    SpriteDraw* sprite = ecs_column(it, SpriteDraw, 1);
+
+    for (int i = 0; i < it->count; ++i) {
+        uint32_t row = sprite[i].sprite_id / 16;
+        uint32_t col = sprite[i].sprite_id % 16;
+
+        const float flip_offsets[3] = {0.0f, 1.0f, 1.0f};
+        const float flip_scales[3] = {1.0f, -1.0f, -1.0f};
+
+        float fx = flip_offsets[sprite[i].flip & SPRITE_FLIP_X];
+        float fy = flip_offsets[sprite[i].flip & SPRITE_FLIP_Y];
+
+        float fw = flip_scales[sprite[i].flip & SPRITE_FLIP_X];
+        float fh = flip_scales[sprite[i].flip & SPRITE_FLIP_Y];
+
+        sprites[sprite_ct] = (struct sprite){
+            .pos =
+                (vec3){
+                    .x = sprite[i].pos.x,
+                    .y = sprite[i].pos.y,
+                    .z = sprite[i].layer,
+                },
+            .rect = {(col + fx) / 16.0f, (row + fy) / 16.0f, fw / 16, fh / 16},
+            .origin = sprite[i].origin,
+        };
+        sprite_ct++;
+    }
+}
+
+void SystemSpriteRendererDrawImport(ecs_world_t* world)
+{
+    ECS_MODULE(world, SystemSpriteRenderer);
+
+    ecs_atfini(world, sg_shutdown, NULL);
+
+    ECS_COMPONENT(world, SpriteDraw);
+
+    ECS_SYSTEM(world, RenderSpriteDrawCalls, EcsOnStore, SpriteDraw);
+
+    ECS_EXPORT_COMPONENT(SpriteDraw);
+
+    spr_init();
+}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "flecs.h"
 #include "sokol_gfx.h"
 #include "tx_math.h"
 #include "tx_types.h"
@@ -27,3 +28,18 @@ typedef struct sprite_draw_desc {
 } sprite_draw_desc;
 
 void spr_draw(const sprite_draw_desc* desc);
+
+typedef struct SpriteDraw {
+    uint32_t sprite_id;
+    sprite_flip flip;
+    vec2 origin;
+    float layer;
+} SpriteDraw;
+
+typedef struct SystemSpriteRenderer {
+    ECS_DECLARE_COMPONENT(SpriteDraw);
+} SystemSpriteRenderer;
+
+void SystemSpriteRendererImport(ecs_world_t* world);
+
+#define SystemSpriteRendererImportHandles(handles) ECS_IMPORT_COMPONENT(handles, SpriteDraw);

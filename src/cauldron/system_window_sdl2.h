@@ -17,12 +17,9 @@ typedef struct WindowDesc {
 } WindowDesc;
 
 typedef struct SystemSdl2Window {
-    ECS_DECLARE_COMPONENT(Sdl2Window);
     ECS_DECLARE_COMPONENT(WindowDesc);
 } SystemSdl2Window;
 
 void SystemSdl2WindowImport(ecs_world_t* world);
 
-#define SystemSdl2WindowImportHandles(handles)                                                     \
-    ECS_IMPORT_COMPONENT(handles, Sdl2Window);                                                     \
-    ECS_IMPORT_COMPONENT(handles, WindowDesc);
+#define SystemSdl2WindowImportHandles(handles) ECS_IMPORT_COMPONENT(handles, WindowDesc);

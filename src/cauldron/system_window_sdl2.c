@@ -83,5 +83,4 @@ void SystemSdl2WindowImport(ecs_world_t* world)
     ECS_SYSTEM(world, Sdl2SwapWindow, EcsOnStore, Sdl2Window);
 
     ECS_EXPORT_COMPONENT(WindowDesc);
-    ECS_EXPORT_COMPONENT(Sdl2Window);
 }
